@@ -1056,21 +1056,24 @@ function drawThemeCornerBracket(ctx, x, y, flipX, flipY, theme) {
     case 'acanthus_bracket':
     default:
       ctx.strokeStyle = theme.borderRibbon1;
-      ctx.lineWidth = 3.5;
+      ctx.lineWidth = 4.0;
       ctx.beginPath();
-      ctx.moveTo(0, 75); ctx.lineTo(0, 0); ctx.lineTo(75, 0);
+      ctx.moveTo(0, 80); ctx.lineTo(0, 24); ctx.lineTo(24, 0); ctx.lineTo(80, 0);
       ctx.stroke();
+
       ctx.strokeStyle = theme.borderRibbon2;
       ctx.lineWidth = 1.8;
       ctx.beginPath();
-      ctx.moveTo(10, 60); ctx.lineTo(10, 10); ctx.lineTo(60, 10);
+      ctx.moveTo(12, 68); ctx.lineTo(12, 28); ctx.lineTo(28, 12); ctx.lineTo(68, 12);
       ctx.stroke();
+
+      // Precision polished metallic corner index
       ctx.fillStyle = theme.borderRibbon1;
       ctx.beginPath();
-      ctx.arc(28, 28, 6, 0, Math.PI * 2);
+      ctx.arc(36, 36, 5, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = theme.outerBorder;
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.lineWidth = 1.2;
       ctx.stroke();
       break;
   }
@@ -2054,17 +2057,17 @@ function drawThemeYardWatermark(ctx, theme) {
 
     case 'damask':
     default: {
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.045)';
-      ctx.lineWidth = 1.2;
-      const gridW = 64;
-      for (let x = 32; x < 1024; x += gridW) {
-        for (let y = 32; y < 1024; y += gridW) {
+      // Modern Geometric Luxury Octagonal Weave (Replaces Victorian antique damask wallpaper)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.lineWidth = 1.0;
+      const step = 80;
+      for (let x = 40; x < 1024; x += step) {
+        for (let y = 40; y < 1024; y += step) {
           ctx.beginPath();
-          ctx.moveTo(x, y - 18);
-          ctx.lineTo(x + 18, y);
-          ctx.lineTo(x, y + 18);
-          ctx.lineTo(x - 18, y);
-          ctx.closePath();
+          ctx.rect(x - 20, y - 20, 40, 40);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(x, y, 12, 0, Math.PI * 2);
           ctx.stroke();
         }
       }
@@ -2076,13 +2079,15 @@ function drawThemeYardWatermark(ctx, theme) {
 
 function drawThemeYardCenterRosette(ctx, cx, cy, padHex, theme, socketCenters) {
   ctx.save();
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
-  ctx.shadowBlur = 16;
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+  ctx.shadowBlur = 18;
   ctx.shadowOffsetY = 4;
 
+  // Modern Faceted Luxury Outer Bevel
+  const rOuter = 104;
   ctx.beginPath();
-  ctx.arc(cx, cy, 110, 0, Math.PI * 2);
-  ctx.fillStyle = theme.outerBorder;
+  ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
+  ctx.fillStyle = '#0a0e14';
   ctx.fill();
   ctx.strokeStyle = theme.borderRibbon1;
   ctx.lineWidth = 4.5;
@@ -2091,14 +2096,15 @@ function drawThemeYardCenterRosette(ctx, cx, cy, padHex, theme, socketCenters) {
   ctx.shadowBlur = 0;
   ctx.shadowOffsetY = 0;
 
+  // Inner Chamfered Ring
   ctx.beginPath();
-  ctx.arc(cx, cy, 96, 0, Math.PI * 2);
+  ctx.arc(cx, cy, 92, 0, Math.PI * 2);
   ctx.strokeStyle = theme.borderRibbon2;
-  ctx.lineWidth = 2.0;
+  ctx.lineWidth = 1.8;
   ctx.stroke();
 
-  // Central Star Emblem
-  const rStar = 88;
+  // Modern 8-Point Precision Geometric Starburst (Hyper-clean luxury facets)
+  const rStar = 82;
   const rInner = 36;
   for (let i = 0; i < 8; i++) {
     const aTip = (i * 2 * Math.PI) / 8 - Math.PI / 2;
@@ -2110,7 +2116,7 @@ function drawThemeYardCenterRosette(ctx, cx, cy, padHex, theme, socketCenters) {
     ctx.lineTo(cx + Math.cos(aTip) * rStar, cy + Math.sin(aTip) * rStar);
     ctx.lineTo(cx + Math.cos(aL) * rInner, cy + Math.sin(aL) * rInner);
     ctx.closePath();
-    ctx.fillStyle = theme.borderRibbon1;
+    ctx.fillStyle = (i % 2 === 0) ? theme.borderRibbon1 : theme.borderRibbon2;
     ctx.fill();
 
     ctx.beginPath();
@@ -2118,74 +2124,22 @@ function drawThemeYardCenterRosette(ctx, cx, cy, padHex, theme, socketCenters) {
     ctx.lineTo(cx + Math.cos(aTip) * rStar, cy + Math.sin(aTip) * rStar);
     ctx.lineTo(cx + Math.cos(aR) * rInner, cy + Math.sin(aR) * rInner);
     ctx.closePath();
-    ctx.fillStyle = theme.borderRibbon2;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
     ctx.fill();
   }
 
-  // Central Gemstone Reactor
-  ctx.beginPath();
-  ctx.arc(cx, cy, 28, 0, Math.PI * 2);
-  const gemGrad = ctx.createRadialGradient(cx - 8, cy - 8, 4, cx, cy, 28);
+  // Radiant Central Gemstone Orb
+  const rGem = 32;
+  const gemGrad = ctx.createRadialGradient(cx - 8, cy - 8, 4, cx, cy, rGem);
   gemGrad.addColorStop(0.0, '#ffffff');
-  gemGrad.addColorStop(0.3, padHex);
-  gemGrad.addColorStop(1.0, theme.outerBorder);
+  gemGrad.addColorStop(0.35, padHex);
+  gemGrad.addColorStop(1.0, '#06090e');
+  ctx.beginPath();
+  ctx.arc(cx, cy, rGem, 0, Math.PI * 2);
   ctx.fillStyle = gemGrad;
   ctx.fill();
   ctx.strokeStyle = theme.borderRibbon1;
   ctx.lineWidth = 2.5;
-  ctx.stroke();
-
-  // Bus Lines to the 4 sockets
-  socketCenters.forEach(([sx, sy]) => {
-    ctx.strokeStyle = theme.borderRibbon1;
-    ctx.lineWidth = 1.8;
-    ctx.setLineDash([8, 6]);
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(sx, sy);
-    ctx.stroke();
-    ctx.setLineDash([]);
-  });
-
-  ctx.restore();
-}
-
-function drawThemeTrackArrow(ctx, theme) {
-  ctx.save();
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-  ctx.shadowBlur = 6;
-  ctx.shadowOffsetY = 2;
-
-  // Left Chevron Wing
-  ctx.beginPath();
-  ctx.moveTo(128, 68);
-  ctx.lineTo(58, 162);
-  ctx.lineTo(84, 186);
-  ctx.lineTo(128, 126);
-  ctx.closePath();
-  ctx.fillStyle = theme.trackRim1;
-  ctx.fill();
-
-  // Right Chevron Wing
-  ctx.beginPath();
-  ctx.moveTo(128, 68);
-  ctx.lineTo(198, 162);
-  ctx.lineTo(172, 186);
-  ctx.lineTo(128, 126);
-  ctx.closePath();
-  ctx.fillStyle = theme.trackRim2;
-  ctx.fill();
-
-  ctx.strokeStyle = theme.outerBorder;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(58, 162);
-  ctx.lineTo(128, 68);
-  ctx.lineTo(198, 162);
-  ctx.lineTo(172, 186);
-  ctx.lineTo(128, 126);
-  ctx.lineTo(84, 186);
-  ctx.closePath();
   ctx.stroke();
 
   ctx.restore();
@@ -2404,78 +2358,135 @@ function getCachedYardFloorTexture(q) {
     [512 + 300, 512 + 300]
   ];
 
-  // 1. Deep Royal Satin Bed with Luminous Core & Velvet Vignette
-  const bedGrad = ctx.createRadialGradient(512, 512, 60, 512, 512, 680);
-  bedGrad.addColorStop(0.0, padHex);
-  bedGrad.addColorStop(0.35, innerHex);
-  bedGrad.addColorStop(0.85, innerHex);
-  bedGrad.addColorStop(1.0, theme.outerBorder);
+  // 1. Ultra-Modern Radiant Gemstone Surface (High clarity, rich saturation, zero murky mud)
+  const bedGrad = ctx.createRadialGradient(512, 512, 50, 512, 512, 700);
+  bedGrad.addColorStop(0.0, padHex); // Luminous radiant gem bloom
+  bedGrad.addColorStop(0.40, padHex); // Keep player goti color pure and vibrant
+  bedGrad.addColorStop(0.80, innerHex); // Deep royal hue
+  bedGrad.addColorStop(1.0, '#090d12'); // Sleek luxury obsidian boundary
   ctx.fillStyle = bedGrad;
   ctx.fillRect(0, 0, 1024, 1024);
 
-  // 2. Theme Watermark Motif
-  drawThemeYardWatermark(ctx, theme);
+  // Subtle modern 45-degree brushed satin sheen
+  const sheen = ctx.createLinearGradient(0, 0, 1024, 1024);
+  sheen.addColorStop(0.0, 'rgba(255, 255, 255, 0.12)');
+  sheen.addColorStop(0.48, 'rgba(255, 255, 255, 0.02)');
+  sheen.addColorStop(0.52, 'rgba(0, 0, 0, 0.05)');
+  sheen.addColorStop(1.0, 'rgba(0, 0, 0, 0.28)');
+  ctx.fillStyle = sheen;
+  ctx.fillRect(0, 0, 1024, 1024);
 
-  // 3. Yard Perimeter Ribbons
+  // 2. Modern Precision Micro-Texture (Aerospace tactile micro-matrix)
   ctx.save();
-  ctx.strokeStyle = theme.borderRibbon1;
-  ctx.lineWidth = 6;
-  ctx.strokeRect(18, 18, 988, 988);
-
-  ctx.strokeStyle = theme.borderRibbon2;
-  ctx.lineWidth = 2.4;
-  ctx.strokeRect(30, 30, 964, 964);
-
-  // 4 Corner Accents in Yard
-  drawThemeCornerBracket(ctx, 34, 34, 1, 1, theme);
-  drawThemeCornerBracket(ctx, 990, 34, -1, 1, theme);
-  drawThemeCornerBracket(ctx, 34, 990, 1, -1, theme);
-  drawThemeCornerBracket(ctx, 990, 990, -1, -1, theme);
-  ctx.restore();
-
-  // 4. Four Sockets (aligned with ±1.20)
-  socketCenters.forEach(([sx, sy]) => {
-    ctx.save();
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
-    ctx.shadowBlur = 14;
-    ctx.shadowOffsetY = 4;
-
-    ctx.beginPath();
-    ctx.arc(sx, sy, 172, 0, Math.PI * 2);
-    ctx.strokeStyle = theme.yardRingColor;
-    ctx.lineWidth = 5.0;
-    ctx.stroke();
-
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetY = 0;
-
-    ctx.beginPath();
-    ctx.arc(sx, sy, 160, 0, Math.PI * 2);
-    ctx.strokeStyle = theme.yardRingInner;
-    ctx.lineWidth = 2.0;
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(sx, sy, 148, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-    ctx.fill();
-    ctx.strokeStyle = theme.outerBorder;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    for (let a = 0; a < 4; a++) {
-      const ang = (a * Math.PI) / 2 + Math.PI / 4;
-      const spX = sx + Math.cos(ang) * 172;
-      const spY = sy + Math.sin(ang) * 172;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+  const dotStep = 32;
+  for (let x = 16; x < 1024; x += dotStep) {
+    for (let y = 16; y < 1024; y += dotStep) {
       ctx.beginPath();
-      ctx.arc(spX, spY, 4.0, 0, Math.PI * 2);
-      ctx.fillStyle = theme.yardRingColor;
+      ctx.arc(x, y, 1.2, 0, Math.PI * 2);
       ctx.fill();
     }
+  }
+  ctx.restore();
+
+  // 3. Theme-Specific Modern Watermark
+  drawThemeYardWatermark(ctx, theme);
+
+  // 4. Modern Chamfered Architectural Perimeter Frame (No vintage/antique double-frames)
+  const frameMargin = 22;
+  const frameCut = 44;
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(frameMargin + frameCut, frameMargin);
+  ctx.lineTo(1024 - frameMargin - frameCut, frameMargin);
+  ctx.lineTo(1024 - frameMargin, frameMargin + frameCut);
+  ctx.lineTo(1024 - frameMargin, 1024 - frameMargin - frameCut);
+  ctx.lineTo(1024 - frameMargin - frameCut, 1024 - frameMargin);
+  ctx.lineTo(frameMargin + frameCut, 1024 - frameMargin);
+  ctx.lineTo(frameMargin, 1024 - frameMargin - frameCut);
+  ctx.lineTo(frameMargin, frameMargin + frameCut);
+  ctx.closePath();
+
+  ctx.strokeStyle = theme.borderRibbon1;
+  ctx.lineWidth = 5.5;
+  ctx.stroke();
+
+  // Inner precision hairline frame
+  const innerMargin = 34;
+  const innerCut = 36;
+  ctx.beginPath();
+  ctx.moveTo(innerMargin + innerCut, innerMargin);
+  ctx.lineTo(1024 - innerMargin - innerCut, innerMargin);
+  ctx.lineTo(1024 - innerMargin, innerMargin + innerCut);
+  ctx.lineTo(1024 - innerMargin, 1024 - innerMargin - innerCut);
+  ctx.lineTo(1024 - innerMargin - innerCut, 1024 - innerMargin);
+  ctx.lineTo(innerMargin + innerCut, 1024 - innerMargin);
+  ctx.lineTo(innerMargin, 1024 - innerMargin - innerCut);
+  ctx.lineTo(innerMargin, innerMargin + innerCut);
+  ctx.closePath();
+  ctx.strokeStyle = theme.borderRibbon2;
+  ctx.lineWidth = 2.0;
+  ctx.stroke();
+
+  // 4 Modern Corner Chamfer Accents
+  [
+    [frameMargin + frameCut / 2, frameMargin + frameCut / 2],
+    [1024 - frameMargin - frameCut / 2, frameMargin + frameCut / 2],
+    [frameMargin + frameCut / 2, 1024 - frameMargin - frameCut / 2],
+    [1024 - frameMargin - frameCut / 2, 1024 - frameMargin - frameCut / 2]
+  ].forEach(([cx, cy]) => {
+    ctx.beginPath();
+    ctx.arc(cx, cy, 4.5, 0, Math.PI * 2);
+    ctx.fillStyle = theme.borderRibbon1;
+    ctx.fill();
+  });
+  ctx.restore();
+
+  // 5. Clean Architectural Docking Foundations Beneath the 4 3D Pedestals
+  // (Replaces redundant giant overlapping clock circles with sleek modern mounting pads)
+  socketCenters.forEach(([sx, sy]) => {
+    ctx.save();
+    // Soft Ambient Occlusion Drop Shadow for the 3D pad mesh
+    const aoGrad = ctx.createRadialGradient(sx, sy, 70, sx, sy, 160);
+    aoGrad.addColorStop(0.0, 'rgba(0, 0, 0, 0.45)');
+    aoGrad.addColorStop(0.70, 'rgba(0, 0, 0, 0.20)');
+    aoGrad.addColorStop(1.0, 'rgba(0, 0, 0, 0.0)');
+    ctx.beginPath();
+    ctx.arc(sx, sy, 160, 0, Math.PI * 2);
+    ctx.fillStyle = aoGrad;
+    ctx.fill();
+
+    // Sleek modern 45-degree corner alignment ticks framing the 3D pad
+    const tickDist = 120;
+    const tickLen = 22;
+    ctx.strokeStyle = theme.borderRibbon2;
+    ctx.lineWidth = 2.5;
+
+    [
+      [-1, -1], [1, -1], [-1, 1], [1, 1]
+    ].forEach(([dx, dy]) => {
+      const tx = sx + dx * tickDist;
+      const ty = sy + dy * tickDist;
+      ctx.beginPath();
+      ctx.moveTo(tx, ty - dy * tickLen);
+      ctx.lineTo(tx, ty);
+      ctx.lineTo(tx - dx * tickLen, ty);
+      ctx.stroke();
+    });
+
+    // Sleek hairline alignment bus line to central house rosette
+    ctx.strokeStyle = theme.borderRibbon1;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(512, 512);
+    ctx.lineTo(sx, sy);
+    ctx.stroke();
+    ctx.setLineDash([]);
     ctx.restore();
   });
 
-  // 5. Central Theme Rosette
+  // 6. Ultra-Modern Central House Crest Insignia
   drawThemeYardCenterRosette(ctx, 512, 512, padHex, theme, socketCenters);
 
   const tex = new THREE.CanvasTexture(cvs);
@@ -2498,35 +2509,149 @@ function getCachedPadBoxTexture(padColor) {
   const padHex = colorToHexStr(padColor);
   const theme = getThemeProfile(currentTheme);
 
-  // Gradient Base
-  const grad = ctx.createRadialGradient(128, 128, 15, 128, 128, 150);
+  // 1. Ultra-Modern Radiant Gemstone / Carbon Base Slab
+  const grad = ctx.createRadialGradient(128, 128, 10, 128, 128, 150);
   grad.addColorStop(0.0, padHex);
-  grad.addColorStop(0.80, padHex);
-  grad.addColorStop(1.0, theme.outerBorder);
+  grad.addColorStop(0.70, padHex);
+  grad.addColorStop(1.0, '#0a0d11');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 256, 256);
 
-  // Chamfer Rim
-  ctx.strokeStyle = theme.padRimColor;
-  ctx.lineWidth = 7;
-  ctx.strokeRect(6, 6, 244, 244);
+  // Subtle modern brushed satin sheen (45-degree light reflection)
+  const sheen = ctx.createLinearGradient(0, 0, 256, 256);
+  sheen.addColorStop(0.0, 'rgba(255, 255, 255, 0.18)');
+  sheen.addColorStop(0.45, 'rgba(255, 255, 255, 0.02)');
+  sheen.addColorStop(0.55, 'rgba(0, 0, 0, 0.08)');
+  sheen.addColorStop(1.0, 'rgba(0, 0, 0, 0.35)');
+  ctx.fillStyle = sheen;
+  ctx.fillRect(0, 0, 256, 256);
 
-  ctx.strokeStyle = theme.padRimInner;
-  ctx.lineWidth = 2.5;
-  ctx.strokeRect(14, 14, 228, 228);
-
-  // Center Seating Ring
+  // 2. Modern 45-Degree Chamfered Outer Bezel
+  const chamfer = 24;
+  ctx.save();
   ctx.beginPath();
-  ctx.arc(128, 128, 76, 0, Math.PI * 2);
+  ctx.moveTo(8 + chamfer, 8);
+  ctx.lineTo(248 - chamfer, 8);
+  ctx.lineTo(248, 8 + chamfer);
+  ctx.lineTo(248, 248 - chamfer);
+  ctx.lineTo(248 - chamfer, 248);
+  ctx.lineTo(8 + chamfer, 248);
+  ctx.lineTo(8, 248 - chamfer);
+  ctx.lineTo(8, 8 + chamfer);
+  ctx.closePath();
+
+  // Outer Metallic Bevel Rim
   ctx.strokeStyle = theme.padRimColor;
-  ctx.lineWidth = 3.5;
+  ctx.lineWidth = 4.5;
   ctx.stroke();
 
+  // 3D Highlight on Top/Left, Shadow on Bottom/Right
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+  ctx.lineWidth = 2.0;
   ctx.beginPath();
-  ctx.arc(128, 128, 66, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+  ctx.moveTo(8, 248 - chamfer);
+  ctx.lineTo(8, 8 + chamfer);
+  ctx.lineTo(8 + chamfer, 8);
+  ctx.lineTo(248 - chamfer, 8);
+  ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.65)';
+  ctx.lineWidth = 2.0;
+  ctx.beginPath();
+  ctx.moveTo(248 - chamfer, 8);
+  ctx.lineTo(248, 8 + chamfer);
+  ctx.lineTo(248, 248 - chamfer);
+  ctx.lineTo(248 - chamfer, 248);
+  ctx.lineTo(8 + chamfer, 248);
+  ctx.stroke();
+
+  // Inner hairline conduit
+  ctx.beginPath();
+  ctx.moveTo(18 + chamfer * 0.7, 18);
+  ctx.lineTo(238 - chamfer * 0.7, 18);
+  ctx.lineTo(238, 18 + chamfer * 0.7);
+  ctx.lineTo(238, 238 - chamfer * 0.7);
+  ctx.lineTo(238 - chamfer * 0.7, 238);
+  ctx.lineTo(18 + chamfer * 0.7, 238);
+  ctx.lineTo(18, 238 - chamfer * 0.7);
+  ctx.lineTo(18, 18 + chamfer * 0.7);
+  ctx.closePath();
+  ctx.strokeStyle = theme.padRimInner;
+  ctx.lineWidth = 1.6;
+  ctx.stroke();
+  ctx.restore();
+
+  // 4 Corner Precision Fasteners / Studs
+  [
+    [26, 26], [230, 26], [26, 230], [230, 230]
+  ].forEach(([fx, fy]) => {
+    ctx.beginPath();
+    ctx.arc(fx, fy, 4, 0, Math.PI * 2);
+    ctx.fillStyle = theme.padRimColor;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.55)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+  });
+
+  // 3. Precision Recessed Circular Docking Plinth (Horology / Aerospace Well)
+  const cx = 128, cy = 128;
+  const rOuter = 82;
+
+  // Outer recessed ring shadow
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+  ctx.fill();
+  ctx.strokeStyle = theme.padRimColor;
+  ctx.lineWidth = 3.0;
+  ctx.stroke();
+
+  // Subtle circular micro-tracks (Horology sunray/sub-dial finish)
+  for (let rTrack of [72, 62, 52]) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, rTrack, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.lineWidth = 1.0;
+    ctx.stroke();
+  }
+
+  // 4 Precision Index Tick Marks (North, South, East, West)
+  [
+    [cx, cy - rOuter - 2, cx, cy - rOuter + 8],
+    [cx, cy + rOuter - 8, cx, cy + rOuter + 2],
+    [cx - rOuter - 2, cy, cx - rOuter + 8, cy],
+    [cx + rOuter - 8, cy, cx + rOuter + 2, cy]
+  ].forEach(([x1, y1, x2, y2]) => {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = theme.padRimColor;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+  });
+
+  // 4. Center Polished Jewel Target (Where Goti Rests)
+  const rTarget = 42;
+  const targetGrad = ctx.createRadialGradient(cx - 6, cy - 6, 2, cx, cy, rTarget);
+  targetGrad.addColorStop(0.0, '#ffffff');
+  targetGrad.addColorStop(0.35, padHex);
+  targetGrad.addColorStop(1.0, '#080c10');
+  ctx.beginPath();
+  ctx.arc(cx, cy, rTarget, 0, Math.PI * 2);
+  ctx.fillStyle = targetGrad;
+  ctx.fill();
+  ctx.strokeStyle = theme.padRimInner;
   ctx.lineWidth = 2.0;
   ctx.stroke();
+
+  // Precision Center Crosshair Pip
+  ctx.beginPath();
+  ctx.arc(cx, cy, 3.5, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.restore();
 
   const tex = new THREE.CanvasTexture(cvs);
   tex.encoding = THREE.sRGBEncoding;
@@ -2534,6 +2659,106 @@ function getCachedPadBoxTexture(padColor) {
   tex.generateMipmaps = true;
   padBoxTexCache.set(key, tex);
   return tex;
+}
+
+
+function drawModernTrackChevron(ctx, hex, rimColor, rimInner) {
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 4;
+
+  const tipY = 64;
+  const notchY = 118;
+  const wingLeftX = 64;
+  const wingRightX = 192;
+  const wingBottomY = 172;
+
+  // 1. Sleek Aerodynamic Primary Chevron
+  // Left Wing (Luminous Highlight Facet)
+  const leftGrad = ctx.createLinearGradient(wingLeftX, wingBottomY, 128, tipY);
+  leftGrad.addColorStop(0.0, rimColor);
+  leftGrad.addColorStop(0.6, rimInner);
+  leftGrad.addColorStop(1.0, '#ffffff');
+
+  ctx.beginPath();
+  ctx.moveTo(128, tipY);
+  ctx.lineTo(wingLeftX, wingBottomY);
+  ctx.lineTo(wingLeftX + 22, wingBottomY + 18);
+  ctx.lineTo(128, notchY);
+  ctx.closePath();
+  ctx.fillStyle = leftGrad;
+  ctx.fill();
+
+  // Right Wing (Rich Saturated Jewel Facet)
+  const rightGrad = ctx.createLinearGradient(128, tipY, wingRightX, wingBottomY);
+  rightGrad.addColorStop(0.0, rimInner);
+  rightGrad.addColorStop(0.5, rimColor);
+  rightGrad.addColorStop(1.0, 'rgba(0, 0, 0, 0.45)');
+
+  ctx.beginPath();
+  ctx.moveTo(128, tipY);
+  ctx.lineTo(wingRightX, wingBottomY);
+  ctx.lineTo(wingRightX - 22, wingBottomY + 18);
+  ctx.lineTo(128, notchY);
+  ctx.closePath();
+  ctx.fillStyle = rightGrad;
+  ctx.fill();
+
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
+
+  // Razor-sharp Outer Metallic Bevel Line
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(wingLeftX, wingBottomY);
+  ctx.lineTo(128, tipY);
+  ctx.lineTo(wingRightX, wingBottomY);
+  ctx.stroke();
+
+  // Dark Precision Shadow Spine
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.65)';
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(wingLeftX + 22, wingBottomY + 18);
+  ctx.lineTo(128, notchY);
+  ctx.lineTo(wingRightX - 22, wingBottomY + 18);
+  ctx.stroke();
+
+  // Central Vertical Ridge Line (Diamond Chisel Cut)
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(128, tipY);
+  ctx.lineTo(128, notchY);
+  ctx.stroke();
+
+  // 2. Secondary Velocity Micro-Chevron (Aerodynamic Telemetry Trail)
+  const subTipY = notchY + 22;
+  const subNotchY = subTipY + 26;
+  const subSpan = 42;
+  ctx.beginPath();
+  ctx.moveTo(128, subTipY);
+  ctx.lineTo(128 - subSpan, subTipY + 32);
+  ctx.lineTo(128 - subSpan + 14, subTipY + 40);
+  ctx.lineTo(128, subNotchY);
+  ctx.lineTo(128 + subSpan - 14, subTipY + 40);
+  ctx.lineTo(128 + subSpan, subTipY + 32);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+  ctx.fill();
+  ctx.strokeStyle = rimInner;
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+  // Apex Photon Spark / Diamond Node
+  ctx.beginPath();
+  ctx.arc(128, tipY, 4, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+
+  ctx.restore();
 }
 
 function getCachedTrackTileTexture(tileColor) {
@@ -2546,54 +2771,74 @@ function getCachedTrackTileTexture(tileColor) {
   cvs.height = 256;
   const ctx = cvs.getContext('2d');
   const hex = colorToHexStr(tileColor);
-  const theme = getThemeProfile(currentTheme);
 
-  // Tile Base Slab
-  const grad = ctx.createLinearGradient(0, 0, 256, 256);
+  // 1. Ultra-Modern Radiant Gemstone Slab
+  const grad = ctx.createRadialGradient(128, 128, 10, 128, 128, 160);
   grad.addColorStop(0.0, hex);
-  grad.addColorStop(0.60, hex);
-  grad.addColorStop(1.0, theme.outerBorder);
+  grad.addColorStop(0.65, hex);
+  grad.addColorStop(1.0, '#0a0e14');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 256, 256);
 
-  // 3D Inset Bevel Highlight & Shadow
-  ctx.strokeStyle = theme.tileHighlight || 'rgba(255, 255, 255, 0.55)';
-  ctx.lineWidth = 4;
+  // Brushed Satin 45-degree Sheen
+  const sheen = ctx.createLinearGradient(0, 0, 256, 256);
+  sheen.addColorStop(0.0, 'rgba(255, 255, 255, 0.22)');
+  sheen.addColorStop(0.48, 'rgba(255, 255, 255, 0.03)');
+  sheen.addColorStop(0.52, 'rgba(0, 0, 0, 0.05)');
+  sheen.addColorStop(1.0, 'rgba(0, 0, 0, 0.35)');
+  ctx.fillStyle = sheen;
+  ctx.fillRect(0, 0, 256, 256);
+
+  // 2. 3D Precision Chamfered Bevel
+  // Outer Highlight (Top & Left)
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+  ctx.lineWidth = 3.5;
   ctx.beginPath();
   ctx.moveTo(4, 252);
   ctx.lineTo(4, 4);
   ctx.lineTo(252, 4);
   ctx.stroke();
 
-  ctx.strokeStyle = theme.tileShadow || 'rgba(0, 0, 0, 0.65)';
-  ctx.lineWidth = 4;
+  // Outer Shadow (Bottom & Right)
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.75)';
+  ctx.lineWidth = 3.5;
   ctx.beginPath();
   ctx.moveTo(252, 4);
   ctx.lineTo(252, 252);
   ctx.lineTo(4, 252);
   ctx.stroke();
 
-  // Inlaid Rim
-  ctx.strokeStyle = theme.trackRim1;
-  ctx.lineWidth = 4;
+  // Sleek Inlaid Metallic Hairline Bezel (harmonized with player gemstone & gold)
+  const isYellow = (tileColor === PALETTE.YELLOW || hex.toLowerCase() === '#d9b300');
+  const isRed = (tileColor === PALETTE.RED || hex.toLowerCase() === '#ba1d1d');
+  const isBlue = (tileColor === PALETTE.BLUE || hex.toLowerCase() === '#0c4bbd');
+
+  const rimColor = isYellow ? '#ffd700' : (isRed ? '#ff6b6b' : (isBlue ? '#38bdf8' : '#e2e8f0'));
+  const rimInner = isYellow ? '#fff3b0' : (isRed ? '#ffd1d1' : (isBlue ? '#bae6fd' : '#ffffff'));
+
+  ctx.strokeStyle = rimColor;
+  ctx.lineWidth = 3.5;
   ctx.strokeRect(10, 10, 236, 236);
 
-  ctx.strokeStyle = theme.trackRim2;
-  ctx.lineWidth = 1.8;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+  ctx.lineWidth = 1.2;
   ctx.strokeRect(16, 16, 224, 224);
 
-  // 4 Corner Accents
+  // 4 Micro Precision Corner Pins
   [
     [22, 22], [234, 22], [22, 234], [234, 234]
-  ].forEach(([x, y]) => {
-    ctx.fillStyle = theme.trackRim1;
+  ].forEach(([px, py]) => {
     ctx.beginPath();
-    ctx.arc(x, y, 3.2, 0, Math.PI * 2);
+    ctx.arc(px, py, 3, 0, Math.PI * 2);
+    ctx.fillStyle = rimInner;
     ctx.fill();
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.55)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
   });
 
-  // Chiseled 3D Chevron / Arrowhead Pointing Home
-  drawThemeTrackArrow(ctx, theme);
+  // 3. Ultra-Sleek Modern Directional Chevron Arrow (Pointing to Home / Victory)
+  drawModernTrackChevron(ctx, hex, rimColor, rimInner);
 
   const tex = new THREE.CanvasTexture(cvs);
   tex.encoding = THREE.sRGBEncoding;
@@ -2602,7 +2847,6 @@ function getCachedTrackTileTexture(tileColor) {
   trackTileTexCache.set(key, tex);
   return tex;
 }
-
 
 function createQuadrants() {
   const quads = [
