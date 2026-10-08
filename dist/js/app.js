@@ -61,17 +61,17 @@ let currentRoomCode = null;
 // Calibrated Museum Palette (Agent 1: Palette Heirloom Stylist - Luminous Royal Gemstones & Deep Contrast)
 const PALETTE = {
   BG_TEAL: 0x02161b,
-  TABLE: 0x011216,
-  TRACK_BASE: 0x1e262c,
-  LINE_GRAY: 0x5f7180,
+  TABLE: 0x02161b,
+  TRACK_BASE: 0xb8c1c8,
+  LINE_GRAY: 0x718290,
   YELLOW: 0xd9b300,
-  YELLOW_INNER: 0x524300,
+  YELLOW_INNER: 0xccb760,
   BLUE: 0x0c4bbd,
-  BLUE_INNER: 0x051d45,
+  BLUE_INNER: 0x88add1,
   RED: 0xba1d1d,
-  RED_INNER: 0x4a0d0d,
+  RED_INNER: 0xc98288,
   CHARCOAL: 0x2b3238,
-  CHARCOAL_INNER: 0x14181c,
+  CHARCOAL_INNER: 0x98a6b2,
   DICE_BODY: 0xfafcff,
   DICE_PIPS: 0x182026,
   BRASS_GOLD: 0xc89e3a,
@@ -206,8 +206,8 @@ function init() {
 let ambientLight, keySpot, rimLight, fillLight;
 
 function setupStudioLights() {
-  // Rich Studio Diffuse Ambient Light - Calibrated for deep contrast and dark rich tones
-  ambientLight = new THREE.AmbientLight(0xffffff, 0.48);
+  // Rich Studio Diffuse Ambient Light - Calibrated for balanced saturation & crisp contrast
+  ambientLight = new THREE.AmbientLight(0xffffff, 0.56);
   scene.add(ambientLight);
 
   // Key Studio Spotlight (warm ivory key spotlight casting punchy directional clarity)
@@ -286,9 +286,8 @@ function createBoardPlatform() {
   const size = 15.6;
   const height = 0.65;
 
-  // Solid dark gray beveled base slab casting soft drop shadow
-  // Solid deep obsidian beveled base slab casting soft drop shadow
-  const baseMat = getMatteMat(0x13191f);
+  // Solid rich dark slate beveled base slab casting soft drop shadow
+  const baseMat = getMatteMat(0x212930);
   const baseMesh = new THREE.Mesh(new THREE.BoxGeometry(size, height, size), baseMat);
   baseMesh.position.y = height / 2;
   baseMesh.matrixAutoUpdate = false;
@@ -303,18 +302,18 @@ function createBoardPlatform() {
   cvs.height = 2048;
   const ctx = cvs.getContext('2d');
 
-  // Deep satin obsidian slate ceramic tile surface (Rich dark luxury benchmark)
-  ctx.fillStyle = '#1c2329';
+  // Satin slate ceramic tile surface (Tastefully minor darker - crisp contrast, zero bleached glare)
+  ctx.fillStyle = '#b8c1c8';
   ctx.fillRect(0, 0, 2048, 2048);
 
   // Subtle clean dark frame rim around the outer board border
-  ctx.lineWidth = 12;
-  ctx.strokeStyle = '#0a0d10';
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = '#182026';
   ctx.strokeRect(5, 5, 2038, 2038);
 
   // Central cross path grid lines ONLY (rows 6..9 and cols 6..9)
   const step = 2048 / 15;
-  ctx.strokeStyle = '#4e5e6c';
+  ctx.strokeStyle = '#718290';
   ctx.lineWidth = 3.2;
 
   // Horizontal track lines (rows 6, 7, 8)
@@ -445,10 +444,10 @@ function createBoardPlatform() {
   }
 
   const cornerDirectionArrows = [
-    { col: 6, row: 5, angle: -Math.PI / 2, color: '#c89e3a' }, // North / Top Arm (Red)
-    { col: 9, row: 6, angle: 0,            color: '#c89e3a' }, // East / Right Arm (Charcoal)
-    { col: 8, row: 9, angle: Math.PI / 2,  color: '#c89e3a' }, // South / Bottom Arm (Yellow)
-    { col: 5, row: 8, angle: Math.PI,      color: '#c89e3a' }  // West / Left Arm (Blue)
+    { col: 6, row: 5, angle: -Math.PI / 2, color: '#1c242c' }, // North / Top Arm (Red)
+    { col: 9, row: 6, angle: 0,            color: '#1c242c' }, // East / Right Arm (Charcoal)
+    { col: 8, row: 9, angle: Math.PI / 2,  color: '#1c242c' }, // South / Bottom Arm (Yellow)
+    { col: 5, row: 8, angle: Math.PI,      color: '#1c242c' }  // West / Left Arm (Blue)
   ];
 
   cornerDirectionArrows.forEach(({ col, row, angle, color }) => {
@@ -607,7 +606,7 @@ function createCenterPyramid() {
   const boxH = 0.40;
   const collar = new THREE.Mesh(
     new THREE.BoxGeometry(boxSize, boxH, boxSize),
-    getMatteMat(0x181e24)
+    getMatteMat(0x2e363d)
   );
   collar.position.y = boxH / 2;
   collar.matrixAutoUpdate = false;
