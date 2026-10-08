@@ -134,8 +134,8 @@ function init() {
     preserveDrawingBuffer: false,
     depth: true
   });
-  // Crisp High-DPI Retina resolution (clamped to 2.0 for razor-sharp clarity without waste)
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.0));
+  // Razor-sharp High-DPI Retina resolution (clamped to 3.0 for OLED Super Retina sharpness)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 3.0));
   // Soft Shadow Mapping - Completely disabled for superdooper smooth 60-FPS rendering
   renderer.shadowMap.enabled = false;
   renderer.shadowMap.autoUpdate = false;
@@ -206,12 +206,12 @@ function init() {
 let ambientLight, keySpot, rimLight, fillLight;
 
 function setupStudioLights() {
-  // Rich Studio Diffuse Ambient Light
-  ambientLight = new THREE.AmbientLight(0xffffff, 0.72);
+  // Rich Studio Diffuse Ambient Light - Calibrated for high color saturation & deep contrast
+  ambientLight = new THREE.AmbientLight(0xffffff, 0.58);
   scene.add(ambientLight);
 
-  // Key Studio Spotlight (warm ivory key spotlight casting 4K soft contact shadows)
-  keySpot = new THREE.DirectionalLight(0xfff8ee, 0.28);
+  // Key Studio Spotlight (warm ivory key spotlight casting punchy directional clarity)
+  keySpot = new THREE.DirectionalLight(0xfff8ee, 0.42);
   keySpot.position.set(5, 30, 8);
   keySpot.target.position.set(0, 0, 0);
   scene.add(keySpot.target);
@@ -232,13 +232,13 @@ function setupStudioLights() {
   keySpot.shadow.camera.near = 5;
   keySpot.shadow.camera.far = 65;
 
-  // Cool rim directional light for pawn contour separation
-  rimLight = new THREE.DirectionalLight(0xd0e8ff, 0.16);
+  // Cool rim directional light for pawn contour separation & crisp highlights
+  rimLight = new THREE.DirectionalLight(0xd0e8ff, 0.22);
   rimLight.position.set(-10, 20, -10);
   scene.add(rimLight);
 
-  // Warm fill directional light
-  fillLight = new THREE.DirectionalLight(0xffeedd, 0.12);
+  // Warm fill directional light for vibrant side facets
+  fillLight = new THREE.DirectionalLight(0xffeedd, 0.16);
   fillLight.position.set(10, 20, 10);
   scene.add(fillLight);
 }
@@ -458,6 +458,8 @@ function createBoardPlatform() {
   boardTex.encoding = THREE.sRGBEncoding;
   boardTex.anisotropy = 16;
   boardTex.generateMipmaps = true;
+  boardTex.minFilter = THREE.LinearMipmapLinearFilter;
+  boardTex.magFilter = THREE.LinearFilter;
 
   const topMat = getMatteMat(0xffffff, boardTex);
   topMat.userData.isBoardTexture = true;
@@ -8748,6 +8750,8 @@ function createYardRankTexture(rankType, playerName, isMe) {
   ctx.restore();
 
   const texture = new THREE.CanvasTexture(cvs);
+  texture.encoding = THREE.sRGBEncoding;
+  texture.anisotropy = 16;
   texture.generateMipmaps = true;
   texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.magFilter = THREE.LinearFilter;

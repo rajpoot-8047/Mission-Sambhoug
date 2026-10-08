@@ -56,6 +56,8 @@ button:active, .btn-action:active, .btn-die-choice:active, .btn-popup-die:active
   display: block;
   z-index: 1;
   touch-action: none;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 /* Top Navigation Bar with Safe Area support */
