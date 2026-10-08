@@ -11386,89 +11386,107 @@ function createCenterCounterTexture(pid, count) {
 
   const cx = 128;
   const cy = 128;
-  const r = 112;
+  const r = 114;
 
-  // 1. Dark Drop Shadow
+  // 1. Dark Drop Shadow under disc
+  ctx.save();
   ctx.beginPath();
   ctx.arc(cx, cy + 4, r, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
   ctx.fill();
+  ctx.restore();
 
-  // 2. Base Radial Fill matching player gemstone
-  const grad = ctx.createRadialGradient(cx, cy, 20, cx, cy, r);
+  // 2. Rich Vibrant Jewel Background matching player gotiyan
+  const grad = ctx.createRadialGradient(cx, cy, 15, cx, cy, r);
   if (pid === 0) { // Red
-    grad.addColorStop(0, '#781212');
-    grad.addColorStop(0.65, '#450a0a');
-    grad.addColorStop(1, '#1a0303');
+    grad.addColorStop(0, '#dc2626');
+    grad.addColorStop(0.65, '#991b1b');
+    grad.addColorStop(1, '#450a0a');
   } else if (pid === 1) { // Yellow
-    grad.addColorStop(0, '#8c7000');
-    grad.addColorStop(0.65, '#524200');
-    grad.addColorStop(1, '#211a00');
+    grad.addColorStop(0, '#facc15');
+    grad.addColorStop(0.65, '#ca8a04');
+    grad.addColorStop(1, '#713f12');
   } else if (pid === 2) { // Blue
-    grad.addColorStop(0, '#0c4bbd');
-    grad.addColorStop(0.65, '#072b6b');
-    grad.addColorStop(1, '#021230');
+    grad.addColorStop(0, '#2563eb');
+    grad.addColorStop(0.65, '#1d4ed8');
+    grad.addColorStop(1, '#172554');
   } else { // Charcoal
-    grad.addColorStop(0, '#38414a');
-    grad.addColorStop(0.65, '#21272c');
-    grad.addColorStop(1, '#0e1114');
+    grad.addColorStop(0, '#475569');
+    grad.addColorStop(0.65, '#334155');
+    grad.addColorStop(1, '#0f172a');
   }
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.fillStyle = grad;
   ctx.fill();
 
-  // 3. Metallic Outer Bezel & Highlight
-  let strokeOuter, strokeInner, textColor;
+  // 3. Crisp Metallic Bezel Rings
+  let strokeOuter, strokeInner;
   if (pid === 0) {
-    strokeOuter = '#ef4444'; strokeInner = '#fca5a5'; textColor = '#fee2e2';
+    strokeOuter = '#f87171'; strokeInner = '#fee2e2';
   } else if (pid === 1) {
-    strokeOuter = '#f59e0b'; strokeInner = '#fde68a'; textColor = '#fef3c7';
+    strokeOuter = '#fde047'; strokeInner = '#fef9c3';
   } else if (pid === 2) {
-    strokeOuter = '#38bdf8'; strokeInner = '#bae6fd'; textColor = '#e0f2fe';
+    strokeOuter = '#60a5fa'; strokeInner = '#dbeafe';
   } else {
-    strokeOuter = '#94a3b8'; strokeInner = '#e2e8f0'; textColor = '#f8fafc';
+    strokeOuter = '#cbd5e1'; strokeInner = '#ffffff';
   }
 
   if (count === 4) {
-    // 👑 Crown gold border on complete sanctuary victory!
+    // 👑 Radiant Gold border for completed house
     strokeOuter = '#fbbf24';
     strokeInner = '#fef08a';
-    textColor = '#fef08a';
   }
 
-  ctx.lineWidth = 10;
+  // Outer Ring
+  ctx.lineWidth = 9;
   ctx.strokeStyle = strokeOuter;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r - 4, 0, Math.PI * 2);
   ctx.stroke();
 
-  // 4. Inset Hairline Ring
-  ctx.beginPath();
-  ctx.arc(cx, cy, r - 10, 0, Math.PI * 2);
+  // Inset Hairline Ring
   ctx.lineWidth = 2.5;
   ctx.strokeStyle = strokeInner;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r - 14, 0, Math.PI * 2);
   ctx.stroke();
 
-  // 5. Hero Number Display ("0", "1", "2", "3", "4" with Crown)
+  // 4. Ultra-Visible, Bold, Geometric Number Typography
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
   if (count === 4) {
-    ctx.font = '36px sans-serif';
-    ctx.fillText('👑', cx, cy - 42);
-    ctx.font = '900 110px "Cinzel", "Plus Jakarta Sans", sans-serif';
-    ctx.lineWidth = 9;
+    // Crown above 4
+    ctx.font = '40px sans-serif';
+    ctx.fillText('👑', cx, cy - 46);
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 4;
+    ctx.font = '900 115px "Plus Jakarta Sans", "Inter", "Arial", sans-serif';
+    ctx.lineWidth = 7;
     ctx.strokeStyle = '#000000';
-    ctx.strokeText('4', cx, cy + 28);
-    ctx.fillStyle = textColor;
-    ctx.fillText('4', cx, cy + 28);
+    ctx.strokeText('4', cx, cy + 24);
+    ctx.fillStyle = '#fef08a';
+    ctx.fillText('4', cx, cy + 24);
+    ctx.restore();
   } else {
     const numStr = String(count);
-    ctx.font = '900 135px "Cinzel", "Plus Jakarta Sans", sans-serif';
-    ctx.lineWidth = 10;
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
-    ctx.strokeText(numStr, cx, cy + 6);
-    ctx.fillStyle = count === 0 ? 'rgba(255, 255, 255, 0.40)' : '#ffffff';
-    ctx.fillText(numStr, cx, cy + 6);
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetY = 4;
+    // Clean, modern, perfectly rounded sans-serif font
+    ctx.font = '900 135px "Plus Jakarta Sans", "Inter", "Arial", sans-serif';
+    ctx.lineWidth = 7;
+    ctx.strokeStyle = '#000000';
+    ctx.strokeText(numStr, cx, cy + 4);
+    // Solid luminous pure white fill for maximum readability
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(numStr, cx, cy + 4);
+    ctx.restore();
   }
 
   const tex = new THREE.CanvasTexture(cvs);
@@ -11498,10 +11516,10 @@ function updateCenterSanctuaryCounters() {
 
   // Centroids for each triangular facet of the center pyramid
   const counterPositions = [
-    { pid: 0, x: 0.50, y: 1.54, z: -0.50 }, // Red (Back-Right)
-    { pid: 1, x: -0.50, y: 1.54, z: 0.50 }, // Yellow (Front-Left)
-    { pid: 2, x: -0.50, y: 1.54, z: -0.50 }, // Blue (Back-Left)
-    { pid: 3, x: 0.50, y: 1.54, z: 0.50 }   // Charcoal (Front-Right)
+    { pid: 0, x: 0.52, y: 1.62, z: -0.52 }, // Red (Back-Right)
+    { pid: 1, x: -0.52, y: 1.62, z: 0.52 }, // Yellow (Front-Left)
+    { pid: 2, x: -0.52, y: 1.62, z: -0.52 }, // Blue (Back-Left)
+    { pid: 3, x: 0.52, y: 1.62, z: 0.52 }   // Charcoal (Front-Right)
   ];
 
   counterPositions.forEach((cp) => {
@@ -11512,19 +11530,20 @@ function updateCenterSanctuaryCounters() {
 
     let badgeMesh = centerSanctuaryCounterMeshes[pid];
     if (!badgeMesh) {
-      const geo = new THREE.PlaneGeometry(0.72, 0.72);
+      const geo = new THREE.PlaneGeometry(0.70, 0.70);
       const texture = createCenterCounterTexture(pid, finishedCount);
       const mat = new THREE.MeshBasicMaterial({
         map: texture,
         transparent: true,
-        opacity: 0.98,
+        opacity: 0.99,
+        depthTest: false,   // Zero clipping by pyramid geometry!
         depthWrite: false,
         side: THREE.DoubleSide
       });
       badgeMesh = new THREE.Mesh(geo, mat);
       badgeMesh.rotation.x = -Math.PI / 2;
       badgeMesh.position.set(cp.x, cp.y, cp.z);
-      badgeMesh.renderOrder = 8;
+      badgeMesh.renderOrder = 25; // Always renders completely on top
       badgeMesh.userData = { playerId: pid, count: finishedCount };
       scene.add(badgeMesh);
       centerSanctuaryCounterMeshes[pid] = badgeMesh;
