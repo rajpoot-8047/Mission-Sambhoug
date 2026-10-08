@@ -23,26 +23,31 @@ jobs:
       - name: Sync Capacitor iOS Assets
         run: npx cap sync ios
 
-      - name: Build Xcode Archive
+      - name: Resolve Swift Package Dependencies
         run: |
           cd ios/App
-          xcodebuild clean archive \
+          xcodebuild -resolvePackageDependencies -project App.xcodeproj
+
+      - name: Build iOS App Binary
+        run: |
+          cd ios/App
+          xcodebuild build \
             -project App.xcodeproj \
             -scheme App \
             -configuration Release \
             -destination 'generic/platform=iOS' \
-            -archivePath build/App.xcarchive \
+            -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY=""
 
       - name: Package Unsigned IPA
         run: |
-          cd ios/App/build
+          cd ios/App
           mkdir -p Payload
-          cp -R App.xcarchive/Products/Applications/App.app Payload/
-          zip -r Mission_Sambhoug_Ludo.ipa Payload
-          mv Mission_Sambhoug_Ludo.ipa ../../../
+          cp -R build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -qr Mission_Sambhoug_Ludo.ipa Payload
+          mv Mission_Sambhoug_Ludo.ipa ../../
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
