@@ -11269,7 +11269,7 @@ function createYardRankTexture(rankType, playerName, isMe) {
   const displayPlayerName = (playerName || '').toUpperCase();
   ctx.fillText(displayPlayerName, cx, cy - 65);
 
-  // 8. Main Rank Headline ("1st", "2nd", "3rd", "YOU LOSE")
+  // 8. Main Rank Headline ("1ST", "2ND", "3RD", "YOU LOSE")
   if (rankType === 'lose') {
     const loseText = isMe ? 'YOU LOSE' : 'LOST';
     ctx.font = '900 80px "Cinzel", "Plus Jakarta Sans", sans-serif';
@@ -11279,12 +11279,13 @@ function createYardRankTexture(rankType, playerName, isMe) {
     ctx.fillStyle = textColor;
     ctx.fillText(loseText, cx, cy + 22);
   } else {
+    const mainRankText = (rankType || '').toUpperCase();
     ctx.font = '900 150px "Cinzel", "Plus Jakarta Sans", sans-serif';
     ctx.lineWidth = 10;
     ctx.strokeStyle = textStroke;
-    ctx.strokeText(rankType, cx, cy + 22);
+    ctx.strokeText(mainRankText, cx, cy + 22);
     ctx.fillStyle = textColor;
-    ctx.fillText(rankType, cx, cy + 22);
+    ctx.fillText(mainRankText, cx, cy + 22);
   }
 
   // 9. Bottom Ribbon Pill Banner
@@ -11363,24 +11364,44 @@ function createYardRankBadgeMesh(rankType, playerName, isMe, quad) {
 function updateYardRankBadges() {
   if (!scene || !engine) return;
 
-  const activeRanks = (engine.rankings && engine.rankings.length > 0)
-    ? [...engine.rankings]
-    : (engine.winner ? [engine.winner.id] : []);
-
   const activeCount = engine.activePlayerCount || 4;
   let activeSequence = activeCount === 2 ? [0, 1] : (activeCount === 3 ? [0, 3, 1] : [0, 3, 1, 2]);
   const activeIds = activeSequence.slice(0, activeCount);
 
-  // If game is over, ensure any unfinished players are placed at the end of activeRanks
-  if (engine.isGameOver) {
-    activeIds.forEach((pid) => {
-      if (!activeRanks.includes(pid)) activeRanks.push(pid);
-    });
+  // If match is over OR 2 winners have finished in a 4-player match,
+  // finalize remaining unfinished players into rankings sorted by game progress!
+  if (engine.isGameOver || (activeCount === 4 && engine.rankings && engine.rankings.length >= 2)) {
+    if (typeof engine.finalizeRankings === 'function') {
+      engine.finalizeRankings(activeIds);
+    } else {
+      const unfinished = activeIds
+        .filter((pid) => !engine.rankings.includes(pid))
+        .map((pid) => {
+          const player = engine.players[pid];
+          const finishedPawns = player ? player.pawns.filter((p) => p.isFinished).length : 0;
+          const totalSteps = player ? player.pawns.reduce((sum, p) => sum + (p.stepOnTrack > -1 ? p.stepOnTrack : 0), 0) : 0;
+          return { pid, finishedPawns, totalSteps };
+        });
+      unfinished.sort((a, b) => (b.finishedPawns - a.finishedPawns) || (b.totalSteps - a.totalSteps));
+      unfinished.forEach((u) => {
+        if (!engine.rankings.includes(u.pid)) engine.rankings.push(u.pid);
+      });
+    }
   }
+
+  const activeRanks = (engine.rankings && engine.rankings.length > 0)
+    ? [...engine.rankings]
+    : (engine.winner ? [engine.winner.id] : []);
+
+  // Ensure every active player is accounted for
+  activeIds.forEach((pid) => {
+    if (!activeRanks.includes(pid)) activeRanks.push(pid);
+  });
 
   const myPlayer = (typeof getMyPlayerInfo === 'function') ? getMyPlayerInfo() : null;
   const myPlayerId = myPlayer ? myPlayer.id : 0;
   const totalPlayers = activeIds.length;
+  const isMatchComplete = engine.isGameOver || activeRanks.length >= totalPlayers || (activeCount === 4 && engine.rankings && engine.rankings.length >= 2);
 
   activeRanks.forEach((pid, rankIdx) => {
     if (!activeIds.includes(pid)) return;
@@ -11389,24 +11410,26 @@ function updateYardRankBadges() {
     if (rankIdx === 0) {
       rankType = '1st';
     } else if (rankIdx === 1) {
-      if (totalPlayers === 2 && engine.isGameOver) {
+      if (totalPlayers === 2 && isMatchComplete) {
         rankType = 'lose';
       } else {
         rankType = '2nd';
       }
     } else if (rankIdx === 2) {
-      if (totalPlayers === 3 && engine.isGameOver) {
+      if (totalPlayers === 3 && isMatchComplete) {
         rankType = 'lose';
       } else {
         rankType = '3rd';
       }
-    } else if (rankIdx === 3 || (engine.isGameOver && rankIdx === activeRanks.length - 1)) {
+    } else if (rankIdx === 3 || (isMatchComplete && rankIdx === activeRanks.length - 1)) {
       rankType = 'lose';
     }
 
+    // Only render 3rd or Lose badges once the match has completed or podium is finalized
     if (!rankType) return;
+    if ((rankType === '3rd' || rankType === 'lose') && !isMatchComplete) return;
 
-    // Check if badge already exists for this player
+    // Check if badge already exists for this player with identical rank
     if (yardRankMeshes[pid]) {
       if (yardRankMeshes[pid].userData && yardRankMeshes[pid].userData.rankType === rankType) {
         return;
@@ -11458,6 +11481,16 @@ function showVictoryModal(winner, rankings) {
   isAwaitingPawnMove = false;
   isTurnTransitioning = false;
 
+  engine.isGameOver = true;
+
+  const activeCount = engine.activePlayerCount || 4;
+  let activeSequence = activeCount === 2 ? [0, 1] : (activeCount === 3 ? [0, 3, 1] : [0, 3, 1, 2]);
+  const activeIds = activeSequence.slice(0, activeCount);
+
+  if (typeof engine.finalizeRankings === 'function') {
+    engine.finalizeRankings(activeIds);
+  }
+
   clearActiveMatchSession();
   clearOfflineGameState();
   updateYardRankBadges();
@@ -11465,13 +11498,11 @@ function showVictoryModal(winner, rankings) {
   const modal = document.getElementById('victory-modal');
   if (!modal) return;
 
-  const activeRanks = (rankings && rankings.length > 0)
-    ? [...rankings]
-    : (engine.rankings && engine.rankings.length > 0 ? [...engine.rankings] : [winner ? winner.id : 0]);
+  const activeRanks = (engine.rankings && engine.rankings.length > 0)
+    ? [...engine.rankings]
+    : (rankings && rankings.length > 0 ? [...rankings] : [winner ? winner.id : 0]);
 
   // Ensure all active players are present in leaderboard
-  const activeCount = engine.activePlayerCount || 4;
-  let activeSequence = activeCount === 2 ? [0, 1] : (activeCount === 3 ? [0, 3, 1] : [0, 3, 1, 2]);
   activeSequence.slice(0, activeCount).forEach(pid => {
     if (!activeRanks.includes(pid)) activeRanks.push(pid);
   });

@@ -125,6 +125,40 @@ class LudoGameEngine {
     return true;
   }
 
+  finalizeRankings(activeIds) {
+    if (!activeIds) {
+      const count = this.activePlayerCount || this.players.length;
+      let activeSequence = count === 2 ? [0, 1] : (count === 3 ? [0, 3, 1] : [0, 3, 1, 2]);
+      activeIds = activeSequence.slice(0, count);
+    }
+
+    const unfinished = activeIds
+      .filter((pid) => !this.rankings.includes(pid))
+      .map((pid) => {
+        const player = this.players[pid];
+        const finishedPawns = player ? player.pawns.filter((p) => p.isFinished).length : 0;
+        const totalSteps = player ? player.pawns.reduce((sum, p) => sum + (p.stepOnTrack > -1 ? p.stepOnTrack : 0), 0) : 0;
+        const activePawns = player ? player.pawns.filter((p) => p.stepOnTrack > -1 && !p.isFinished).length : 0;
+        return { pid, finishedPawns, totalSteps, activePawns };
+      });
+
+    // Sort unfinished players fairly by:
+    // 1. Finished pawns count
+    // 2. Highest total steps traveled
+    // 3. Active pawns on board
+    unfinished.sort((a, b) => {
+      if (b.finishedPawns !== a.finishedPawns) return b.finishedPawns - a.finishedPawns;
+      if (b.totalSteps !== a.totalSteps) return b.totalSteps - a.totalSteps;
+      return b.activePawns - a.activePawns;
+    });
+
+    unfinished.forEach((u) => {
+      if (!this.rankings.includes(u.pid)) {
+        this.rankings.push(u.pid);
+      }
+    });
+  }
+
   checkPlayerFinish(player) {
     if (player && player.isWinner && !this.rankings.includes(player.id)) {
       this.rankings.push(player.id);
@@ -142,12 +176,13 @@ class LudoGameEngine {
       }
       const activeIds = activeSequence.slice(0, count);
 
-      if (this.rankings.length >= activeIds.length - 1) {
-        for (const pid of activeIds) {
-          if (!this.rankings.includes(pid)) {
-            this.rankings.push(pid);
-          }
-        }
+      // Match completion threshold:
+      // 2P: 1 winner finishes -> match complete
+      // 3P: 2 winners finish -> match complete
+      // 4P: 2 winners finish -> match complete (1st & 2nd winners, 3rd & 4th/Loser decided by progress)
+      const finishThreshold = count === 4 ? 2 : (activeIds.length - 1);
+      if (this.rankings.length >= finishThreshold) {
+        this.finalizeRankings(activeIds);
         this.isGameOver = true;
       }
       return true;
