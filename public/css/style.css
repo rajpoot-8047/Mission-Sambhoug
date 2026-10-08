@@ -1288,7 +1288,7 @@ button:active, .btn-action:active, .btn-die-choice:active, .btn-popup-die:active
 /* ==========================================================================
    MOBILE PORTRAIT VIEWPORT RESPONSIVENESS
    ========================================================================== */
-@media (max-width: 768px) and (orientation: portrait) {
+@media (max-width: 920px) and (orientation: portrait), (max-width: 768px) {
   /* Top Nav 3x3 Grid on Mobile */
   .top-nav-bar {
     top: max(8px, env(safe-area-inset-top, 8px));
@@ -1402,10 +1402,13 @@ button:active, .btn-action:active, .btn-die-choice:active, .btn-popup-die:active
   }
 
   .tray-nav-group {
+    display: inline-flex !important;
     flex-direction: row !important;
     gap: 3px !important;
     width: auto !important;
+    min-width: max-content !important;
     flex-shrink: 0 !important;
+    flex-wrap: nowrap !important;
     align-items: center !important;
   }
 
@@ -1430,6 +1433,7 @@ button:active, .btn-action:active, .btn-die-choice:active, .btn-popup-die:active
   .btn-tray-nav {
     flex: 0 0 auto !important;
     width: auto !important;
+    max-width: none !important;
     padding: 2.5px 5px !important;
     font-size: 8px !important;
     gap: 3px !important;
@@ -1442,11 +1446,16 @@ button:active, .btn-action:active, .btn-die-choice:active, .btn-popup-die:active
 
   /* 2-Dice Choice Bar */
   .two-dice-group {
+    display: inline-flex !important;
     gap: 2.5px !important;
     padding: 1.5px 3px !important;
     flex-direction: row !important;
     flex-shrink: 0 !important;
+    flex-wrap: nowrap !important;
     width: auto !important;
+    min-width: max-content !important;
+    max-width: none !important;
+    align-items: center !important;
   }
 
   .btn-die-choice {
@@ -1456,6 +1465,9 @@ button:active, .btn-action:active, .btn-die-choice:active, .btn-popup-die:active
     border-radius: 5px !important;
     min-height: 22px !important;
     height: 22px !important;
+    width: auto !important;
+    max-width: none !important;
+    flex: 0 0 auto !important;
     flex-shrink: 0 !important;
     white-space: nowrap !important;
   }
