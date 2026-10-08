@@ -44,6 +44,6 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ['@capacitor/core', '@capacitor/android', '@capacitor/app'],
+    exclude: ['@capacitor/core', '@capacitor/android'],
   },
 });
