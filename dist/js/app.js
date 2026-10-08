@@ -311,56 +311,192 @@ function createBoardPlatform() {
   baseMesh.receiveShadow = false;
   masterExportGroup.add(baseMesh);
 
-  // 2048x2048 Ceramic Floor Texture (Central path grid lines ONLY - zero outer margin grid lines)
+  // 2048x2048 Luxury Porcelain & Inlaid Marble Floor Texture
   const cvs = document.createElement('canvas');
   cvs.width = 2048;
   cvs.height = 2048;
   const ctx = cvs.getContext('2d');
 
-  // Satin slate ceramic tile surface (Tastefully minor darker - crisp contrast, zero bleached glare)
-  ctx.fillStyle = '#b8c1c8';
+  // 1. Satin Alabaster/Porcelain Ceramic Base with subtle radial depth
+  const baseGrad = ctx.createRadialGradient(1024, 1024, 150, 1024, 1024, 1350);
+  baseGrad.addColorStop(0.0, '#c3ccd3');
+  baseGrad.addColorStop(0.65, '#b8c1c8');
+  baseGrad.addColorStop(1.0, '#adb6bd');
+  ctx.fillStyle = baseGrad;
   ctx.fillRect(0, 0, 2048, 2048);
 
-  // Subtle clean dark frame rim around the outer board border
+  // Subtle organic marble veining ribbons across the board
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+  ctx.lineWidth = 18;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(100, 200);
+  ctx.bezierCurveTo(450, 600, 900, 300, 1400, 800);
+  ctx.bezierCurveTo(1700, 1100, 1600, 1600, 1950, 1900);
+  ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(100, 120, 135, 0.08)';
+  ctx.lineWidth = 14;
+  ctx.beginPath();
+  ctx.moveTo(1900, 250);
+  ctx.bezierCurveTo(1500, 650, 1200, 1200, 600, 1500);
+  ctx.bezierCurveTo(350, 1650, 250, 1800, 150, 1950);
+  // Delicate organic crystalline micro-veins & subtle golden pyrite ribbons
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.24)';
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(350, 420);
+  ctx.bezierCurveTo(620, 520, 880, 440, 1150, 720);
+  ctx.bezierCurveTo(1400, 960, 1680, 940, 1880, 1320);
+  ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(70, 95, 115, 0.08)';
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.moveTo(1720, 420);
+  ctx.bezierCurveTo(1420, 820, 920, 1120, 520, 1320);
+  ctx.bezierCurveTo(320, 1420, 220, 1620, 120, 1780);
+  ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(200, 158, 58, 0.12)';
+  ctx.lineWidth = 3.5;
+  ctx.beginPath();
+  ctx.moveTo(400, 1600);
+  ctx.bezierCurveTo(700, 1400, 1300, 1500, 1650, 1100);
+  ctx.stroke();
+  ctx.restore();
+
+  // 2. Dual Inlaid 24K Polished Brass Outer Ribbons & Dark Frame Rim
   ctx.lineWidth = 10;
   ctx.strokeStyle = '#182026';
   ctx.strokeRect(5, 5, 2038, 2038);
 
-  // Central cross path grid lines ONLY (rows 6..9 and cols 6..9)
+  ctx.lineWidth = 4.5;
+  ctx.strokeStyle = '#c89e3a';
+  ctx.strokeRect(22, 22, 2004, 2004);
+
+  ctx.lineWidth = 2.0;
+  ctx.strokeStyle = '#e0be5a';
+  ctx.strokeRect(32, 32, 1984, 1984);
+
+  // 4 Royal Heirloom Brass Corner Brackets
+  const drawCornerBracket = (x, y, flipX, flipY) => {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(flipX, flipY);
+    ctx.strokeStyle = '#c89e3a';
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    ctx.moveTo(0, 75);
+    ctx.lineTo(0, 0);
+    ctx.lineTo(75, 0);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#e0be5a';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(10, 60);
+    ctx.lineTo(10, 10);
+    ctx.lineTo(60, 10);
+    ctx.stroke();
+
+    ctx.fillStyle = '#c89e3a';
+    ctx.beginPath();
+    ctx.arc(28, 28, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#6b4d08';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.restore();
+  };
+  drawCornerBracket(38, 38, 1, 1);
+  drawCornerBracket(2010, 38, -1, 1);
+  drawCornerBracket(38, 2010, 1, -1);
+  drawCornerBracket(2010, 2010, -1, -1);
+
+  // 3. Central Track Cross: Individually Inlaid Porcelain Tile Slabs with 3D Bevel Relief
   const step = 2048 / 15;
-  ctx.strokeStyle = '#718290';
+
+  for (let r = 0; r < 15; r++) {
+    for (let c = 0; c < 15; c++) {
+      const isHorizontalArm = (r >= 6 && r <= 8);
+      const isVerticalArm = (c >= 6 && c <= 8);
+      if (!isHorizontalArm && !isVerticalArm) continue; // Skip quadrant yards
+
+      const isCenterCore = (r >= 6 && r <= 8) && (c >= 6 && c <= 8);
+      if (isCenterCore) continue; // Covered by center pyramid collar
+
+      const tx = c * step + 2;
+      const ty = r * step + 2;
+      const tw = step - 4;
+      const th = step - 4;
+
+      // Inlaid ceramic tile gradient
+      const tileGrad = ctx.createLinearGradient(tx, ty, tx + tw, ty + th);
+      tileGrad.addColorStop(0.0, '#dce4ea');
+      tileGrad.addColorStop(0.5, '#cfd8df');
+      tileGrad.addColorStop(1.0, '#c1cbd2');
+      ctx.fillStyle = tileGrad;
+      ctx.fillRect(tx, ty, tw, th);
+
+      // 3D Inset Bevel Highlight (Top & Left)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(tx, ty + th);
+      ctx.lineTo(tx, ty);
+      ctx.lineTo(tx + tw, ty);
+      ctx.stroke();
+
+      // 3D Inset Bevel Shadow (Bottom & Right)
+      ctx.strokeStyle = 'rgba(30, 42, 54, 0.35)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(tx + tw, ty);
+      ctx.lineTo(tx + tw, ty + th);
+      ctx.lineTo(tx, ty + th);
+      ctx.stroke();
+
+      // Delicate tile border
+      ctx.strokeStyle = '#718290';
+      ctx.lineWidth = 1.0;
+      ctx.strokeRect(tx, ty, tw, th);
+    }
+  }
+
+  // Cross path boundary lines
+  ctx.strokeStyle = '#5a6976';
   ctx.lineWidth = 3.2;
 
-  // Horizontal track lines (rows 6, 7, 8)
-  for (let r = 6; r <= 9; r++) {
+  // Horizontal track lines (rows 6, 9)
+  for (let r of [6, 9]) {
     ctx.beginPath();
     ctx.moveTo(0, r * step);
     ctx.lineTo(2048, r * step);
     ctx.stroke();
   }
-  for (let c = 0; c <= 15; c++) {
-    ctx.beginPath();
-    ctx.moveTo(c * step, 6 * step);
-    ctx.lineTo(c * step, 9 * step);
-    ctx.stroke();
-  }
-
-  // Vertical track lines (cols 6, 7, 8)
-  for (let c = 6; c <= 9; c++) {
+  // Vertical track lines (cols 6, 9)
+  for (let c of [6, 9]) {
     ctx.beginPath();
     ctx.moveTo(c * step, 0);
     ctx.lineTo(c * step, 2048);
     ctx.stroke();
   }
-  for (let r = 0; r <= 15; r++) {
-    ctx.beginPath();
-    ctx.moveTo(6 * step, r * step);
-    ctx.lineTo(9 * step, r * step);
-    ctx.stroke();
-  }
 
-  // 8 Official Ludo Celestial Stars (4 Start Stars + 4 Safe Castle Stars)
-  // Perfectly aligned with PERIMETER_TRACK SAFE_STAR_INDICES [0, 8, 13, 21, 26, 34, 39, 47]
+  // Center 3x3 collar inlaid brass boundary
+  ctx.save();
+  ctx.strokeStyle = '#c89e3a';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(6 * step, 6 * step, 3 * step, 3 * step);
+  ctx.strokeStyle = '#7a5a14';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(6 * step + 4, 6 * step + 4, 3 * step - 8, 3 * step - 8);
+  ctx.restore();
+
+  // 4. 8 Official Ludo Celestial Stars: Chiseled 3D Brass Medallions with Gemstone Center
   const stars = [
     [6, 13], // Yellow Start Star (Index 0)
     [2, 8],  // Yellow Castle Safe Star (Index 8)
@@ -372,70 +508,148 @@ function createBoardPlatform() {
     [8, 12]  // Charcoal Castle Safe Star (Index 47)
   ];
 
-  function drawStar(cx, cy, r) {
+  const starColors = {
+    '6,13': '#d9b300',
+    '2,8':  '#d9b300',
+    '1,6':  '#0c4bbd',
+    '6,2':  '#0c4bbd',
+    '8,1':  '#ba1d1d',
+    '12,6': '#ba1d1d',
+    '13,8': '#2b3238',
+    '8,12': '#2b3238'
+  };
+
+  function drawStar(cx, cy, r, gemColor = '#d9b300') {
     ctx.save();
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.40)';
-    ctx.shadowBlur = 8;
-    ctx.shadowOffsetY = 2;
 
-    ctx.fillStyle = '#c89e3a';
+    // Contact drop shadow
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 3;
+
+    // Inlaid Circular Brass Medallion Base
     ctx.beginPath();
-    let rot = (Math.PI / 2) * 3;
-    const stepAngle = Math.PI / 5;
-    for (let i = 0; i < 5; i++) {
-      let x = cx + Math.cos(rot) * r;
-      let y = cy + Math.sin(rot) * r;
-      ctx.lineTo(x, y);
-      rot += stepAngle;
-      x = cx + Math.cos(rot) * (r * 0.44);
-      y = cy + Math.sin(rot) * (r * 0.44);
-      ctx.lineTo(x, y);
-      rot += stepAngle;
-    }
-    ctx.closePath();
+    ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
+    ctx.fillStyle = '#8f681a';
     ctx.fill();
-
-    ctx.strokeStyle = '#694c06';
-    ctx.lineWidth = 3.2;
+    ctx.strokeStyle = '#c89e3a';
+    ctx.lineWidth = 3.5;
     ctx.stroke();
 
     ctx.shadowBlur = 0;
-    ctx.fillStyle = '#f0ca58';
+    ctx.shadowOffsetY = 0;
+
+    // Milled inner golden ring
     ctx.beginPath();
-    ctx.arc(cx, cy, r * 0.16, 0, Math.PI * 2);
+    ctx.arc(cx, cy, r * 0.98, 0, Math.PI * 2);
+    ctx.strokeStyle = '#dfb858';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Chiseled 3D Faceted 5-Point Star
+    for (let i = 0; i < 5; i++) {
+      const aTip = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+      const aLeftInner = aTip - Math.PI / 5;
+      const aRightInner = aTip + Math.PI / 5;
+
+      const rInner = r * 0.44;
+      const tipX = cx + Math.cos(aTip) * r;
+      const tipY = cy + Math.sin(aTip) * r;
+      const lInX = cx + Math.cos(aLeftInner) * rInner;
+      const lInY = cy + Math.sin(aLeftInner) * rInner;
+      const rInX = cx + Math.cos(aRightInner) * rInner;
+      const rInY = cy + Math.sin(aRightInner) * rInner;
+
+      // Bright polished gold half facet (Left)
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(tipX, tipY);
+      ctx.lineTo(lInX, lInY);
+      ctx.closePath();
+      ctx.fillStyle = '#fce588';
+      ctx.fill();
+
+      // Shaded antique bronze half facet (Right)
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(tipX, tipY);
+      ctx.lineTo(rInX, rInY);
+      ctx.closePath();
+      ctx.fillStyle = '#a67b17';
+      ctx.fill();
+    }
+
+    // Outer star outline
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const aTip = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+      const aIn = aTip + Math.PI / 5;
+      const rInner = r * 0.44;
+      const x1 = cx + Math.cos(aTip) * r;
+      const y1 = cy + Math.sin(aTip) * r;
+      const x2 = cx + Math.cos(aIn) * rInner;
+      const y2 = cy + Math.sin(aIn) * rInner;
+      if (i === 0) ctx.moveTo(x1, y1);
+      else ctx.lineTo(x1, y1);
+      ctx.lineTo(x2, y2);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = '#5c3e06';
+    ctx.lineWidth = 1.8;
+    ctx.stroke();
+
+    // Central Polished Gemstone Cabochon
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2);
+    ctx.fillStyle = gemColor;
+    ctx.fill();
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 2.0;
+    ctx.stroke();
+
+    // Jewel specular glint
+    ctx.beginPath();
+    ctx.arc(cx - r * 0.07, cy - r * 0.07, r * 0.06, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
     ctx.fill();
 
     ctx.restore();
   }
 
   stars.forEach(([c, r]) => {
-    drawStar((c + 0.5) * step, (r + 0.5) * step, step * 0.36);
+    const key = `${c},${r}`;
+    const gem = starColors[key] || '#d9b300';
+    drawStar((c + 0.5) * step, (r + 0.5) * step, step * 0.38, gem);
   });
 
-  // Classic Clean Ludo Directional Arrows on Corner Turn Tiles (matching reference board)
-  function drawDirectionalArrow(cx, cy, angle, colorHex = '#242e36') {
+  // 5. Classic Inlaid Metallic Directional Arrows
+  function drawDirectionalArrow(cx, cy, angle, colorHex = '#1c242c') {
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(angle);
 
     const length = step * 0.58;
-    const shaftW = 5.0;
+    const shaftW = 5.2;
     const headLen = step * 0.22;
     const headW = step * 0.22;
     const barbRecess = step * 0.055;
 
-    // Crisp subtle drop shadow for depth on ceramic floor
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
-    ctx.shadowBlur = 4;
-    ctx.shadowOffsetY = 1.5;
+    // Contact drop shadow
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.40)';
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetY = 2;
 
-    // Arrow shaft line
-    ctx.strokeStyle = colorHex;
-    ctx.lineWidth = shaftW;
+    // Inlaid brass underlay
+    ctx.strokeStyle = '#8f681a';
+    ctx.lineWidth = shaftW + 2;
     ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(-length * 0.46, 0);
     ctx.lineTo(length * 0.46 - headLen + barbRecess, 0);
+    ctx.stroke();
+
+    ctx.strokeStyle = colorHex;
+    ctx.lineWidth = shaftW;
     ctx.stroke();
 
     // Barbed triangular arrowhead
@@ -452,7 +666,8 @@ function createBoardPlatform() {
     ctx.closePath();
     ctx.fill();
 
-    ctx.lineWidth = 1.0;
+    ctx.strokeStyle = '#c89e3a';
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
     ctx.restore();
@@ -485,6 +700,391 @@ function createBoardPlatform() {
   topMesh.updateMatrix();
   topMesh.receiveShadow = false;
   masterExportGroup.add(topMesh);
+}
+
+// Caches for Yard and Track Procedural Luxury Textures
+const yardFloorTexCache = new Map();
+const padBoxTexCache = new Map();
+const trackTileTexCache = new Map();
+
+function getCachedYardFloorTexture(q) {
+  if (typeof document === 'undefined' || !document.createElement) return null;
+  const key = `${q.name}_${q.inner}_${q.pad}`;
+  if (yardFloorTexCache.has(key)) return yardFloorTexCache.get(key);
+
+  const cvs = document.createElement('canvas');
+  cvs.width = 1024;
+  cvs.height = 1024;
+  const ctx = cvs.getContext('2d');
+
+  const innerHex = colorToHexStr(q.inner);
+  const padHex = colorToHexStr(q.pad);
+
+  // 1. Deep Royal Satin Bed with Luminous Core & Velvet Vignette
+  const bedGrad = ctx.createRadialGradient(512, 512, 60, 512, 512, 680);
+  bedGrad.addColorStop(0.0, padHex); // vibrant gem bloom at center
+  bedGrad.addColorStop(0.25, innerHex); // authentic royal satin hue
+  bedGrad.addColorStop(0.85, innerHex);
+  bedGrad.addColorStop(1.0, '#0d1115'); // dark velvet frame boundary
+  ctx.fillStyle = bedGrad;
+  ctx.fillRect(0, 0, 1024, 1024);
+
+  // 2. Micro Damask / Royal Brocade Watermark Pattern
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.045)';
+  ctx.lineWidth = 1.2;
+  const gridW = 64;
+  for (let x = 32; x < 1024; x += gridW) {
+    for (let y = 32; y < 1024; y += gridW) {
+      ctx.beginPath();
+      ctx.moveTo(x, y - 18);
+      ctx.lineTo(x + 18, y);
+      ctx.lineTo(x, y + 18);
+      ctx.lineTo(x - 18, y);
+      ctx.closePath();
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+
+  // 3. Dual Inlaid 24K Polished Brass Yard Perimeter Ribbons
+  ctx.save();
+  ctx.strokeStyle = '#c89e3a';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(18, 18, 988, 988);
+
+  ctx.strokeStyle = '#e0be5a';
+  ctx.lineWidth = 2.4;
+  ctx.strokeRect(30, 30, 964, 964);
+
+  // 4 Corner Fleurons in Yard Borders
+  const drawYardCorner = (x, y, fx, fy) => {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(fx, fy);
+    ctx.strokeStyle = '#dfb858';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(0, 40);
+    ctx.lineTo(0, 0);
+    ctx.lineTo(40, 0);
+    ctx.stroke();
+
+    ctx.fillStyle = '#c89e3a';
+    ctx.beginPath();
+    ctx.arc(16, 16, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  };
+  drawYardCorner(34, 34, 1, 1);
+  drawYardCorner(990, 34, -1, 1);
+  drawYardCorner(34, 990, 1, -1);
+  drawYardCorner(990, 990, -1, -1);
+  ctx.restore();
+
+  // 4. Four Turned-Brass Recessed Socket Pedestal Rings (aligned with ±1.20)
+  // Scale: 1024 / 4.1 = 249.756 px/unit. 1.20 * 249.756 = 300 px from center (512)
+  const socketCenters = [
+    [512 - 300, 512 - 300],
+    [512 + 300, 512 - 300],
+    [512 - 300, 512 + 300],
+    [512 + 300, 512 + 300]
+  ];
+
+  socketCenters.forEach(([sx, sy]) => {
+    ctx.save();
+    // Drop shadow
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetY = 4;
+
+    // Outer turned brass ring
+    ctx.beginPath();
+    ctx.arc(sx, sy, 172, 0, Math.PI * 2);
+    ctx.strokeStyle = '#c89e3a';
+    ctx.lineWidth = 5.5;
+    ctx.stroke();
+
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    // Inner milled gold pinstripe ring
+    ctx.beginPath();
+    ctx.arc(sx, sy, 162, 0, Math.PI * 2);
+    ctx.strokeStyle = '#dfb858';
+    ctx.lineWidth = 2.0;
+    ctx.stroke();
+
+    // Recessed dark socket ring
+    ctx.beginPath();
+    ctx.arc(sx, sy, 150, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+    ctx.fill();
+    ctx.strokeStyle = '#7a5a14';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // 4 Corner Gold Filigree Spurs around each socket
+    for (let a = 0; a < 4; a++) {
+      const ang = (a * Math.PI) / 2 + Math.PI / 4;
+      const spX = sx + Math.cos(ang) * 172;
+      const spY = sy + Math.sin(ang) * 172;
+      ctx.beginPath();
+      ctx.arc(spX, spY, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffd700';
+      ctx.fill();
+    }
+    ctx.restore();
+  });
+
+  // 5. Central 8-Point Royal Heirloom Rosette Medallion (Between the 4 Pawns)
+  ctx.save();
+  const cx = 512;
+  const cy = 512;
+
+  // Medallion drop shadow
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.60)';
+  ctx.shadowBlur = 14;
+  ctx.shadowOffsetY = 4;
+
+  // Inlaid circular brass medallion base
+  ctx.beginPath();
+  ctx.arc(cx, cy, 108, 0, Math.PI * 2);
+  ctx.fillStyle = '#7a5214';
+  ctx.fill();
+  ctx.strokeStyle = '#c89e3a';
+  ctx.lineWidth = 4.5;
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
+
+  // Milled gear bezel
+  ctx.beginPath();
+  ctx.arc(cx, cy, 96, 0, Math.PI * 2);
+  ctx.strokeStyle = '#e0be5a';
+  ctx.lineWidth = 2.0;
+  ctx.stroke();
+
+  // 8-Point Chiseled 3D Star Rosette
+  const rStar = 88;
+  const rInner = 36;
+  for (let i = 0; i < 8; i++) {
+    const aTip = (i * 2 * Math.PI) / 8 - Math.PI / 2;
+    const aLeft = aTip - Math.PI / 8;
+    const aRight = aTip + Math.PI / 8;
+
+    const tipX = cx + Math.cos(aTip) * rStar;
+    const tipY = cy + Math.sin(aTip) * rStar;
+    const lX = cx + Math.cos(aLeft) * rInner;
+    const lY = cy + Math.sin(aLeft) * rInner;
+    const rX = cx + Math.cos(aRight) * rInner;
+    const rY = cy + Math.sin(aRight) * rInner;
+
+    // Bright 24K gold facet
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(tipX, tipY);
+    ctx.lineTo(lX, lY);
+    ctx.closePath();
+    ctx.fillStyle = '#ffdf78';
+    ctx.fill();
+
+    // Shaded antique bronze facet
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(tipX, tipY);
+    ctx.lineTo(rX, rY);
+    ctx.closePath();
+    ctx.fillStyle = '#946c14';
+    ctx.fill();
+  }
+
+  // Central Gemstone Cabochon matching goti/pad color
+  ctx.beginPath();
+  ctx.arc(cx, cy, 26, 0, Math.PI * 2);
+  const gemGrad = ctx.createRadialGradient(cx - 7, cy - 7, 3, cx, cy, 26);
+  gemGrad.addColorStop(0.0, '#ffffff');
+  gemGrad.addColorStop(0.3, padHex);
+  gemGrad.addColorStop(1.0, '#0a0d10');
+  ctx.fillStyle = gemGrad;
+  ctx.fill();
+  ctx.strokeStyle = '#ffd700';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Radiating filigree vines to the 4 socket pedestals
+  socketCenters.forEach(([sx, sy]) => {
+    ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)';
+    ctx.lineWidth = 2.0;
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(sx, sy);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  ctx.restore();
+
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.encoding = THREE.sRGBEncoding;
+  tex.anisotropy = 16;
+  tex.generateMipmaps = true;
+  yardFloorTexCache.set(key, tex);
+  return tex;
+}
+
+function getCachedPadBoxTexture(padColor) {
+  if (typeof document === 'undefined' || !document.createElement) return null;
+  const key = String(padColor);
+  if (padBoxTexCache.has(key)) return padBoxTexCache.get(key);
+
+  const cvs = document.createElement('canvas');
+  cvs.width = 256;
+  cvs.height = 256;
+  const ctx = cvs.getContext('2d');
+  const padHex = colorToHexStr(padColor);
+
+  // Volumetric polished plinth gradient
+  const grad = ctx.createRadialGradient(128, 128, 20, 128, 128, 150);
+  grad.addColorStop(0.0, padHex);
+  grad.addColorStop(0.85, padHex);
+  grad.addColorStop(1.0, '#101418');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 256, 256);
+
+  // 24K Inlaid Gold Chamfered Rim
+  ctx.strokeStyle = '#c89e3a';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(6, 6, 244, 244);
+
+  ctx.strokeStyle = '#dfb858';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(14, 14, 228, 228);
+
+  // Turned brass center seating ring where goti base rests
+  ctx.beginPath();
+  ctx.arc(128, 128, 76, 0, Math.PI * 2);
+  ctx.strokeStyle = '#dfb858';
+  ctx.lineWidth = 3.5;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(128, 128, 68, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.lineWidth = 2.0;
+  ctx.stroke();
+
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.encoding = THREE.sRGBEncoding;
+  tex.anisotropy = 16;
+  tex.generateMipmaps = true;
+  padBoxTexCache.set(key, tex);
+  return tex;
+}
+
+function getCachedTrackTileTexture(tileColor) {
+  if (typeof document === 'undefined' || !document.createElement) return null;
+  const key = String(tileColor);
+  if (trackTileTexCache.has(key)) return trackTileTexCache.get(key);
+
+  const cvs = document.createElement('canvas');
+  cvs.width = 256;
+  cvs.height = 256;
+  const ctx = cvs.getContext('2d');
+  const hex = colorToHexStr(tileColor);
+
+  // Polished Gemstone Tile Slab Base
+  const grad = ctx.createLinearGradient(0, 0, 256, 256);
+  grad.addColorStop(0.0, hex);
+  grad.addColorStop(0.5, hex);
+  grad.addColorStop(1.0, '#101418');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 256, 256);
+
+  // 3D Inset Bevel Highlight & Shadow
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(4, 252);
+  ctx.lineTo(4, 4);
+  ctx.lineTo(252, 4);
+  ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.55)';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(252, 4);
+  ctx.lineTo(252, 252);
+  ctx.lineTo(4, 252);
+  ctx.stroke();
+
+  // Inlaid 24K Gold Rim
+  ctx.strokeStyle = '#c89e3a';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(10, 10, 236, 236);
+
+  ctx.strokeStyle = '#dfb858';
+  ctx.lineWidth = 1.8;
+  ctx.strokeRect(16, 16, 224, 224);
+
+  // 4 Corner Gold Accents
+  [
+    [22, 22], [234, 22], [22, 234], [234, 234]
+  ].forEach(([x, y]) => {
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Chiseled 3D Royal Chevron / Arrowhead Pointing Home
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetY = 2;
+
+  // Left Chevron Wing (Bright Gold)
+  ctx.beginPath();
+  ctx.moveTo(128, 70);
+  ctx.lineTo(60, 160);
+  ctx.lineTo(84, 185);
+  ctx.lineTo(128, 126);
+  ctx.closePath();
+  ctx.fillStyle = '#ffdf78';
+  ctx.fill();
+
+  // Right Chevron Wing (Shaded Antique Bronze)
+  ctx.beginPath();
+  ctx.moveTo(128, 70);
+  ctx.lineTo(196, 160);
+  ctx.lineTo(172, 185);
+  ctx.lineTo(128, 126);
+  ctx.closePath();
+  ctx.fillStyle = '#a67b17';
+  ctx.fill();
+
+  ctx.strokeStyle = '#7a5a14';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(60, 160);
+  ctx.lineTo(128, 70);
+  ctx.lineTo(196, 160);
+  ctx.lineTo(172, 185);
+  ctx.lineTo(128, 126);
+  ctx.lineTo(84, 185);
+  ctx.closePath();
+  ctx.stroke();
+
+  ctx.restore();
+
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.encoding = THREE.sRGBEncoding;
+  tex.anisotropy = 16;
+  tex.generateMipmaps = true;
+  trackTileTexCache.set(key, tex);
+  return tex;
 }
 
 function createQuadrants() {
@@ -548,8 +1148,9 @@ function createQuadrants() {
     wallE.receiveShadow = false;
     group.add(wallE);
 
-    // Smooth Recessed Inner Square Floor (matte: no specular glare hotspot)
-    const floorMesh = new THREE.Mesh(floorGeo, getMatteMat(q.inner));
+    // Smooth Recessed Inner Square Floor with Royal Satin Rosette Texture (matte: zero specular glare hotspot)
+    const floorTex = getCachedYardFloorTexture(q);
+    const floorMesh = new THREE.Mesh(floorGeo, getMatteMat(0xffffff, floorTex));
     floorMesh.position.y = floorH / 2;
     floorMesh.matrixAutoUpdate = false;
     floorMesh.updateMatrix();
@@ -561,8 +1162,9 @@ function createQuadrants() {
       [-1.20, -1.20], [1.20, -1.20],
       [-1.20,  1.20], [1.20,  1.20]
     ];
-    // Pad material uses calibrated goti body color so boxes exactly match gotiyan
-    const padMat = getMatteMat(q.pad);
+    // Pad material uses calibrated goti body color with turned brass chamfer so boxes exactly match gotiyan
+    const padTex = getCachedPadBoxTexture(q.pad);
+    const padMat = getMatteMat(0xffffff, padTex);
 
     padOffsets.forEach(([px, pz]) => {
       const padMesh = new THREE.Mesh(padGeo, padMat);
@@ -587,14 +1189,15 @@ function createSteppedTracks() {
   const trackTileGeo = new THREE.BoxGeometry(tileSize, stepH, tileSize);
 
   const pathways = [
-    { color: PALETTE.RED,      axis: 'z', sign: -1 }, // Top arm: rows 1 to 5 (z: -6.24 to -2.08)
-    { color: PALETTE.YELLOW,   axis: 'z', sign:  1 }, // Bottom arm: rows 13 to 9 (z: +6.24 to +2.08)
-    { color: PALETTE.BLUE,     axis: 'x', sign: -1 }, // Left arm: cols 1 to 5 (x: -6.24 to -2.08)
-    { color: PALETTE.CHARCOAL, axis: 'x', sign:  1 }  // Right arm: cols 13 to 9 (x: +6.24 to +2.08)
+    { color: PALETTE.RED,      axis: 'z', sign: -1, rotY: Math.PI },       // Top arm: pointing towards center pyramid
+    { color: PALETTE.YELLOW,   axis: 'z', sign:  1, rotY: 0 },             // Bottom arm: pointing towards center pyramid
+    { color: PALETTE.BLUE,     axis: 'x', sign: -1, rotY: -Math.PI / 2 },  // Left arm: pointing towards center pyramid
+    { color: PALETTE.CHARCOAL, axis: 'x', sign:  1, rotY: Math.PI / 2 }    // Right arm: pointing towards center pyramid
   ];
 
   pathways.forEach((p) => {
-    const pMat = getMatteMat(p.color);
+    const tileTex = getCachedTrackTileTexture(p.color);
+    const pMat = getMatteMat(0xffffff, tileTex);
     // 5 square blocks filling rows/cols 1 to 5 leading from outer track into center pyramid
     for (let i = 0; i < 5; i++) {
       // dist goes from 6 * step (outer square 1/13) down to 2 * step (inner square 5/9)
@@ -604,6 +1207,7 @@ function createSteppedTracks() {
 
       const mesh = new THREE.Mesh(trackTileGeo, pMat);
       mesh.position.set(px, 0.655 + stepH / 2, pz);
+      if (p.rotY) mesh.rotation.y = p.rotY;
       mesh.matrixAutoUpdate = false;
       mesh.updateMatrix();
       mesh.castShadow = false;
@@ -2958,13 +3562,64 @@ function getGotiBodyTexture(skinId, pColor, pNum = 0, pIdx = 0) {
 
   // Specific Skin Rendering Logic - ALWAYS on top of the player's core identity color
   if (skinId === 'classic') {
-    // Polished agate gemstone with inlaid brass ribbons
-    drawGoldBand(460, 24);
-    drawGoldBand(165, 14);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
-    for (let i = 0; i < 6; i++) {
-      ctx.fillRect(i * 90, 0, 35, 512);
+    // 1. Banded Agate Gemstone Chatoyancy & Organic Curved Strata
+    ctx.save();
+    for (let b = 0; b < 10; b++) {
+      ctx.beginPath();
+      const by = 80 + b * 36;
+      ctx.moveTo(0, by);
+      ctx.bezierCurveTo(140, by - 14, 340, by + 16, 512, by - 8);
+      ctx.lineTo(512, by + 18);
+      ctx.bezierCurveTo(340, by + 34, 140, by + 4, 0, by + 18);
+      ctx.closePath();
+      ctx.fillStyle = (b % 2 === 0) ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.12)';
+      ctx.fill();
     }
+    ctx.restore();
+
+    // 2. Chatoyant Silk Sheen Vertical Highlights (translucent gemstone depth)
+    ctx.save();
+    const chatoyantGrad = ctx.createLinearGradient(0, 0, 512, 0);
+    chatoyantGrad.addColorStop(0.0, 'rgba(255, 255, 255, 0.0)');
+    chatoyantGrad.addColorStop(0.2, 'rgba(255, 255, 255, 0.18)');
+    chatoyantGrad.addColorStop(0.35, 'rgba(255, 255, 255, 0.0)');
+    chatoyantGrad.addColorStop(0.65, 'rgba(255, 255, 255, 0.22)');
+    chatoyantGrad.addColorStop(0.8, 'rgba(255, 255, 255, 0.0)');
+    ctx.fillStyle = chatoyantGrad;
+    ctx.fillRect(0, 0, 512, 512);
+    ctx.restore();
+
+    // 3. Spindle Waist Turned 24K Gold Belt
+    drawGoldBand(155, 20);
+
+    // 4. Lower Pedestal Turned 24K Gold Belt with Guilloché Engraving
+    drawGoldBand(440, 36);
+
+    // Guilloché fretwork & micro-rivets along lower gold band
+    ctx.save();
+    ctx.strokeStyle = 'rgba(90, 60, 14, 0.85)';
+    ctx.lineWidth = 1.6;
+    for (let x = 8; x < 512; x += 24) {
+      ctx.beginPath();
+      ctx.arc(x + 12, 458, 6.5, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#fff8db';
+      ctx.beginPath();
+      ctx.arc(x + 12, 458, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // 5. Royal Heirloom Star Crest on Front & Back Chest
+    [128, 384].forEach(x => {
+      drawStar(x, 260, 24, '#ffd700', '#d4af37');
+      // Diamond center glint
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(x, 260, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    });
   } else if (skinId === 'royal_crown') {
     // Imperial heraldry & gold filigree
     drawGoldBand(465, 22);
