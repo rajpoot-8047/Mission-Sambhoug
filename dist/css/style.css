@@ -1491,3 +1491,65 @@ body.theme-scifi #btn-roll:hover {
 body.theme-scifi #btn-roll:active {
   box-shadow: 0 0 15px rgba(0, 229, 255, 0.3) !important;
 }
+
+/* 16 Set-Specific HUD & Glow Accents */
+body.theme-football #btn-roll, body.theme-soccer #btn-roll {
+  background: linear-gradient(135deg, #15803d 0%, #166534 50%, #14532d 100%) !important;
+  border-color: rgba(34, 197, 94, 0.7) !important;
+  box-shadow: 0 0 25px rgba(34, 197, 94, 0.35) !important;
+}
+body.theme-cowboy #btn-roll {
+  background: linear-gradient(135deg, #8d5b38 0%, #6f4222 50%, #532f15 100%) !important;
+  border-color: rgba(224, 169, 109, 0.7) !important;
+  box-shadow: 0 0 25px rgba(205, 140, 72, 0.35) !important;
+}
+body.theme-ninja #btn-roll {
+  background: linear-gradient(135deg, #2b2d42 0%, #1f2029 50%, #121318 100%) !important;
+  border-color: rgba(230, 57, 70, 0.7) !important;
+  box-shadow: 0 0 25px rgba(230, 57, 70, 0.35) !important;
+}
+body.theme-hoodie #btn-roll {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #0077b6 100%) !important;
+  border-color: rgba(144, 224, 239, 0.7) !important;
+  box-shadow: 0 0 25px rgba(72, 202, 228, 0.35) !important;
+}
+body.theme-king #btn-roll {
+  background: linear-gradient(135deg, #b8860b 0%, #856108 50%, #4a3604 100%) !important;
+  border-color: rgba(255, 215, 0, 0.8) !important;
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.4) !important;
+}
+body.theme-cap #btn-roll {
+  background: linear-gradient(135deg, #0284c7 0%, #075985 50%, #0c4a6e 100%) !important;
+  border-color: rgba(56, 189, 248, 0.7) !important;
+  box-shadow: 0 0 25px rgba(2, 132, 199, 0.35) !important;
+}
+body.theme-gamer #btn-roll {
+  background: linear-gradient(135deg, #06d6a0 0%, #0f766e 50%, #115e59 100%) !important;
+  border-color: rgba(247, 37, 133, 0.8) !important;
+  box-shadow: 0 0 25px rgba(6, 214, 160, 0.45) !important;
+}
+body.theme-cute_boys #btn-roll {
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 50%, #0369a1 100%) !important;
+  border-color: rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 0 25px rgba(186, 230, 253, 0.45) !important;
+}
+body.theme-neon_glow #btn-roll {
+  background: linear-gradient(135deg, #f72585 0%, #7209b7 50%, #3a0ca3 100%) !important;
+  border-color: rgba(76, 201, 240, 0.8) !important;
+  box-shadow: 0 0 25px rgba(247, 37, 133, 0.45) !important;
+}
+body.theme-cool_boys #btn-roll {
+  background: linear-gradient(135deg, #7b2cbf 0%, #5a189a 50%, #3c096c 100%) !important;
+  border-color: rgba(255, 183, 3, 0.8) !important;
+  box-shadow: 0 0 25px rgba(255, 183, 3, 0.4) !important;
+}
+body.theme-minimal_crown #btn-roll {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%) !important;
+  border-color: rgba(199, 210, 254, 0.8) !important;
+  box-shadow: 0 0 25px rgba(129, 140, 248, 0.35) !important;
+}
+body.theme-paw #btn-roll {
+  background: linear-gradient(135deg, #db2777 0%, #be185d 50%, #9d174d 100%) !important;
+  border-color: rgba(244, 114, 182, 0.8) !important;
+  box-shadow: 0 0 25px rgba(244, 114, 182, 0.4) !important;
+}

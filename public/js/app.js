@@ -294,7 +294,7 @@ function getMatteMat(color, map = null) {
 
 function createTableFloor() {
   const geo = new THREE.PlaneGeometry(120, 120);
-  const color = (currentTheme === 'scifi') ? 0x030712 : PALETTE.TABLE;
+  const color = getThemeProfile(currentTheme).tableColor;
   const mat = new THREE.MeshStandardMaterial({
     color: color,
     roughness: 0.96,
@@ -310,224 +310,1927 @@ function createTableFloor() {
   scene.add(tableFloorMesh);
 }
 
+// scratch/build_themes_js.js
+// 16 MATCHING COMBO SET THEME PROFILES (Agent 6: Palette Heirloom Stylist & Visual Artisan)
+const BOARD_THEME_PROFILES = {
+  royal_crown: {
+    id: 'royal_crown',
+    name: 'Royal Crown',
+    shortName: 'Royal',
+    iconClass: 'fa-solid fa-crown text-amber-400',
+    baseColor: 0x212930,
+    tableColor: 0x02161b,
+    collarColor: 0x2e363d,
+    floorGrad: ['#c3ccd3', '#b8c1c8', '#adb6bd'],
+    tileGrad: ['#dce4ea', '#cfd8df', '#c1cbd2'],
+    tileHighlight: 'rgba(255, 255, 255, 0.75)',
+    tileShadow: 'rgba(30, 42, 54, 0.35)',
+    tileBorder: '#718290',
+    outerBorder: '#182026',
+    borderRibbon1: '#c89e3a',
+    borderRibbon2: '#e0be5a',
+    armBorder: '#5a6976',
+    collarBorder1: '#c89e3a',
+    collarBorder2: '#7a5a14',
+    starStyle: 'brass_faceted',
+    cornerStyle: 'royal_fleuron',
+    arrowStyle: 'brass_inlaid',
+    yardWatermark: 'damask',
+    yardRingColor: '#c89e3a',
+    yardRingInner: '#e0be5a',
+    yardCenterRosette: 'royal_star',
+    padRimColor: '#c89e3a',
+    padRimInner: '#dfb858',
+    trackRim1: '#c89e3a',
+    trackRim2: '#dfb858',
+    trackArrow: 'gold_faceted'
+  },
+  football: {
+    id: 'football',
+    name: 'Football Boys',
+    shortName: 'Football',
+    iconClass: 'fa-solid fa-futbol text-emerald-400',
+    baseColor: 0x0f281e,
+    tableColor: 0x03170e,
+    collarColor: 0x143825,
+    floorGrad: ['#1e5338', '#16432c', '#0e2e1e'],
+    tileGrad: ['#1d593c', '#15452d', '#0e301e'],
+    tileHighlight: 'rgba(255, 255, 255, 0.65)',
+    tileShadow: 'rgba(0, 0, 0, 0.6)',
+    tileBorder: '#ffffff',
+    outerBorder: '#091d14',
+    borderRibbon1: '#ffffff',
+    borderRibbon2: '#d4af37',
+    armBorder: '#ffffff',
+    collarBorder1: '#ffffff',
+    collarBorder2: '#d4af37',
+    starStyle: 'soccer_star',
+    cornerStyle: 'stadium_corner',
+    arrowStyle: 'athletic_chevron',
+    yardWatermark: 'soccer_pitch',
+    yardRingColor: '#ffffff',
+    yardRingInner: '#e2e8f0',
+    yardCenterRosette: 'soccer_ball',
+    padRimColor: '#ffffff',
+    padRimInner: '#22c55e',
+    trackRim1: '#ffffff',
+    trackRim2: '#d4af37',
+    trackArrow: 'athletic_speed'
+  },
+  cowboy: {
+    id: 'cowboy',
+    name: 'Cowboy Vibes',
+    shortName: 'Cowboy',
+    iconClass: 'fa-solid fa-hat-cowboy text-amber-500',
+    baseColor: 0x2c1810,
+    tableColor: 0x1a0d07,
+    collarColor: 0x3b2014,
+    floorGrad: ['#9c6644', '#7f4f24', '#582f0e'],
+    tileGrad: ['#8d5b38', '#6f4222', '#532f15'],
+    tileHighlight: 'rgba(255, 225, 185, 0.55)',
+    tileShadow: 'rgba(35, 15, 5, 0.6)',
+    tileBorder: '#b08968',
+    outerBorder: '#3d2314',
+    borderRibbon1: '#b08968',
+    borderRibbon2: '#ddb892',
+    armBorder: '#b08968',
+    collarBorder1: '#b08968',
+    collarBorder2: '#8c5835',
+    starStyle: 'sheriff_badge',
+    cornerStyle: 'horseshoe_corner',
+    arrowStyle: 'leather_trail',
+    yardWatermark: 'rope_braid',
+    yardRingColor: '#cd8c48',
+    yardRingInner: '#e0a96d',
+    yardCenterRosette: 'sheriff_star',
+    padRimColor: '#cd8c48',
+    padRimInner: '#7f4f24',
+    trackRim1: '#cd8c48',
+    trackRim2: '#e0a96d',
+    trackArrow: 'leather_arrow'
+  },
+  ninja: {
+    id: 'ninja',
+    name: 'Ninja Style',
+    shortName: 'Ninja',
+    iconClass: 'fa-solid fa-user-ninja text-rose-500',
+    baseColor: 0x0d0f12,
+    tableColor: 0x050608,
+    collarColor: 0x16191f,
+    floorGrad: ['#22262c', '#181b20', '#101216'],
+    tileGrad: ['#262b32', '#1b1f24', '#111418'],
+    tileHighlight: 'rgba(230, 57, 70, 0.45)',
+    tileShadow: 'rgba(0, 0, 0, 0.75)',
+    tileBorder: '#e63946',
+    outerBorder: '#0a0b0d',
+    borderRibbon1: '#e63946',
+    borderRibbon2: '#2b2d42',
+    armBorder: '#e63946',
+    collarBorder1: '#e63946',
+    collarBorder2: '#450a0a',
+    starStyle: 'shuriken_star',
+    cornerStyle: 'shinobi_corner',
+    arrowStyle: 'kunai_arrow',
+    yardWatermark: 'ninja_star',
+    yardRingColor: '#e63946',
+    yardRingInner: '#3a0e14',
+    yardCenterRosette: 'shuriken_core',
+    padRimColor: '#e63946',
+    padRimInner: '#1f242d',
+    trackRim1: '#e63946',
+    trackRim2: '#2b2d42',
+    trackArrow: 'kunai_point'
+  },
+  hoodie: {
+    id: 'hoodie',
+    name: 'Hoodie Boys',
+    shortName: 'Hoodie',
+    iconClass: 'fa-solid fa-snowflake text-cyan-300',
+    baseColor: 0x0c2333,
+    tableColor: 0x030d17,
+    collarColor: 0x0e3046,
+    floorGrad: ['#80d8ff', '#48cae4', '#0077b6'],
+    tileGrad: ['#64d1f4', '#38b2d6', '#0284c7'],
+    tileHighlight: 'rgba(255, 255, 255, 0.85)',
+    tileShadow: 'rgba(0, 30, 60, 0.55)',
+    tileBorder: '#ffffff',
+    outerBorder: '#03045e',
+    borderRibbon1: '#ffffff',
+    borderRibbon2: '#90e0ef',
+    armBorder: '#ffffff',
+    collarBorder1: '#ffffff',
+    collarBorder2: '#90e0ef',
+    starStyle: 'snowflake_star',
+    cornerStyle: 'ice_crystal',
+    arrowStyle: 'frost_shard',
+    yardWatermark: 'ice_fractal',
+    yardRingColor: '#ffffff',
+    yardRingInner: '#caf0f8',
+    yardCenterRosette: 'ice_snowflake',
+    padRimColor: '#48cae4',
+    padRimInner: '#ffffff',
+    trackRim1: '#ffffff',
+    trackRim2: '#90e0ef',
+    trackArrow: 'ice_vector'
+  },
+  king: {
+    id: 'king',
+    name: 'King Theme',
+    shortName: 'King',
+    iconClass: 'fa-solid fa-crown text-yellow-400',
+    baseColor: 0x16130b,
+    tableColor: 0x0c0a06,
+    collarColor: 0x2a2010,
+    floorGrad: ['#2c2416', '#1f190e', '#141008'],
+    tileGrad: ['#3a301d', '#282012', '#181208'],
+    tileHighlight: 'rgba(255, 215, 0, 0.65)',
+    tileShadow: 'rgba(10, 8, 4, 0.75)',
+    tileBorder: '#ffd700',
+    outerBorder: '#0d0a05',
+    borderRibbon1: '#ffd700',
+    borderRibbon2: '#ffecb3',
+    armBorder: '#ffd700',
+    collarBorder1: '#ffd700',
+    collarBorder2: '#b8860b',
+    starStyle: 'crown_medallion',
+    cornerStyle: 'monarch_crest',
+    arrowStyle: 'scepter_gold',
+    yardWatermark: 'imperial_crown',
+    yardRingColor: '#ffd700',
+    yardRingInner: '#ffecb3',
+    yardCenterRosette: 'imperial_crest',
+    padRimColor: '#ffd700',
+    padRimInner: '#b8860b',
+    trackRim1: '#ffd700',
+    trackRim2: '#ffecb3',
+    trackArrow: 'scepter_arrow'
+  },
+  cap: {
+    id: 'cap',
+    name: 'Cap Boys',
+    shortName: 'Cap',
+    iconClass: 'fa-solid fa-baseball-bat-ball text-sky-400',
+    baseColor: 0x151c24,
+    tableColor: 0x070b10,
+    collarColor: 0x1e293b,
+    floorGrad: ['#334155', '#1e293b', '#0f172a'],
+    tileGrad: ['#3b4c63', '#243245', '#131b26'],
+    tileHighlight: 'rgba(56, 189, 248, 0.6)',
+    tileShadow: 'rgba(0, 0, 0, 0.65)',
+    tileBorder: '#38bdf8',
+    outerBorder: '#090d12',
+    borderRibbon1: '#0284c7',
+    borderRibbon2: '#f8fafc',
+    armBorder: '#38bdf8',
+    collarBorder1: '#0284c7',
+    collarBorder2: '#38bdf8',
+    starStyle: 'speedway_star',
+    cornerStyle: 'racing_bracket',
+    arrowStyle: 'rally_arrow',
+    yardWatermark: 'speed_streaks',
+    yardRingColor: '#0284c7',
+    yardRingInner: '#38bdf8',
+    yardCenterRosette: 'speed_wheel',
+    padRimColor: '#0284c7',
+    padRimInner: '#f8fafc',
+    trackRim1: '#0284c7',
+    trackRim2: '#f8fafc',
+    trackArrow: 'rally_chevron'
+  },
+  space: {
+    id: 'space',
+    name: 'Space Theme',
+    shortName: 'Sci-Fi',
+    iconClass: 'fa-solid fa-atom text-cyan-400',
+    baseColor: 0x0f172a,
+    tableColor: 0x030712,
+    collarColor: 0x0b1320,
+    floorGrad: ['#0f172a', '#090e17', '#04070d'],
+    tileGrad: ['#16202c', '#0f1722', '#090e15'],
+    tileHighlight: 'rgba(0, 229, 255, 0.55)',
+    tileShadow: 'rgba(0, 0, 0, 0.75)',
+    tileBorder: '#0284c7',
+    outerBorder: '#020617',
+    borderRibbon1: '#00e5ff',
+    borderRibbon2: '#f59e0b',
+    armBorder: '#0284c7',
+    collarBorder1: '#00e5ff',
+    collarBorder2: '#38bdf8',
+    starStyle: 'quantum_portal',
+    cornerStyle: 'telemetry_bracket',
+    arrowStyle: 'photon_thruster',
+    yardWatermark: 'nanotech_hex',
+    yardRingColor: '#00e5ff',
+    yardRingInner: '#38bdf8',
+    yardCenterRosette: 'quantum_reactor',
+    padRimColor: '#00e5ff',
+    padRimInner: '#38bdf8',
+    trackRim1: '#00e5ff',
+    trackRim2: '#38bdf8',
+    trackArrow: 'photon_vector'
+  },
+  soccer: {
+    id: 'soccer',
+    name: 'Soccer Theme',
+    shortName: 'Soccer',
+    iconClass: 'fa-solid fa-futbol text-green-400',
+    baseColor: 0x0e261a,
+    tableColor: 0x03140a,
+    collarColor: 0x144626,
+    floorGrad: ['#15803d', '#166534', '#14532d'],
+    tileGrad: ['#166534', '#14532d', '#0d381e'],
+    tileHighlight: 'rgba(255, 255, 255, 0.7)',
+    tileShadow: 'rgba(0, 20, 10, 0.65)',
+    tileBorder: '#ffffff',
+    outerBorder: '#07170e',
+    borderRibbon1: '#ffffff',
+    borderRibbon2: '#22c55e',
+    armBorder: '#ffffff',
+    collarBorder1: '#ffffff',
+    collarBorder2: '#22c55e',
+    starStyle: 'soccer_star',
+    cornerStyle: 'corner_flag',
+    arrowStyle: 'athletic_chevron',
+    yardWatermark: 'soccer_pitch',
+    yardRingColor: '#ffffff',
+    yardRingInner: '#22c55e',
+    yardCenterRosette: 'soccer_ball',
+    padRimColor: '#ffffff',
+    padRimInner: '#166534',
+    trackRim1: '#ffffff',
+    trackRim2: '#22c55e',
+    trackArrow: 'athletic_speed'
+  },
+  gamer: {
+    id: 'gamer',
+    name: 'Gamer Boys',
+    shortName: 'Gamer',
+    iconClass: 'fa-solid fa-gamepad text-emerald-400',
+    baseColor: 0x121214,
+    tableColor: 0x060608,
+    collarColor: 0x1a1a20,
+    floorGrad: ['#18181b', '#09090b', '#020204'],
+    tileGrad: ['#212126', '#141418', '#0b0b0e'],
+    tileHighlight: 'rgba(6, 214, 160, 0.55)',
+    tileShadow: 'rgba(0, 0, 0, 0.8)',
+    tileBorder: '#06d6a0',
+    outerBorder: '#050506',
+    borderRibbon1: '#06d6a0',
+    borderRibbon2: '#f72585',
+    armBorder: '#06d6a0',
+    collarBorder1: '#06d6a0',
+    collarBorder2: '#f72585',
+    starStyle: 'pixel_star',
+    cornerStyle: 'chassis_bracket',
+    arrowStyle: 'cyber_crosshair',
+    yardWatermark: 'rgb_circuits',
+    yardRingColor: '#06d6a0',
+    yardRingInner: '#4cc9f0',
+    yardCenterRosette: 'gamer_dpad',
+    padRimColor: '#06d6a0',
+    padRimInner: '#f72585',
+    trackRim1: '#06d6a0',
+    trackRim2: '#f72585',
+    trackArrow: 'crosshair_arrow'
+  },
+  cute_boys: {
+    id: 'cute_boys',
+    name: 'Cute Boys',
+    shortName: 'Cute',
+    iconClass: 'fa-solid fa-cloud text-sky-300',
+    baseColor: 0x1c2836,
+    tableColor: 0x08101a,
+    collarColor: 0x1e3a5f,
+    floorGrad: ['#bae6fd', '#7dd3fc', '#38bdf8'],
+    tileGrad: ['#e0f2fe', '#bae6fd', '#7dd3fc'],
+    tileHighlight: 'rgba(255, 255, 255, 0.9)',
+    tileShadow: 'rgba(2, 132, 199, 0.35)',
+    tileBorder: '#ffffff',
+    outerBorder: '#0369a1',
+    borderRibbon1: '#ffffff',
+    borderRibbon2: '#e0f2fe',
+    armBorder: '#ffffff',
+    collarBorder1: '#ffffff',
+    collarBorder2: '#e0f2fe',
+    starStyle: 'smiling_star',
+    cornerStyle: 'cloud_curve',
+    arrowStyle: 'soft_arrow',
+    yardWatermark: 'clouds',
+    yardRingColor: '#ffffff',
+    yardRingInner: '#bae6fd',
+    yardCenterRosette: 'happy_cloud',
+    padRimColor: '#ffffff',
+    padRimInner: '#38bdf8',
+    trackRim1: '#ffffff',
+    trackRim2: '#bae6fd',
+    trackArrow: 'soft_chevron'
+  },
+  marble_royal: {
+    id: 'marble_royal',
+    name: 'Marble Royal',
+    shortName: 'Marble',
+    iconClass: 'fa-solid fa-landmark text-amber-300',
+    baseColor: 0x1e242b,
+    tableColor: 0x02161b,
+    collarColor: 0x2e363d,
+    floorGrad: ['#e2e8f0', '#cbd5e1', '#94a3b8'],
+    tileGrad: ['#f1f5f9', '#e2e8f0', '#cbd5e1'],
+    tileHighlight: 'rgba(255, 255, 255, 0.8)',
+    tileShadow: 'rgba(40, 50, 60, 0.4)',
+    tileBorder: '#c89e3a',
+    outerBorder: '#182026',
+    borderRibbon1: '#c89e3a',
+    borderRibbon2: '#e0be5a',
+    armBorder: '#5a6976',
+    collarBorder1: '#c89e3a',
+    collarBorder2: '#7a5a14',
+    starStyle: 'brass_faceted',
+    cornerStyle: 'acanthus_bracket',
+    arrowStyle: 'brass_inlaid',
+    yardWatermark: 'damask',
+    yardRingColor: '#c89e3a',
+    yardRingInner: '#e0be5a',
+    yardCenterRosette: 'royal_star',
+    padRimColor: '#c89e3a',
+    padRimInner: '#dfb858',
+    trackRim1: '#c89e3a',
+    trackRim2: '#dfb858',
+    trackArrow: 'gold_faceted'
+  },
+  neon_glow: {
+    id: 'neon_glow',
+    name: 'Neon Glow',
+    shortName: 'Neon',
+    iconClass: 'fa-solid fa-wand-magic-sparkles text-pink-400',
+    baseColor: 0x0b0914,
+    tableColor: 0x030208,
+    collarColor: 0x190b2c,
+    floorGrad: ['#1f0c38', '#110620', '#07020d'],
+    tileGrad: ['#2a104a', '#17082c', '#0d0319'],
+    tileHighlight: 'rgba(247, 37, 133, 0.65)',
+    tileShadow: 'rgba(0, 0, 0, 0.85)',
+    tileBorder: '#f72585',
+    outerBorder: '#040108',
+    borderRibbon1: '#f72585',
+    borderRibbon2: '#4cc9f0',
+    armBorder: '#f72585',
+    collarBorder1: '#f72585',
+    collarBorder2: '#4cc9f0',
+    starStyle: 'pulsing_neon',
+    cornerStyle: 'synthwave_bracket',
+    arrowStyle: 'laser_chevron',
+    yardWatermark: 'laser_grid',
+    yardRingColor: '#f72585',
+    yardRingInner: '#4cc9f0',
+    yardCenterRosette: 'synthwave_sun',
+    padRimColor: '#f72585',
+    padRimInner: '#7209b7',
+    trackRim1: '#f72585',
+    trackRim2: '#4cc9f0',
+    trackArrow: 'laser_vector'
+  },
+  cool_boys: {
+    id: 'cool_boys',
+    name: 'Cool Boys',
+    shortName: 'Thunder',
+    iconClass: 'fa-solid fa-bolt text-amber-400',
+    baseColor: 0x1c1829,
+    tableColor: 0x0a0814,
+    collarColor: 0x241a38,
+    floorGrad: ['#3b2d54', '#231936', '#120d1e'],
+    tileGrad: ['#362850', '#221835', '#130d20'],
+    tileHighlight: 'rgba(255, 183, 3, 0.6)',
+    tileShadow: 'rgba(0, 0, 0, 0.75)',
+    tileBorder: '#ffb703',
+    outerBorder: '#0d0917',
+    borderRibbon1: '#ffb703',
+    borderRibbon2: '#7b2cbf',
+    armBorder: '#ffb703',
+    collarBorder1: '#ffb703',
+    collarBorder2: '#7b2cbf',
+    starStyle: 'thunder_star',
+    cornerStyle: 'lightning_bracket',
+    arrowStyle: 'lightning_bolt',
+    yardWatermark: 'lightning_fissures',
+    yardRingColor: '#ffb703',
+    yardRingInner: '#7b2cbf',
+    yardCenterRosette: 'lightning_core',
+    padRimColor: '#ffb703',
+    padRimInner: '#3a0ca3',
+    trackRim1: '#ffb703',
+    trackRim2: '#7b2cbf',
+    trackArrow: 'lightning_vector'
+  },
+  minimal_crown: {
+    id: 'minimal_crown',
+    name: 'Minimal Crown',
+    shortName: 'Minimal',
+    iconClass: 'fa-solid fa-crown text-indigo-300',
+    baseColor: 0x181824,
+    tableColor: 0x090910,
+    collarColor: 0x1e1e2e,
+    floorGrad: ['#e0e7ff', '#c7d2fe', '#a5b4fc'],
+    tileGrad: ['#eef2ff', '#e0e7ff', '#c7d2fe'],
+    tileHighlight: 'rgba(255, 255, 255, 0.85)',
+    tileShadow: 'rgba(49, 46, 129, 0.25)',
+    tileBorder: '#818cf8',
+    outerBorder: '#312e81',
+    borderRibbon1: '#818cf8',
+    borderRibbon2: '#c7d2fe',
+    armBorder: '#818cf8',
+    collarBorder1: '#818cf8',
+    collarBorder2: '#c7d2fe',
+    starStyle: 'minimal_glyph',
+    cornerStyle: 'minimal_bracket',
+    arrowStyle: 'needle_arrow',
+    yardWatermark: 'concentric_rings',
+    yardRingColor: '#818cf8',
+    yardRingInner: '#c7d2fe',
+    yardCenterRosette: 'minimal_ring',
+    padRimColor: '#818cf8',
+    padRimInner: '#c7d2fe',
+    trackRim1: '#818cf8',
+    trackRim2: '#c7d2fe',
+    trackArrow: 'needle_point'
+  },
+  paw: {
+    id: 'paw',
+    name: 'Paw Theme',
+    shortName: 'Paw',
+    iconClass: 'fa-solid fa-paw text-pink-400',
+    baseColor: 0x20141b,
+    tableColor: 0x0e060b,
+    collarColor: 0x2a1724,
+    floorGrad: ['#fce7f3', '#fbcfe8', '#f472b6'],
+    tileGrad: ['#fdf2f8', '#fce7f3', '#fbcfe8'],
+    tileHighlight: 'rgba(255, 255, 255, 0.9)',
+    tileShadow: 'rgba(157, 23, 77, 0.35)',
+    tileBorder: '#f472b6',
+    outerBorder: '#500724',
+    borderRibbon1: '#f472b6',
+    borderRibbon2: '#db2777',
+    armBorder: '#f472b6',
+    collarBorder1: '#f472b6',
+    collarBorder2: '#db2777',
+    starStyle: 'paw_print',
+    cornerStyle: 'paw_ear',
+    arrowStyle: 'paw_arrow',
+    yardWatermark: 'paw_trail',
+    yardRingColor: '#f472b6',
+    yardRingInner: '#db2777',
+    yardCenterRosette: 'paw_emblem',
+    padRimColor: '#f472b6',
+    padRimInner: '#9d174d',
+    trackRim1: '#f472b6',
+    trackRim2: '#db2777',
+    trackArrow: 'paw_chevron'
+  }
+};
+
+function getThemeProfile(themeId) {
+  if (themeId === 'scifi') themeId = 'space';
+  if (themeId === 'heirloom') themeId = 'royal_crown';
+  return BOARD_THEME_PROFILES[themeId] || BOARD_THEME_PROFILES['royal_crown'];
+}
+
+
+// ============================================================================
+// THEME DRAWING HELPERS FOR ALL 16 SETS (Agent 7: Three.js Visual Artisan & Stylist)
+// ============================================================================
+
+function drawThemeCornerBracket(ctx, x, y, flipX, flipY, theme) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(flipX, flipY);
+
+  switch (theme.cornerStyle) {
+    case 'stadium_corner':
+    case 'corner_flag':
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 4.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 85); ctx.lineTo(0, 0); ctx.lineTo(85, 0);
+      ctx.stroke();
+      // Penalty arc
+      ctx.strokeStyle = theme.borderRibbon2;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(0, 0, 52, 0, Math.PI / 2);
+      ctx.stroke();
+      break;
+
+    case 'horseshoe_corner':
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(0, 80); ctx.lineTo(0, 16); ctx.bezierCurveTo(0, 0, 0, 0, 16, 0); ctx.lineTo(80, 0);
+      ctx.stroke();
+      // Iron rivet studs
+      [ [12, 60], [20, 20], [60, 12] ].forEach(([rx, ry]) => {
+        ctx.beginPath();
+        ctx.arc(rx, ry, 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = theme.borderRibbon2;
+        ctx.fill();
+        ctx.strokeStyle = theme.outerBorder;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+      break;
+
+    case 'shinobi_corner':
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 4.0;
+      ctx.beginPath();
+      ctx.moveTo(0, 85); ctx.lineTo(0, 22); ctx.lineTo(22, 0); ctx.lineTo(85, 0);
+      ctx.stroke();
+      ctx.strokeStyle = theme.borderRibbon2;
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(12, 70); ctx.lineTo(12, 28); ctx.lineTo(28, 12); ctx.lineTo(70, 12);
+      ctx.stroke();
+      // Blood ruby accent
+      ctx.beginPath();
+      ctx.arc(36, 36, 6, 0, Math.PI * 2);
+      ctx.fillStyle = theme.borderRibbon1;
+      ctx.fill();
+      break;
+
+    case 'ice_crystal':
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 4.0;
+      ctx.beginPath();
+      ctx.moveTo(0, 80); ctx.lineTo(0, 25); ctx.lineTo(25, 0); ctx.lineTo(80, 0);
+      ctx.stroke();
+      // Crystalline inner facets
+      ctx.strokeStyle = theme.borderRibbon2;
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(0, 45); ctx.lineTo(45, 0);
+      ctx.moveTo(25, 60); ctx.lineTo(60, 25);
+      ctx.stroke();
+      // Glowing ice node
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(30, 30, 5, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+
+    case 'monarch_crest':
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 4.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 80); ctx.lineTo(0, 0); ctx.lineTo(80, 0);
+      ctx.stroke();
+      ctx.strokeStyle = theme.borderRibbon2;
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(14, 65); ctx.lineTo(14, 14); ctx.lineTo(65, 14);
+      ctx.stroke();
+      // 24K Royal Pearl
+      ctx.beginPath();
+      ctx.arc(30, 30, 7, 0, Math.PI * 2);
+      ctx.fillStyle = theme.borderRibbon1;
+      ctx.fill();
+      ctx.strokeStyle = theme.outerBorder;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      break;
+
+    case 'racing_bracket':
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(0, 85); ctx.lineTo(0, 30); ctx.lineTo(30, 0); ctx.lineTo(85, 0);
+      ctx.stroke();
+      ctx.strokeStyle = theme.borderRibbon2;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(14, 75); ctx.lineTo(14, 38); ctx.lineTo(38, 14); ctx.lineTo(75, 14);
+      ctx.stroke();
+      break;
+
+    case 'telemetry_bracket':
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 4.0;
+      ctx.beginPath();
+      ctx.moveTo(0, 85); ctx.lineTo(0, 20); ctx.lineTo(20, 0); ctx.lineTo(85, 0);
+      ctx.stroke();
+      ctx.strokeStyle = theme.borderRibbon2;
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(14, 70); ctx.lineTo(14, 26); ctx.lineTo(26, 14); ctx.lineTo(70, 14);
+      ctx.stroke();
+      ctx.fillStyle = theme.borderRibbon1;
+      ctx.beginPath();
+      ctx.arc(36, 36, 7, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+
+    case 'chassis_bracket':
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 4.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 80); ctx.lineTo(0, 25); ctx.lineTo(25, 0); ctx.lineTo(80, 0);
+      ctx.stroke();
+      ctx.strokeStyle = theme.borderRibbon2;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(16, 68); ctx.lineTo(16, 32); ctx.lineTo(32, 16); ctx.lineTo(68, 16);
+      ctx.stroke();
+      // LED node
+      ctx.fillStyle = theme.borderRibbon1;
+      ctx.beginPath();
+      ctx.arc(34, 34, 6, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+
+    case 'cloud_curve':
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 4.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 75);
+      ctx.bezierCurveTo(15, 60, 25, 65, 30, 45);
+      ctx.bezierCurveTo(35, 25, 45, 25, 55, 30);
+      ctx.bezierCurveTo(60, 15, 65, 15, 75, 0);
+      ctx.stroke();
+      ctx.fillStyle = theme.borderRibbon2;
+      ctx.beginPath();
+      ctx.arc(28, 28, 8, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+
+    case 'synthwave_bracket':
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 4.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 85); ctx.lineTo(0, 0); ctx.lineTo(85, 0);
+      ctx.stroke();
+      ctx.strokeStyle = theme.borderRibbon2;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(12, 72); ctx.lineTo(12, 12); ctx.lineTo(72, 12);
+      ctx.stroke();
+      ctx.fillStyle = theme.borderRibbon1;
+      ctx.beginPath();
+      ctx.arc(26, 26, 5, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+
+    case 'lightning_bracket':
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 4.0;
+      ctx.beginPath();
+      ctx.moveTo(0, 80); ctx.lineTo(12, 50); ctx.lineTo(6, 45); ctx.lineTo(35, 15); ctx.lineTo(28, 10); ctx.lineTo(80, 0);
+      ctx.stroke();
+      ctx.strokeStyle = theme.borderRibbon2;
+      ctx.lineWidth = 2.0;
+      ctx.stroke();
+      break;
+
+    case 'minimal_bracket':
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 70); ctx.lineTo(0, 0); ctx.lineTo(70, 0);
+      ctx.stroke();
+      ctx.strokeStyle = theme.borderRibbon2;
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(8, 60); ctx.lineTo(8, 8); ctx.lineTo(60, 8);
+      ctx.stroke();
+      break;
+
+    case 'paw_ear':
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 4.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 75); ctx.quadraticCurveTo(20, 20, 75, 0);
+      ctx.stroke();
+      ctx.fillStyle = theme.borderRibbon1;
+      ctx.beginPath();
+      ctx.arc(32, 32, 7, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+
+    case 'royal_fleuron':
+    case 'acanthus_bracket':
+    default:
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 75); ctx.lineTo(0, 0); ctx.lineTo(75, 0);
+      ctx.stroke();
+      ctx.strokeStyle = theme.borderRibbon2;
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(10, 60); ctx.lineTo(10, 10); ctx.lineTo(60, 10);
+      ctx.stroke();
+      ctx.fillStyle = theme.borderRibbon1;
+      ctx.beginPath();
+      ctx.arc(28, 28, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = theme.outerBorder;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      break;
+  }
+
+  ctx.restore();
+}
+
+function drawThemeStar(ctx, cx, cy, r, gemColor, theme) {
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetY = 3;
+
+  switch (theme.starStyle) {
+    case 'quantum_portal': {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.15, 0, Math.PI * 2);
+      ctx.fillStyle = '#082f49';
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.98, 0, Math.PI * 2);
+      ctx.strokeStyle = theme.borderRibbon2;
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      for (let p = 0; p < 8; p++) {
+        const ap = (p * Math.PI) / 4;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(ap) * (r * 0.98), cy + Math.sin(ap) * (r * 0.98));
+        ctx.lineTo(cx + Math.cos(ap) * (r * 1.15), cy + Math.sin(ap) * (r * 1.15));
+        ctx.strokeStyle = theme.borderRibbon1;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      for (let i = 0; i < 5; i++) {
+        const aTip = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+        const aL = aTip - Math.PI / 5;
+        const aR = aTip + Math.PI / 5;
+        const rIn = r * 0.44;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * r, cy + Math.sin(aTip) * r);
+        ctx.lineTo(cx + Math.cos(aL) * rIn, cy + Math.sin(aL) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#38bdf8';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * r, cy + Math.sin(aTip) * r);
+        ctx.lineTo(cx + Math.cos(aR) * rIn, cy + Math.sin(aR) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#0284c7';
+        ctx.fill();
+      }
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.24, 0, Math.PI * 2);
+      ctx.fillStyle = gemColor;
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 2.0;
+      ctx.stroke();
+      break;
+    }
+
+    case 'soccer_star': {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
+      ctx.fillStyle = '#0f281e';
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      // 5-Point Gold Star Frame
+      for (let i = 0; i < 5; i++) {
+        const aTip = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+        const aL = aTip - Math.PI / 5;
+        const aR = aTip + Math.PI / 5;
+        const rIn = r * 0.44;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * r, cy + Math.sin(aTip) * r);
+        ctx.lineTo(cx + Math.cos(aL) * rIn, cy + Math.sin(aL) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * r, cy + Math.sin(aTip) * r);
+        ctx.lineTo(cx + Math.cos(aR) * rIn, cy + Math.sin(aR) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#d4af37';
+        ctx.fill();
+      }
+
+      // Center Soccer Pentagon
+      ctx.beginPath();
+      const rP = r * 0.30;
+      for (let p = 0; p < 5; p++) {
+        const ap = (p * 2 * Math.PI) / 5 - Math.PI / 2;
+        const px = cx + Math.cos(ap) * rP;
+        const py = cy + Math.sin(ap) * rP;
+        if (p === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fillStyle = '#111111';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.12, 0, Math.PI * 2);
+      ctx.fillStyle = gemColor;
+      ctx.fill();
+      break;
+    }
+
+    case 'sheriff_badge': {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
+      ctx.fillStyle = '#3d2314';
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      // 6-Point Sheriff Star with Ball Tips
+      const points = 6;
+      for (let i = 0; i < points; i++) {
+        const aTip = (i * 2 * Math.PI) / points - Math.PI / 2;
+        const aIn = aTip + Math.PI / points;
+        const rIn = r * 0.48;
+        const tx = cx + Math.cos(aTip) * r;
+        const ty = cy + Math.sin(aTip) * r;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(tx, ty);
+        ctx.lineTo(cx + Math.cos(aIn) * rIn, cy + Math.sin(aIn) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = (i % 2 === 0) ? '#e0a96d' : '#cd8c48';
+        ctx.fill();
+
+        // Tip ball
+        ctx.beginPath();
+        ctx.arc(tx, ty, r * 0.10, 0, Math.PI * 2);
+        ctx.fillStyle = '#fce588';
+        ctx.fill();
+        ctx.strokeStyle = '#5c3317';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Center Turquoise / Gemstone Cabochon
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.25, 0, Math.PI * 2);
+      ctx.fillStyle = gemColor;
+      ctx.fill();
+      ctx.strokeStyle = '#e0a96d';
+      ctx.lineWidth = 2.0;
+      ctx.stroke();
+      break;
+    }
+
+    case 'shuriken_star': {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
+      ctx.fillStyle = '#101216';
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      // 4-Point Metallic Shuriken Blades
+      for (let i = 0; i < 4; i++) {
+        const aTip = (i * Math.PI) / 2;
+        const aL = aTip - Math.PI / 4;
+        const aR = aTip + Math.PI / 4;
+        const rIn = r * 0.35;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * (r * 1.05), cy + Math.sin(aTip) * (r * 1.05));
+        ctx.lineTo(cx + Math.cos(aL) * rIn, cy + Math.sin(aL) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#495057';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * (r * 1.05), cy + Math.sin(aTip) * (r * 1.05));
+        ctx.lineTo(cx + Math.cos(aR) * rIn, cy + Math.sin(aR) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#212529';
+        ctx.fill();
+      }
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.24, 0, Math.PI * 2);
+      ctx.fillStyle = gemColor;
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 2.0;
+      ctx.stroke();
+      break;
+    }
+
+    case 'snowflake_star': {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
+      ctx.fillStyle = '#032338';
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      // 6-Point Snowflake Crystalline Star
+      for (let i = 0; i < 6; i++) {
+        const a = (i * Math.PI) / 3;
+        const tx = cx + Math.cos(a) * r;
+        const ty = cy + Math.sin(a) * r;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(tx, ty);
+        ctx.stroke();
+
+        // Branches
+        const bx = cx + Math.cos(a) * (r * 0.65);
+        const by = cy + Math.sin(a) * (r * 0.65);
+        const aL = a - Math.PI / 4;
+        const aR = a + Math.PI / 4;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(bx, by); ctx.lineTo(bx + Math.cos(aL) * (r * 0.28), by + Math.sin(aL) * (r * 0.28));
+        ctx.moveTo(bx, by); ctx.lineTo(bx + Math.cos(aR) * (r * 0.28), by + Math.sin(aR) * (r * 0.28));
+        ctx.stroke();
+      }
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2);
+      ctx.fillStyle = gemColor;
+      ctx.fill();
+      ctx.strokeStyle = '#caf0f8';
+      ctx.lineWidth = 2.0;
+      ctx.stroke();
+      break;
+    }
+
+    case 'crown_medallion': {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
+      ctx.fillStyle = '#16130b';
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      // Imperial Crown Emblem
+      const cw = r * 0.85;
+      const ch = r * 0.55;
+      ctx.beginPath();
+      ctx.moveTo(cx - cw * 0.6, cy + ch * 0.4);
+      ctx.lineTo(cx - cw * 0.75, cy - ch * 0.4);
+      ctx.lineTo(cx - cw * 0.25, cy);
+      ctx.lineTo(cx, cy - ch * 0.7);
+      ctx.lineTo(cx + cw * 0.25, cy);
+      ctx.lineTo(cx + cw * 0.75, cy - ch * 0.4);
+      ctx.lineTo(cx + cw * 0.6, cy + ch * 0.4);
+      ctx.closePath();
+      ctx.fillStyle = '#ffd700';
+      ctx.fill();
+      ctx.strokeStyle = '#ffecb3';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Crown Jewels
+      [ [-cw * 0.75, -ch * 0.4], [0, -ch * 0.7], [cw * 0.75, -ch * 0.4] ].forEach(([jx, jy]) => {
+        ctx.beginPath();
+        ctx.arc(cx + jx, cy + jy, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+      });
+
+      ctx.beginPath();
+      ctx.arc(cx, cy + ch * 0.1, r * 0.18, 0, Math.PI * 2);
+      ctx.fillStyle = gemColor;
+      ctx.fill();
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      break;
+    }
+
+    case 'speedway_star': {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
+      ctx.fillStyle = '#0f172a';
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      // Racing Rings
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.95, 0, Math.PI * 2);
+      ctx.strokeStyle = theme.borderRibbon2;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      for (let i = 0; i < 5; i++) {
+        const aTip = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+        const aL = aTip - Math.PI / 5;
+        const aR = aTip + Math.PI / 5;
+        const rIn = r * 0.44;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * r, cy + Math.sin(aTip) * r);
+        ctx.lineTo(cx + Math.cos(aL) * rIn, cy + Math.sin(aL) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#38bdf8';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * r, cy + Math.sin(aTip) * r);
+        ctx.lineTo(cx + Math.cos(aR) * rIn, cy + Math.sin(aR) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#0284c7';
+        ctx.fill();
+      }
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2);
+      ctx.fillStyle = gemColor;
+      ctx.fill();
+      break;
+    }
+
+    case 'pixel_star': {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
+      ctx.fillStyle = '#09090b';
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      // 8-Point Pixel Gaming Star
+      for (let i = 0; i < 8; i++) {
+        const aTip = (i * 2 * Math.PI) / 8 - Math.PI / 2;
+        const aL = aTip - Math.PI / 8;
+        const aR = aTip + Math.PI / 8;
+        const rIn = r * 0.40;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * r, cy + Math.sin(aTip) * r);
+        ctx.lineTo(cx + Math.cos(aL) * rIn, cy + Math.sin(aL) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = (i % 2 === 0) ? '#06d6a0' : '#4cc9f0';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * r, cy + Math.sin(aTip) * r);
+        ctx.lineTo(cx + Math.cos(aR) * rIn, cy + Math.sin(aR) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#f72585';
+        ctx.fill();
+      }
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.24, 0, Math.PI * 2);
+      ctx.fillStyle = gemColor;
+      ctx.fill();
+      ctx.strokeStyle = '#06d6a0';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      break;
+    }
+
+    case 'smiling_star': {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
+      ctx.fillStyle = '#e0f2fe';
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      // Cute Rounded 5-Point Star
+      for (let i = 0; i < 5; i++) {
+        const aTip = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+        const aL = aTip - Math.PI / 5;
+        const aR = aTip + Math.PI / 5;
+        const rIn = r * 0.48;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * r, cy + Math.sin(aTip) * r);
+        ctx.lineTo(cx + Math.cos(aL) * rIn, cy + Math.sin(aL) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#fef08a';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * r, cy + Math.sin(aTip) * r);
+        ctx.lineTo(cx + Math.cos(aR) * rIn, cy + Math.sin(aR) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#fde047';
+        ctx.fill();
+      }
+
+      // Cute Face
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.arc(cx - r * 0.12, cy - r * 0.05, 2.5, 0, Math.PI * 2);
+      ctx.arc(cx + r * 0.12, cy - r * 0.05, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      // Smile
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.12, 0.2, Math.PI - 0.2);
+      ctx.stroke();
+      break;
+    }
+
+    case 'pulsing_neon': {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
+      ctx.fillStyle = '#07020d';
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      // Neon Outrun 4-Point Star Burst
+      for (let i = 0; i < 4; i++) {
+        const aTip = (i * Math.PI) / 2;
+        const aL = aTip - Math.PI / 4;
+        const aR = aTip + Math.PI / 4;
+        const rIn = r * 0.28;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * (r * 1.1), cy + Math.sin(aTip) * (r * 1.1));
+        ctx.lineTo(cx + Math.cos(aL) * rIn, cy + Math.sin(aL) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#f72585';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * (r * 1.1), cy + Math.sin(aTip) * (r * 1.1));
+        ctx.lineTo(cx + Math.cos(aR) * rIn, cy + Math.sin(aR) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#4cc9f0';
+        ctx.fill();
+      }
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.24, 0, Math.PI * 2);
+      ctx.fillStyle = gemColor;
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      break;
+    }
+
+    case 'thunder_star': {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
+      ctx.fillStyle = '#120d1e';
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      // Thunderbolt Motif
+      ctx.beginPath();
+      ctx.moveTo(cx + r * 0.15, cy - r * 0.85);
+      ctx.lineTo(cx - r * 0.45, cy + r * 0.05);
+      ctx.lineTo(cx - r * 0.05, cy + r * 0.05);
+      ctx.lineTo(cx - r * 0.25, cy + r * 0.85);
+      ctx.lineTo(cx + r * 0.45, cy - r * 0.05);
+      ctx.lineTo(cx + r * 0.05, cy - r * 0.05);
+      ctx.closePath();
+      ctx.fillStyle = '#ffb703';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.18, 0, Math.PI * 2);
+      ctx.fillStyle = gemColor;
+      ctx.fill();
+      break;
+    }
+
+    case 'minimal_glyph': {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
+      ctx.fillStyle = '#eef2ff';
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      // Ultra-clean 4-Point Hairline Star
+      for (let i = 0; i < 4; i++) {
+        const aTip = (i * Math.PI) / 2;
+        const aIn = aTip + Math.PI / 4;
+        const rIn = r * 0.32;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * r, cy + Math.sin(aTip) * r);
+        ctx.lineTo(cx + Math.cos(aIn) * rIn, cy + Math.sin(aIn) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = (i % 2 === 0) ? '#818cf8' : '#a5b4fc';
+        ctx.fill();
+      }
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.20, 0, Math.PI * 2);
+      ctx.fillStyle = gemColor;
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      break;
+    }
+
+    case 'paw_print': {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
+      ctx.fillStyle = '#500724';
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      // Main Pad
+      ctx.beginPath();
+      ctx.arc(cx, cy + r * 0.18, r * 0.35, 0, Math.PI * 2);
+      ctx.fillStyle = '#f472b6';
+      ctx.fill();
+      ctx.strokeStyle = '#db2777';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 4 Toe Pads
+      const toes = [
+        [ -r * 0.38, -r * 0.22, r * 0.14 ],
+        [ -r * 0.14, -r * 0.46, r * 0.16 ],
+        [  r * 0.14, -r * 0.46, r * 0.16 ],
+        [  r * 0.38, -r * 0.22, r * 0.14 ]
+      ];
+      toes.forEach(([tx, ty, tr]) => {
+        ctx.beginPath();
+        ctx.arc(cx + tx, cy + ty, tr, 0, Math.PI * 2);
+        ctx.fillStyle = '#fbcfe8';
+        ctx.fill();
+        ctx.strokeStyle = '#db2777';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+
+      ctx.beginPath();
+      ctx.arc(cx, cy + r * 0.18, r * 0.14, 0, Math.PI * 2);
+      ctx.fillStyle = gemColor;
+      ctx.fill();
+      break;
+    }
+
+    case 'brass_faceted':
+    default: {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
+      ctx.fillStyle = '#8f681a';
+      ctx.fill();
+      ctx.strokeStyle = theme.borderRibbon1;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.98, 0, Math.PI * 2);
+      ctx.strokeStyle = theme.borderRibbon2;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      for (let i = 0; i < 5; i++) {
+        const aTip = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+        const aL = aTip - Math.PI / 5;
+        const aR = aTip + Math.PI / 5;
+        const rIn = r * 0.44;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * r, cy + Math.sin(aTip) * r);
+        ctx.lineTo(cx + Math.cos(aL) * rIn, cy + Math.sin(aL) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#fce588';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(aTip) * r, cy + Math.sin(aTip) * r);
+        ctx.lineTo(cx + Math.cos(aR) * rIn, cy + Math.sin(aR) * rIn);
+        ctx.closePath();
+        ctx.fillStyle = '#a67b17';
+        ctx.fill();
+      }
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2);
+      ctx.fillStyle = gemColor;
+      ctx.fill();
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 2.0;
+      ctx.stroke();
+      break;
+    }
+  }
+
+  // Specular jewel glint
+  ctx.beginPath();
+  ctx.arc(cx - r * 0.07, cy - r * 0.07, r * 0.06, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawThemeArrow(ctx, cx, cy, angle, colorHex, theme) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(angle);
+
+  const step = 2048 / 15;
+  const length = step * 0.58;
+  const shaftW = 5.2;
+  const headLen = step * 0.22;
+  const headW = step * 0.22;
+  const barbRecess = step * 0.055;
+
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.40)';
+  ctx.shadowBlur = 5;
+  ctx.shadowOffsetY = 2;
+
+  ctx.strokeStyle = theme.borderRibbon1;
+  ctx.lineWidth = shaftW + 2;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-length * 0.46, 0);
+  ctx.lineTo(length * 0.46 - headLen + barbRecess, 0);
+  ctx.stroke();
+
+  ctx.strokeStyle = colorHex;
+  ctx.lineWidth = shaftW;
+  ctx.stroke();
+
+  const tipX = length * 0.46;
+  const baseBackX = tipX - headLen;
+  const notchX = baseBackX + barbRecess;
+
+  ctx.fillStyle = colorHex;
+  ctx.beginPath();
+  ctx.moveTo(tipX, 0);
+  ctx.lineTo(baseBackX, -headW * 0.5);
+  ctx.lineTo(notchX, 0);
+  ctx.lineTo(baseBackX, headW * 0.5);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle = theme.borderRibbon1;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawThemeFloorMotif(ctx, theme) {
+  ctx.save();
+  switch (theme.id) {
+    case 'space': {
+      // Hex nano-grid
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.055)';
+      ctx.lineWidth = 1.4;
+      const hexStep = 64;
+      for (let x = 32; x < 2048; x += hexStep) {
+        for (let y = 32; y < 2048; y += hexStep) {
+          ctx.beginPath();
+          for (let s = 0; s < 6; s++) {
+            const a = (s * Math.PI) / 3;
+            const hx = x + Math.cos(a) * 22;
+            const hy = y + Math.sin(a) * 22;
+            if (s === 0) ctx.moveTo(hx, hy); else ctx.lineTo(hx, hy);
+          }
+          ctx.closePath();
+          ctx.stroke();
+        }
+      }
+      // Cyber circuit traces
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.22)';
+      ctx.lineWidth = 3.5;
+      ctx.lineCap = 'square';
+      ctx.beginPath();
+      ctx.moveTo(120, 220); ctx.lineTo(380, 220); ctx.lineTo(520, 360); ctx.lineTo(520, 600);
+      ctx.moveTo(1928, 220); ctx.lineTo(1668, 220); ctx.lineTo(1528, 360); ctx.lineTo(1528, 600);
+      ctx.moveTo(120, 1828); ctx.lineTo(380, 1828); ctx.lineTo(520, 1688); ctx.lineTo(520, 1448);
+      ctx.moveTo(1928, 1828); ctx.lineTo(1668, 1828); ctx.lineTo(1528, 1688); ctx.lineTo(1528, 1448);
+      ctx.stroke();
+      break;
+    }
+
+    case 'football':
+    case 'soccer': {
+      // Stadium lawn pitch stripes
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.035)';
+      for (let y = 0; y < 2048; y += 128) {
+        ctx.fillRect(0, y, 2048, 64);
+      }
+      // Chalk center circle
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(1024, 1024, 450, 0, Math.PI * 2);
+      ctx.stroke();
+      break;
+    }
+
+    case 'cowboy': {
+      // Cedar woodgrain planks
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+      ctx.lineWidth = 2;
+      for (let y = 64; y < 2048; y += 64) {
+        ctx.beginPath();
+        ctx.moveTo(0, y); ctx.lineTo(2048, y);
+        ctx.stroke();
+      }
+      // Leather stitches along border
+      ctx.strokeStyle = '#ddb892';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([8, 8]);
+      ctx.strokeRect(50, 50, 1948, 1948);
+      ctx.setLineDash([]);
+      break;
+    }
+
+    case 'ninja': {
+      // Katana slash lines
+      ctx.strokeStyle = 'rgba(230, 57, 70, 0.12)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(100, 1948); ctx.lineTo(1948, 100);
+      ctx.moveTo(100, 100); ctx.lineTo(1948, 1948);
+      ctx.stroke();
+      break;
+    }
+
+    case 'hoodie': {
+      // Glacier ice facets
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+      ctx.lineWidth = 1.8;
+      const step = 128;
+      for (let x = 64; x < 2048; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0); ctx.lineTo(x + 64, 2048);
+        ctx.stroke();
+      }
+      break;
+    }
+
+    case 'gamer': {
+      // RGB Bus Traces
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = 'rgba(6, 214, 160, 0.18)';
+      ctx.strokeRect(100, 100, 1848, 1848);
+      ctx.strokeStyle = 'rgba(247, 37, 133, 0.18)';
+      ctx.strokeRect(140, 140, 1768, 1768);
+      break;
+    }
+
+    case 'neon_glow': {
+      // Synthwave perspective grid
+      ctx.strokeStyle = 'rgba(247, 37, 133, 0.14)';
+      ctx.lineWidth = 1.5;
+      for (let x = 0; x <= 2048; x += 128) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0); ctx.lineTo(x, 2048);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= 2048; y += 128) {
+        ctx.beginPath();
+        ctx.moveTo(0, y); ctx.lineTo(2048, y);
+        ctx.stroke();
+      }
+      break;
+    }
+
+    case 'cool_boys': {
+      // Lightning discharge fissures
+      ctx.strokeStyle = 'rgba(255, 183, 3, 0.15)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(200, 200); ctx.lineTo(500, 600); ctx.lineTo(400, 650); ctx.lineTo(700, 1100);
+      ctx.moveTo(1848, 200); ctx.lineTo(1548, 600); ctx.lineTo(1648, 650); ctx.lineTo(1348, 1100);
+      ctx.stroke();
+      break;
+    }
+
+    case 'paw': {
+      // Playful paw print boundary trail
+      const pawStep = 180;
+      for (let x = 120; x < 1928; x += pawStep) {
+        ctx.fillStyle = 'rgba(244, 114, 182, 0.12)';
+        ctx.beginPath();
+        ctx.arc(x, 70, 8, 0, Math.PI * 2);
+        ctx.arc(x, 1978, 8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+
+    case 'minimal_crown': {
+      // Ultra-fine minimalist grid
+      ctx.strokeStyle = 'rgba(129, 140, 248, 0.08)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 2048; i += 256) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0); ctx.lineTo(i, 2048);
+        ctx.moveTo(0, i); ctx.lineTo(2048, i);
+        ctx.stroke();
+      }
+      break;
+    }
+
+    case 'royal_crown':
+    case 'marble_royal':
+    default: {
+      // Organic marble veining ribbons
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 18;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(100, 200);
+      ctx.bezierCurveTo(450, 600, 900, 300, 1400, 800);
+      ctx.bezierCurveTo(1700, 1100, 1600, 1600, 1950, 1900);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(100, 120, 135, 0.08)';
+      ctx.lineWidth = 14;
+      ctx.beginPath();
+      ctx.moveTo(1900, 250);
+      ctx.bezierCurveTo(1500, 650, 1200, 1200, 600, 1500);
+      ctx.bezierCurveTo(350, 1650, 250, 1800, 150, 1950);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(200, 158, 58, 0.12)';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(400, 1600);
+      ctx.bezierCurveTo(700, 1400, 1300, 1500, 1650, 1100);
+      ctx.stroke();
+      break;
+    }
+  }
+  ctx.restore();
+}
+
+function drawThemeYardWatermark(ctx, theme) {
+  ctx.save();
+  switch (theme.yardWatermark) {
+    case 'nanotech_hex': {
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.06)';
+      ctx.lineWidth = 1.2;
+      const gridW = 56;
+      for (let x = 28; x < 1024; x += gridW) {
+        for (let y = 28; y < 1024; y += gridW) {
+          ctx.beginPath();
+          for (let s = 0; s < 6; s++) {
+            const a = (s * Math.PI) / 3;
+            const hx = x + Math.cos(a) * 16;
+            const hy = y + Math.sin(a) * 16;
+            if (s === 0) ctx.moveTo(hx, hy); else ctx.lineTo(hx, hy);
+          }
+          ctx.closePath();
+          ctx.stroke();
+        }
+      }
+      break;
+    }
+
+    case 'soccer_pitch': {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(512, 512, 280, 0, Math.PI * 2);
+      ctx.stroke();
+      break;
+    }
+
+    case 'rope_braid': {
+      ctx.strokeStyle = 'rgba(224, 169, 109, 0.12)';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([10, 8]);
+      ctx.strokeRect(50, 50, 924, 924);
+      ctx.setLineDash([]);
+      break;
+    }
+
+    case 'ninja_star': {
+      ctx.strokeStyle = 'rgba(230, 57, 70, 0.08)';
+      ctx.lineWidth = 2;
+      for (let a = 0; a < 4; a++) {
+        const ang = (a * Math.PI) / 2;
+        ctx.beginPath();
+        ctx.moveTo(512, 512);
+        ctx.lineTo(512 + Math.cos(ang) * 350, 512 + Math.sin(ang) * 350);
+        ctx.stroke();
+      }
+      break;
+    }
+
+    case 'ice_fractal': {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.10)';
+      ctx.lineWidth = 1.8;
+      for (let i = 0; i < 6; i++) {
+        const a = (i * Math.PI) / 3;
+        ctx.beginPath();
+        ctx.moveTo(512, 512);
+        ctx.lineTo(512 + Math.cos(a) * 360, 512 + Math.sin(a) * 360);
+        ctx.stroke();
+      }
+      break;
+    }
+
+    case 'rgb_circuits': {
+      ctx.strokeStyle = 'rgba(6, 214, 160, 0.10)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(120, 120, 784, 784);
+      ctx.strokeStyle = 'rgba(247, 37, 133, 0.10)';
+      ctx.strokeRect(150, 150, 724, 724);
+      break;
+    }
+
+    case 'laser_grid': {
+      ctx.strokeStyle = 'rgba(247, 37, 133, 0.08)';
+      ctx.lineWidth = 1.5;
+      for (let p = 64; p < 1024; p += 64) {
+        ctx.beginPath(); ctx.moveTo(p, 0); ctx.lineTo(p, 1024); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, p); ctx.lineTo(1024, p); ctx.stroke();
+      }
+      break;
+    }
+
+    case 'damask':
+    default: {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.045)';
+      ctx.lineWidth = 1.2;
+      const gridW = 64;
+      for (let x = 32; x < 1024; x += gridW) {
+        for (let y = 32; y < 1024; y += gridW) {
+          ctx.beginPath();
+          ctx.moveTo(x, y - 18);
+          ctx.lineTo(x + 18, y);
+          ctx.lineTo(x, y + 18);
+          ctx.lineTo(x - 18, y);
+          ctx.closePath();
+          ctx.stroke();
+        }
+      }
+      break;
+    }
+  }
+  ctx.restore();
+}
+
+function drawThemeYardCenterRosette(ctx, cx, cy, padHex, theme, socketCenters) {
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+  ctx.shadowBlur = 16;
+  ctx.shadowOffsetY = 4;
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, 110, 0, Math.PI * 2);
+  ctx.fillStyle = theme.outerBorder;
+  ctx.fill();
+  ctx.strokeStyle = theme.borderRibbon1;
+  ctx.lineWidth = 4.5;
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, 96, 0, Math.PI * 2);
+  ctx.strokeStyle = theme.borderRibbon2;
+  ctx.lineWidth = 2.0;
+  ctx.stroke();
+
+  // Central Star Emblem
+  const rStar = 88;
+  const rInner = 36;
+  for (let i = 0; i < 8; i++) {
+    const aTip = (i * 2 * Math.PI) / 8 - Math.PI / 2;
+    const aL = aTip - Math.PI / 8;
+    const aR = aTip + Math.PI / 8;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(aTip) * rStar, cy + Math.sin(aTip) * rStar);
+    ctx.lineTo(cx + Math.cos(aL) * rInner, cy + Math.sin(aL) * rInner);
+    ctx.closePath();
+    ctx.fillStyle = theme.borderRibbon1;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(aTip) * rStar, cy + Math.sin(aTip) * rStar);
+    ctx.lineTo(cx + Math.cos(aR) * rInner, cy + Math.sin(aR) * rInner);
+    ctx.closePath();
+    ctx.fillStyle = theme.borderRibbon2;
+    ctx.fill();
+  }
+
+  // Central Gemstone Reactor
+  ctx.beginPath();
+  ctx.arc(cx, cy, 28, 0, Math.PI * 2);
+  const gemGrad = ctx.createRadialGradient(cx - 8, cy - 8, 4, cx, cy, 28);
+  gemGrad.addColorStop(0.0, '#ffffff');
+  gemGrad.addColorStop(0.3, padHex);
+  gemGrad.addColorStop(1.0, theme.outerBorder);
+  ctx.fillStyle = gemGrad;
+  ctx.fill();
+  ctx.strokeStyle = theme.borderRibbon1;
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Bus Lines to the 4 sockets
+  socketCenters.forEach(([sx, sy]) => {
+    ctx.strokeStyle = theme.borderRibbon1;
+    ctx.lineWidth = 1.8;
+    ctx.setLineDash([8, 6]);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(sx, sy);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  ctx.restore();
+}
+
+function drawThemeTrackArrow(ctx, theme) {
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetY = 2;
+
+  // Left Chevron Wing
+  ctx.beginPath();
+  ctx.moveTo(128, 68);
+  ctx.lineTo(58, 162);
+  ctx.lineTo(84, 186);
+  ctx.lineTo(128, 126);
+  ctx.closePath();
+  ctx.fillStyle = theme.trackRim1;
+  ctx.fill();
+
+  // Right Chevron Wing
+  ctx.beginPath();
+  ctx.moveTo(128, 68);
+  ctx.lineTo(198, 162);
+  ctx.lineTo(172, 186);
+  ctx.lineTo(128, 126);
+  ctx.closePath();
+  ctx.fillStyle = theme.trackRim2;
+  ctx.fill();
+
+  ctx.strokeStyle = theme.outerBorder;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(58, 162);
+  ctx.lineTo(128, 68);
+  ctx.lineTo(198, 162);
+  ctx.lineTo(172, 186);
+  ctx.lineTo(128, 126);
+  ctx.lineTo(84, 186);
+  ctx.closePath();
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+
 function generateBoardCanvasTexture() {
-  // 2048x2048 Ultra-Resolution Board Floor Texture (Sci-Fi Cyber Matrix or Heirloom Porcelain)
+  // 2048x2048 Ultra-Resolution Board Floor Texture (16 Unique Set Themes)
   const cvs = document.createElement('canvas');
   cvs.width = 2048;
   cvs.height = 2048;
   const ctx = cvs.getContext('2d');
-  const isSciFi = (currentTheme === 'scifi');
+  const theme = getThemeProfile(currentTheme);
 
-  if (isSciFi) {
-    // 1. MODERN SCI-FI THEME: Stealth Titanium / Carbon Composite Plating & Cyber Matrix
-    const baseGrad = ctx.createRadialGradient(1024, 1024, 100, 1024, 1024, 1400);
-    baseGrad.addColorStop(0.0, '#0f172a'); // Deep dark titanium core
-    baseGrad.addColorStop(0.55, '#090e17');
-    baseGrad.addColorStop(1.0, '#04070d'); // Stealth abyss border
-    ctx.fillStyle = baseGrad;
-    ctx.fillRect(0, 0, 2048, 2048);
+  // 1. Theme-Specific Floor Base Radial Gradient
+  const baseGrad = ctx.createRadialGradient(1024, 1024, 120, 1024, 1024, 1380);
+  baseGrad.addColorStop(0.0, theme.floorGrad[0]);
+  baseGrad.addColorStop(0.60, theme.floorGrad[1]);
+  baseGrad.addColorStop(1.0, theme.floorGrad[2]);
+  ctx.fillStyle = baseGrad;
+  ctx.fillRect(0, 0, 2048, 2048);
 
-    // Subtle Luminous Cyan Hexagonal Nano-Grid Matrix
-    ctx.save();
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.055)';
-    ctx.lineWidth = 1.4;
-    const hexStep = 64;
-    for (let x = 32; x < 2048; x += hexStep) {
-      for (let y = 32; y < 2048; y += hexStep) {
-        ctx.beginPath();
-        for (let s = 0; s < 6; s++) {
-          const a = (s * Math.PI) / 3;
-          const hx = x + Math.cos(a) * 22;
-          const hy = y + Math.sin(a) * 22;
-          if (s === 0) ctx.moveTo(hx, hy);
-          else ctx.lineTo(hx, hy);
-        }
-        ctx.closePath();
-        ctx.stroke();
-      }
-    }
-    ctx.restore();
+  // 2. Theme Background Texture Motif
+  drawThemeFloorMotif(ctx, theme);
 
-    // High-Tech Cyber Circuit Traces & Energy Bus Lines
-    ctx.save();
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.22)';
-    ctx.lineWidth = 3.5;
-    ctx.lineCap = 'square';
-    ctx.beginPath();
-    ctx.moveTo(120, 220); ctx.lineTo(380, 220); ctx.lineTo(520, 360); ctx.lineTo(520, 600);
-    ctx.moveTo(1928, 220); ctx.lineTo(1668, 220); ctx.lineTo(1528, 360); ctx.lineTo(1528, 600);
-    ctx.moveTo(120, 1828); ctx.lineTo(380, 1828); ctx.lineTo(520, 1688); ctx.lineTo(520, 1448);
-    ctx.moveTo(1928, 1828); ctx.lineTo(1668, 1828); ctx.lineTo(1528, 1688); ctx.lineTo(1528, 1448);
-    ctx.stroke();
+  // 3. Dual Outer Frame Ribbons
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = theme.outerBorder;
+  ctx.strokeRect(5, 5, 2038, 2038);
 
-    // Micro Glowing Cyber Junction Nodes
-    const nodes = [
-      [380, 220], [520, 360], [1668, 220], [1528, 360],
-      [380, 1828], [520, 1688], [1668, 1828], [1528, 1688]
-    ];
-    nodes.forEach(([nx, ny]) => {
-      ctx.beginPath();
-      ctx.arc(nx, ny, 6, 0, Math.PI * 2);
-      ctx.fillStyle = '#00f0ff';
-      ctx.fill();
-    });
-    ctx.restore();
+  ctx.lineWidth = 4.5;
+  ctx.strokeStyle = theme.borderRibbon1;
+  ctx.strokeRect(22, 22, 2004, 2004);
 
-    // Dual Outer Cyber Border Conduits (Neon Cyan & Electric Gold Telemetry)
-    ctx.lineWidth = 10;
-    ctx.strokeStyle = '#020617';
-    ctx.strokeRect(5, 5, 2038, 2038);
+  ctx.lineWidth = 2.0;
+  ctx.strokeStyle = theme.borderRibbon2;
+  ctx.strokeRect(32, 32, 1984, 1984);
 
-    ctx.lineWidth = 4.5;
-    ctx.strokeStyle = '#00e5ff';
-    ctx.strokeRect(22, 22, 2004, 2004);
+  // 4 Corner Architectural Brackets
+  drawThemeCornerBracket(ctx, 38, 38, 1, 1, theme);
+  drawThemeCornerBracket(ctx, 2010, 38, -1, 1, theme);
+  drawThemeCornerBracket(ctx, 38, 2010, 1, -1, theme);
+  drawThemeCornerBracket(ctx, 2010, 2010, -1, -1, theme);
 
-    ctx.lineWidth = 2.0;
-    ctx.strokeStyle = '#f59e0b';
-    ctx.strokeRect(32, 32, 1984, 1984);
-
-    // 4 Angular Sci-Fi Telemetry Corner Brackets with Ion Emitters
-    const drawSciFiCornerBracket = (x, y, flipX, flipY) => {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.scale(flipX, flipY);
-
-      ctx.strokeStyle = '#00e5ff';
-      ctx.lineWidth = 4.0;
-      ctx.beginPath();
-      ctx.moveTo(0, 85);
-      ctx.lineTo(0, 20);
-      ctx.lineTo(20, 0);
-      ctx.lineTo(85, 0);
-      ctx.stroke();
-
-      ctx.strokeStyle = '#f59e0b';
-      ctx.lineWidth = 2.0;
-      ctx.beginPath();
-      ctx.moveTo(14, 70);
-      ctx.lineTo(14, 26);
-      ctx.lineTo(26, 14);
-      ctx.lineTo(70, 14);
-      ctx.stroke();
-
-      // Glowing Ion Emitter Node
-      ctx.fillStyle = '#00f0ff';
-      ctx.beginPath();
-      ctx.arc(36, 36, 7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.restore();
-    };
-    drawSciFiCornerBracket(38, 38, 1, 1);
-    drawSciFiCornerBracket(2010, 38, -1, 1);
-    drawSciFiCornerBracket(38, 2010, 1, -1);
-    drawSciFiCornerBracket(2010, 2010, -1, -1);
-
-  } else {
-    // 1. ROYAL HEIRLOOM THEME: Satin Alabaster Porcelain & Inlaid Marble Floor
-    const baseGrad = ctx.createRadialGradient(1024, 1024, 150, 1024, 1024, 1350);
-    baseGrad.addColorStop(0.0, '#c3ccd3');
-    baseGrad.addColorStop(0.65, '#b8c1c8');
-    baseGrad.addColorStop(1.0, '#adb6bd');
-    ctx.fillStyle = baseGrad;
-    ctx.fillRect(0, 0, 2048, 2048);
-
-    // Organic marble veining ribbons
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-    ctx.lineWidth = 18;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(100, 200);
-    ctx.bezierCurveTo(450, 600, 900, 300, 1400, 800);
-    ctx.bezierCurveTo(1700, 1100, 1600, 1600, 1950, 1900);
-    ctx.stroke();
-
-    ctx.strokeStyle = 'rgba(100, 120, 135, 0.08)';
-    ctx.lineWidth = 14;
-    ctx.beginPath();
-    ctx.moveTo(1900, 250);
-    ctx.bezierCurveTo(1500, 650, 1200, 1200, 600, 1500);
-    ctx.bezierCurveTo(350, 1650, 250, 1800, 150, 1950);
-    ctx.stroke();
-
-    // Delicate organic crystalline micro-veins & subtle golden pyrite ribbons
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.24)';
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.moveTo(350, 420);
-    ctx.bezierCurveTo(620, 520, 880, 440, 1150, 720);
-    ctx.bezierCurveTo(1400, 960, 1680, 940, 1880, 1320);
-    ctx.stroke();
-
-    ctx.strokeStyle = 'rgba(70, 95, 115, 0.08)';
-    ctx.lineWidth = 6;
-    ctx.beginPath();
-    ctx.moveTo(1720, 420);
-    ctx.bezierCurveTo(1420, 820, 920, 1120, 520, 1320);
-    ctx.bezierCurveTo(320, 1420, 220, 1620, 120, 1780);
-    ctx.stroke();
-
-    ctx.strokeStyle = 'rgba(200, 158, 58, 0.12)';
-    ctx.lineWidth = 3.5;
-    ctx.beginPath();
-    ctx.moveTo(400, 1600);
-    ctx.bezierCurveTo(700, 1400, 1300, 1500, 1650, 1100);
-    ctx.stroke();
-    ctx.restore();
-
-    // Dual Inlaid 24K Polished Brass Outer Ribbons & Dark Frame Rim
-    ctx.lineWidth = 10;
-    ctx.strokeStyle = '#182026';
-    ctx.strokeRect(5, 5, 2038, 2038);
-
-    ctx.lineWidth = 4.5;
-    ctx.strokeStyle = '#c89e3a';
-    ctx.strokeRect(22, 22, 2004, 2004);
-
-    ctx.lineWidth = 2.0;
-    ctx.strokeStyle = '#e0be5a';
-    ctx.strokeRect(32, 32, 1984, 1984);
-
-    // 4 Royal Heirloom Brass Corner Brackets
-    const drawCornerBracket = (x, y, flipX, flipY) => {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.scale(flipX, flipY);
-      ctx.strokeStyle = '#c89e3a';
-      ctx.lineWidth = 3.5;
-      ctx.beginPath();
-      ctx.moveTo(0, 75);
-      ctx.lineTo(0, 0);
-      ctx.lineTo(75, 0);
-      ctx.stroke();
-
-      ctx.strokeStyle = '#e0be5a';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.moveTo(10, 60);
-      ctx.lineTo(10, 10);
-      ctx.lineTo(60, 10);
-      ctx.stroke();
-
-      ctx.fillStyle = '#c89e3a';
-      ctx.beginPath();
-      ctx.arc(28, 28, 6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#6b4d08';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-      ctx.restore();
-    };
-    drawCornerBracket(38, 38, 1, 1);
-    drawCornerBracket(2010, 38, -1, 1);
-    drawCornerBracket(38, 2010, 1, -1);
-    drawCornerBracket(2010, 2010, -1, -1);
-  }
-
-  // Central Track Cross: Individually Inlaid Tile Slabs with 3D Bevel Relief
+  // 4. Central Track Cross: Individually Inlaid Tile Slabs
   const step = 2048 / 15;
 
   for (let r = 0; r < 15; r++) {
@@ -544,74 +2247,41 @@ function generateBoardCanvasTexture() {
       const tw = step - 4;
       const th = step - 4;
 
-      if (isSciFi) {
-        // Sci-Fi Dark Brushed Carbon Tile with Electric Cyan Inset
-        const tileGrad = ctx.createLinearGradient(tx, ty, tx + tw, ty + th);
-        tileGrad.addColorStop(0.0, '#16202c');
-        tileGrad.addColorStop(0.5, '#0f1722');
-        tileGrad.addColorStop(1.0, '#090e15');
-        ctx.fillStyle = tileGrad;
-        ctx.fillRect(tx, ty, tw, th);
+      // Inlaid Slab Gradient
+      const tileGrad = ctx.createLinearGradient(tx, ty, tx + tw, ty + th);
+      tileGrad.addColorStop(0.0, theme.tileGrad[0]);
+      tileGrad.addColorStop(0.5, theme.tileGrad[1]);
+      tileGrad.addColorStop(1.0, theme.tileGrad[2]);
+      ctx.fillStyle = tileGrad;
+      ctx.fillRect(tx, ty, tw, th);
 
-        // 3D Inset Bevel Highlight (Neon Cyan)
-        ctx.strokeStyle = 'rgba(0, 229, 255, 0.45)';
-        ctx.lineWidth = 2.0;
-        ctx.beginPath();
-        ctx.moveTo(tx, ty + th);
-        ctx.lineTo(tx, ty);
-        ctx.lineTo(tx + tw, ty);
-        ctx.stroke();
+      // 3D Inset Bevel Highlight
+      ctx.strokeStyle = theme.tileHighlight;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(tx, ty + th);
+      ctx.lineTo(tx, ty);
+      ctx.lineTo(tx + tw, ty);
+      ctx.stroke();
 
-        // 3D Inset Bevel Shadow
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.65)';
-        ctx.lineWidth = 2.0;
-        ctx.beginPath();
-        ctx.moveTo(tx + tw, ty);
-        ctx.lineTo(tx + tw, ty + th);
-        ctx.lineTo(tx, ty + th);
-        ctx.stroke();
+      // 3D Inset Bevel Shadow
+      ctx.strokeStyle = theme.tileShadow;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(tx + tw, ty);
+      ctx.lineTo(tx + tw, ty + th);
+      ctx.lineTo(tx, ty + th);
+      ctx.stroke();
 
-        // High-tech tile boundary
-        ctx.strokeStyle = '#0284c7';
-        ctx.lineWidth = 1.0;
-        ctx.strokeRect(tx, ty, tw, th);
-      } else {
-        // Heirloom Ceramic Tile Gradient
-        const tileGrad = ctx.createLinearGradient(tx, ty, tx + tw, ty + th);
-        tileGrad.addColorStop(0.0, '#dce4ea');
-        tileGrad.addColorStop(0.5, '#cfd8df');
-        tileGrad.addColorStop(1.0, '#c1cbd2');
-        ctx.fillStyle = tileGrad;
-        ctx.fillRect(tx, ty, tw, th);
-
-        // 3D Inset Bevel Highlight
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(tx, ty + th);
-        ctx.lineTo(tx, ty);
-        ctx.lineTo(tx + tw, ty);
-        ctx.stroke();
-
-        // 3D Inset Bevel Shadow
-        ctx.strokeStyle = 'rgba(30, 42, 54, 0.35)';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(tx + tw, ty);
-        ctx.lineTo(tx + tw, ty + th);
-        ctx.lineTo(tx, ty + th);
-        ctx.stroke();
-
-        // Delicate tile border
-        ctx.strokeStyle = '#718290';
-        ctx.lineWidth = 1.0;
-        ctx.strokeRect(tx, ty, tw, th);
-      }
+      // Inlaid boundary line
+      ctx.strokeStyle = theme.tileBorder;
+      ctx.lineWidth = 1.0;
+      ctx.strokeRect(tx, ty, tw, th);
     }
   }
 
   // Cross path boundary lines
-  ctx.strokeStyle = isSciFi ? '#0284c7' : '#5a6976';
+  ctx.strokeStyle = theme.armBorder;
   ctx.lineWidth = 3.2;
 
   for (let r of [6, 9]) {
@@ -629,15 +2299,15 @@ function generateBoardCanvasTexture() {
 
   // Center 3x3 collar boundary ribbon
   ctx.save();
-  ctx.strokeStyle = isSciFi ? '#00e5ff' : '#c89e3a';
+  ctx.strokeStyle = theme.collarBorder1;
   ctx.lineWidth = 4;
   ctx.strokeRect(6 * step, 6 * step, 3 * step, 3 * step);
-  ctx.strokeStyle = isSciFi ? '#38bdf8' : '#7a5a14';
+  ctx.strokeStyle = theme.collarBorder2;
   ctx.lineWidth = 1.5;
   ctx.strokeRect(6 * step + 4, 6 * step + 4, 3 * step - 8, 3 * step - 8);
   ctx.restore();
 
-  // 8 Official Ludo Celestial Stars: Holographic Quantum Gateways (Sci-Fi) / Chiseled 3D Brass (Heirloom)
+  // 8 Official Ludo Celestial Stars
   const stars = [
     [6, 13], [2, 8], [1, 6], [6, 2],
     [8, 1], [12, 6], [13, 8], [8, 12]
@@ -654,272 +2324,22 @@ function generateBoardCanvasTexture() {
     '8,12': '#2b3238'
   };
 
-  function drawStar(cx, cy, r, gemColor = '#d9b300') {
-    ctx.save();
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-    ctx.shadowBlur = 10;
-    ctx.shadowOffsetY = 3;
-
-    if (isSciFi) {
-      // Sci-Fi Holographic Quantum Portal Base
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 1.15, 0, Math.PI * 2);
-      ctx.fillStyle = '#082f49';
-      ctx.fill();
-      ctx.strokeStyle = '#00e5ff';
-      ctx.lineWidth = 3.5;
-      ctx.stroke();
-
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetY = 0;
-
-      // Concentric Magnetic Levitation Rings
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.98, 0, Math.PI * 2);
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 1.8;
-      ctx.stroke();
-
-      // 8 Radial Energy Emitter Prongs
-      for (let p = 0; p < 8; p++) {
-        const ap = (p * Math.PI) / 4;
-        ctx.beginPath();
-        ctx.moveTo(cx + Math.cos(ap) * (r * 0.98), cy + Math.sin(ap) * (r * 0.98));
-        ctx.lineTo(cx + Math.cos(ap) * (r * 1.15), cy + Math.sin(ap) * (r * 1.15));
-        ctx.strokeStyle = '#00f0ff';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
-
-      // Angular Holographic Cyber Star Glyph
-      for (let i = 0; i < 5; i++) {
-        const aTip = (i * 2 * Math.PI) / 5 - Math.PI / 2;
-        const aLeftInner = aTip - Math.PI / 5;
-        const aRightInner = aTip + Math.PI / 5;
-
-        const rInner = r * 0.44;
-        const tipX = cx + Math.cos(aTip) * r;
-        const tipY = cy + Math.sin(aTip) * r;
-        const lInX = cx + Math.cos(aLeftInner) * rInner;
-        const lInY = cy + Math.sin(aLeftInner) * rInner;
-        const rInX = cx + Math.cos(aRightInner) * rInner;
-        const rInY = cy + Math.sin(aRightInner) * rInner;
-
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(tipX, tipY);
-        ctx.lineTo(lInX, lInY);
-        ctx.closePath();
-        ctx.fillStyle = '#38bdf8';
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(tipX, tipY);
-        ctx.lineTo(rInX, rInY);
-        ctx.closePath();
-        ctx.fillStyle = '#0284c7';
-        ctx.fill();
-      }
-
-      // Central Quantum Singularity Reactor Core
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.24, 0, Math.PI * 2);
-      ctx.fillStyle = gemColor;
-      ctx.fill();
-      ctx.strokeStyle = '#00f0ff';
-      ctx.lineWidth = 2.0;
-      ctx.stroke();
-
-      // High-intensity photon spark
-      ctx.beginPath();
-      ctx.arc(cx - r * 0.08, cy - r * 0.08, r * 0.07, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff';
-      ctx.fill();
-
-    } else {
-      // Inlaid Circular Brass Medallion Base
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 1.14, 0, Math.PI * 2);
-      ctx.fillStyle = '#8f681a';
-      ctx.fill();
-      ctx.strokeStyle = '#c89e3a';
-      ctx.lineWidth = 3.5;
-      ctx.stroke();
-
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetY = 0;
-
-      // Milled inner golden ring
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.98, 0, Math.PI * 2);
-      ctx.strokeStyle = '#dfb858';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // Chiseled 3D Faceted 5-Point Star
-      for (let i = 0; i < 5; i++) {
-        const aTip = (i * 2 * Math.PI) / 5 - Math.PI / 2;
-        const aLeftInner = aTip - Math.PI / 5;
-        const aRightInner = aTip + Math.PI / 5;
-
-        const rInner = r * 0.44;
-        const tipX = cx + Math.cos(aTip) * r;
-        const tipY = cy + Math.sin(aTip) * r;
-        const lInX = cx + Math.cos(aLeftInner) * rInner;
-        const lInY = cy + Math.sin(aLeftInner) * rInner;
-        const rInX = cx + Math.cos(aRightInner) * rInner;
-        const rInY = cy + Math.sin(aRightInner) * rInner;
-
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(tipX, tipY);
-        ctx.lineTo(lInX, lInY);
-        ctx.closePath();
-        ctx.fillStyle = '#fce588';
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(tipX, tipY);
-        ctx.lineTo(rInX, rInY);
-        ctx.closePath();
-        ctx.fillStyle = '#a67b17';
-        ctx.fill();
-      }
-
-      // Outer star outline
-      ctx.beginPath();
-      for (let i = 0; i < 5; i++) {
-        const aTip = (i * 2 * Math.PI) / 5 - Math.PI / 2;
-        const aIn = aTip + Math.PI / 5;
-        const rInner = r * 0.44;
-        const x1 = cx + Math.cos(aTip) * r;
-        const y1 = cy + Math.sin(aTip) * r;
-        const x2 = cx + Math.cos(aIn) * rInner;
-        const y2 = cy + Math.sin(aIn) * rInner;
-        if (i === 0) ctx.moveTo(x1, y1);
-        else ctx.lineTo(x1, y1);
-        ctx.lineTo(x2, y2);
-      }
-      ctx.closePath();
-      ctx.strokeStyle = '#5c3e06';
-      ctx.lineWidth = 1.8;
-      ctx.stroke();
-
-      // Central Polished Gemstone Cabochon
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2);
-      ctx.fillStyle = gemColor;
-      ctx.fill();
-      ctx.strokeStyle = '#ffd700';
-      ctx.lineWidth = 2.0;
-      ctx.stroke();
-
-      // Jewel specular glint
-      ctx.beginPath();
-      ctx.arc(cx - r * 0.07, cy - r * 0.07, r * 0.06, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff';
-      ctx.fill();
-    }
-    ctx.restore();
-  }
-
   stars.forEach(([c, r]) => {
     const key = `${c},${r}`;
     const gem = starColors[key] || '#d9b300';
-    drawStar((c + 0.5) * step, (r + 0.5) * step, step * 0.38, gem);
+    drawThemeStar(ctx, (c + 0.5) * step, (r + 0.5) * step, step * 0.38, gem, theme);
   });
 
-  // 5. Directional Arrows: Photon Thruster Chevrons (Sci-Fi) / Inlaid Metallic (Heirloom)
-  function drawDirectionalArrow(cx, cy, angle, colorHex = '#1c242c') {
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(angle);
-
-    const length = step * 0.58;
-    const shaftW = 5.2;
-    const headLen = step * 0.22;
-    const headW = step * 0.22;
-    const barbRecess = step * 0.055;
-
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.40)';
-    ctx.shadowBlur = 5;
-    ctx.shadowOffsetY = 2;
-
-    if (isSciFi) {
-      // Glowing Photon Thruster Vector
-      ctx.strokeStyle = '#00e5ff';
-      ctx.lineWidth = shaftW + 2;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(-length * 0.46, 0);
-      ctx.lineTo(length * 0.46 - headLen + barbRecess, 0);
-      ctx.stroke();
-
-      ctx.strokeStyle = '#0284c7';
-      ctx.lineWidth = shaftW;
-      ctx.stroke();
-
-      // Barbed triangular arrowhead with glowing plasma core
-      const tipX = length * 0.46;
-      const baseBackX = tipX - headLen;
-      const notchX = baseBackX + barbRecess;
-
-      ctx.fillStyle = '#00e5ff';
-      ctx.beginPath();
-      ctx.moveTo(tipX, 0);
-      ctx.lineTo(baseBackX, -headW * 0.5);
-      ctx.lineTo(notchX, 0);
-      ctx.lineTo(baseBackX, headW * 0.5);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-    } else {
-      ctx.strokeStyle = '#8f681a';
-      ctx.lineWidth = shaftW + 2;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(-length * 0.46, 0);
-      ctx.lineTo(length * 0.46 - headLen + barbRecess, 0);
-      ctx.stroke();
-
-      ctx.strokeStyle = colorHex;
-      ctx.lineWidth = shaftW;
-      ctx.stroke();
-
-      const tipX = length * 0.46;
-      const baseBackX = tipX - headLen;
-      const notchX = baseBackX + barbRecess;
-
-      ctx.fillStyle = colorHex;
-      ctx.beginPath();
-      ctx.moveTo(tipX, 0);
-      ctx.lineTo(baseBackX, -headW * 0.5);
-      ctx.lineTo(notchX, 0);
-      ctx.lineTo(baseBackX, headW * 0.5);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.strokeStyle = '#c89e3a';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
+  // 5. Directional Arrows
   const cornerDirectionArrows = [
-    { col: 6, row: 5, angle: -Math.PI / 2, color: '#1c242c' },
-    { col: 9, row: 6, angle: 0,            color: '#1c242c' },
-    { col: 8, row: 9, angle: Math.PI / 2,  color: '#1c242c' },
-    { col: 5, row: 8, angle: Math.PI,      color: '#1c242c' }
+    { col: 6, row: 5, angle: -Math.PI / 2, color: theme.armBorder },
+    { col: 9, row: 6, angle: 0,            color: theme.armBorder },
+    { col: 8, row: 9, angle: Math.PI / 2,  color: theme.armBorder },
+    { col: 5, row: 8, angle: Math.PI,      color: theme.armBorder }
   ];
 
   cornerDirectionArrows.forEach(({ col, row, angle, color }) => {
-    drawDirectionalArrow((col + 0.5) * step, (row + 0.5) * step, angle, color);
+    drawThemeArrow(ctx, (col + 0.5) * step, (row + 0.5) * step, angle, color, theme);
   });
 
   const boardTex = new THREE.CanvasTexture(cvs);
@@ -931,11 +2351,12 @@ function generateBoardCanvasTexture() {
   return boardTex;
 }
 
+
 function createBoardPlatform() {
   const size = 15.6;
   const height = 0.65;
 
-  const baseColor = (currentTheme === 'scifi') ? 0x0f172a : 0x212930;
+  const baseColor = getThemeProfile(currentTheme).baseColor;
   const baseMat = getMatteMat(baseColor);
   boardBaseMesh = new THREE.Mesh(new THREE.BoxGeometry(size, height, size), baseMat);
   boardBaseMesh.position.y = height / 2;
@@ -974,7 +2395,7 @@ function getCachedYardFloorTexture(q) {
 
   const innerHex = colorToHexStr(q.inner);
   const padHex = colorToHexStr(q.pad);
-  const isSciFi = (currentTheme === 'scifi');
+  const theme = getThemeProfile(currentTheme);
 
   const socketCenters = [
     [512 - 300, 512 - 300],
@@ -983,404 +2404,79 @@ function getCachedYardFloorTexture(q) {
     [512 + 300, 512 + 300]
   ];
 
-  if (isSciFi) {
-    // 1. Quantum Launchpad / Mech Docking Bay with Radial Energy Field
-    const bedGrad = ctx.createRadialGradient(512, 512, 50, 512, 512, 680);
-    bedGrad.addColorStop(0.0, padHex); // Ion core bloom
-    bedGrad.addColorStop(0.35, innerHex); // Quantum plasma frequency
-    bedGrad.addColorStop(0.85, innerHex);
-    bedGrad.addColorStop(1.0, '#04070d'); // Stealth dark outer frame
-    ctx.fillStyle = bedGrad;
-    ctx.fillRect(0, 0, 1024, 1024);
+  // 1. Deep Royal Satin Bed with Luminous Core & Velvet Vignette
+  const bedGrad = ctx.createRadialGradient(512, 512, 60, 512, 512, 680);
+  bedGrad.addColorStop(0.0, padHex);
+  bedGrad.addColorStop(0.35, innerHex);
+  bedGrad.addColorStop(0.85, innerHex);
+  bedGrad.addColorStop(1.0, theme.outerBorder);
+  ctx.fillStyle = bedGrad;
+  ctx.fillRect(0, 0, 1024, 1024);
 
-    // 2. Nanotech Hexagonal Watermark Grid
+  // 2. Theme Watermark Motif
+  drawThemeYardWatermark(ctx, theme);
+
+  // 3. Yard Perimeter Ribbons
+  ctx.save();
+  ctx.strokeStyle = theme.borderRibbon1;
+  ctx.lineWidth = 6;
+  ctx.strokeRect(18, 18, 988, 988);
+
+  ctx.strokeStyle = theme.borderRibbon2;
+  ctx.lineWidth = 2.4;
+  ctx.strokeRect(30, 30, 964, 964);
+
+  // 4 Corner Accents in Yard
+  drawThemeCornerBracket(ctx, 34, 34, 1, 1, theme);
+  drawThemeCornerBracket(ctx, 990, 34, -1, 1, theme);
+  drawThemeCornerBracket(ctx, 34, 990, 1, -1, theme);
+  drawThemeCornerBracket(ctx, 990, 990, -1, -1, theme);
+  ctx.restore();
+
+  // 4. Four Sockets (aligned with ±1.20)
+  socketCenters.forEach(([sx, sy]) => {
     ctx.save();
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.06)';
-    ctx.lineWidth = 1.2;
-    const gridW = 56;
-    for (let x = 28; x < 1024; x += gridW) {
-      for (let y = 28; y < 1024; y += gridW) {
-        ctx.beginPath();
-        for (let s = 0; s < 6; s++) {
-          const a = (s * Math.PI) / 3;
-          const hx = x + Math.cos(a) * 16;
-          const hy = y + Math.sin(a) * 16;
-          if (s === 0) ctx.moveTo(hx, hy);
-          else ctx.lineTo(hx, hy);
-        }
-        ctx.closePath();
-        ctx.stroke();
-      }
-    }
-    ctx.restore();
-
-    // 3. Dual Glowing Neon Cyber Boundary Conduits
-    ctx.save();
-    ctx.strokeStyle = '#00e5ff';
-    ctx.lineWidth = 5.5;
-    ctx.strokeRect(18, 18, 988, 988);
-
-    ctx.strokeStyle = '#38bdf8';
-    ctx.lineWidth = 2.0;
-    ctx.strokeRect(30, 30, 964, 964);
-
-    // 4 Corner Telemetry Chevrons
-    const drawCyberCorner = (x, y, fx, fy) => {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.scale(fx, fy);
-      ctx.strokeStyle = '#00f0ff';
-      ctx.lineWidth = 3.0;
-      ctx.beginPath();
-      ctx.moveTo(0, 44);
-      ctx.lineTo(0, 16);
-      ctx.lineTo(16, 0);
-      ctx.lineTo(44, 0);
-      ctx.stroke();
-
-      ctx.fillStyle = '#00e5ff';
-      ctx.beginPath();
-      ctx.arc(22, 22, 5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    };
-    drawCyberCorner(34, 34, 1, 1);
-    drawCyberCorner(990, 34, -1, 1);
-    drawCyberCorner(34, 990, 1, -1);
-    drawCyberCorner(990, 990, -1, -1);
-    ctx.restore();
-
-    // 4. Four Maglev Docking Sockets (aligned with ±1.20)
-    socketCenters.forEach(([sx, sy]) => {
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
-      ctx.shadowBlur = 14;
-      ctx.shadowOffsetY = 4;
-
-      // Outer magnetic levitation power ring
-      ctx.beginPath();
-      ctx.arc(sx, sy, 172, 0, Math.PI * 2);
-      ctx.strokeStyle = '#00e5ff';
-      ctx.lineWidth = 5.0;
-      ctx.stroke();
-
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetY = 0;
-
-      // Inner glowing energy ring
-      ctx.beginPath();
-      ctx.arc(sx, sy, 160, 0, Math.PI * 2);
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 2.0;
-      ctx.stroke();
-
-      // Recessed dark magnetic well
-      ctx.beginPath();
-      ctx.arc(sx, sy, 148, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(2, 6, 23, 0.45)';
-      ctx.fill();
-      ctx.strokeStyle = '#0284c7';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // 4 Glowing Energy Injector Nodes around each socket
-      for (let a = 0; a < 4; a++) {
-        const ang = (a * Math.PI) / 2 + Math.PI / 4;
-        const spX = sx + Math.cos(ang) * 172;
-        const spY = sy + Math.sin(ang) * 172;
-        ctx.beginPath();
-        ctx.arc(spX, spY, 4.0, 0, Math.PI * 2);
-        ctx.fillStyle = '#00f0ff';
-        ctx.fill();
-      }
-      ctx.restore();
-    });
-
-    // 5. Central Holographic Quantum Warp Reactor Core
-    ctx.save();
-    const cx = 512;
-    const cy = 512;
-
     ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
-    ctx.shadowBlur = 16;
-    ctx.shadowOffsetY = 4;
-
-    // Inlaid circular cyber accelerator base
-    ctx.beginPath();
-    ctx.arc(cx, cy, 110, 0, Math.PI * 2);
-    ctx.fillStyle = '#082f49';
-    ctx.fill();
-    ctx.strokeStyle = '#00e5ff';
-    ctx.lineWidth = 4.5;
-    ctx.stroke();
-
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetY = 0;
-
-    // Glowing energy ring
-    ctx.beginPath();
-    ctx.arc(cx, cy, 96, 0, Math.PI * 2);
-    ctx.strokeStyle = '#38bdf8';
-    ctx.lineWidth = 2.0;
-    ctx.stroke();
-
-    // 8-Point Quantum Accelerator Star
-    const rStar = 88;
-    const rInner = 36;
-    for (let i = 0; i < 8; i++) {
-      const aTip = (i * 2 * Math.PI) / 8 - Math.PI / 2;
-      const aLeft = aTip - Math.PI / 8;
-      const aRight = aTip + Math.PI / 8;
-
-      const tipX = cx + Math.cos(aTip) * rStar;
-      const tipY = cy + Math.sin(aTip) * rStar;
-      const lX = cx + Math.cos(aLeft) * rInner;
-      const lY = cy + Math.sin(aLeft) * rInner;
-      const rX = cx + Math.cos(aRight) * rInner;
-      const rY = cy + Math.sin(aRight) * rInner;
-
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(tipX, tipY);
-      ctx.lineTo(lX, lY);
-      ctx.closePath();
-      ctx.fillStyle = '#38bdf8';
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(tipX, tipY);
-      ctx.lineTo(rX, rY);
-      ctx.closePath();
-      ctx.fillStyle = '#0284c7';
-      ctx.fill();
-    }
-
-    // Central Plasma Singularity Reactor Orb
-    ctx.beginPath();
-    ctx.arc(cx, cy, 28, 0, Math.PI * 2);
-    const gemGrad = ctx.createRadialGradient(cx - 8, cy - 8, 4, cx, cy, 28);
-    gemGrad.addColorStop(0.0, '#ffffff');
-    gemGrad.addColorStop(0.3, padHex);
-    gemGrad.addColorStop(1.0, '#020617');
-    ctx.fillStyle = gemGrad;
-    ctx.fill();
-    ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-
-    // High-tech bus data lines to the 4 sockets
-    socketCenters.forEach(([sx, sy]) => {
-      ctx.strokeStyle = 'rgba(0, 229, 255, 0.40)';
-      ctx.lineWidth = 2.0;
-      ctx.setLineDash([8, 6]);
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(sx, sy);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    });
-
-    ctx.restore();
-
-  } else {
-    // 1. ROYAL HEIRLOOM: Deep Royal Satin Bed with Luminous Core & Velvet Vignette
-    const bedGrad = ctx.createRadialGradient(512, 512, 60, 512, 512, 680);
-    bedGrad.addColorStop(0.0, padHex); // vibrant gem bloom at center
-    bedGrad.addColorStop(0.25, innerHex); // authentic royal satin hue
-    bedGrad.addColorStop(0.85, innerHex);
-    bedGrad.addColorStop(1.0, '#0d1115'); // dark velvet frame boundary
-    ctx.fillStyle = bedGrad;
-    ctx.fillRect(0, 0, 1024, 1024);
-
-    // 2. Micro Damask / Royal Brocade Watermark Pattern
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.045)';
-    ctx.lineWidth = 1.2;
-    const gridW = 64;
-    for (let x = 32; x < 1024; x += gridW) {
-      for (let y = 32; y < 1024; y += gridW) {
-        ctx.beginPath();
-        ctx.moveTo(x, y - 18);
-        ctx.lineTo(x + 18, y);
-        ctx.lineTo(x, y + 18);
-        ctx.lineTo(x - 18, y);
-        ctx.closePath();
-        ctx.stroke();
-      }
-    }
-    ctx.restore();
-
-    // 3. Dual Inlaid 24K Polished Brass Yard Perimeter Ribbons
-    ctx.save();
-    ctx.strokeStyle = '#c89e3a';
-    ctx.lineWidth = 6;
-    ctx.strokeRect(18, 18, 988, 988);
-
-    ctx.strokeStyle = '#e0be5a';
-    ctx.lineWidth = 2.4;
-    ctx.strokeRect(30, 30, 964, 964);
-
-    // 4 Corner Fleurons in Yard Borders
-    const drawYardCorner = (x, y, fx, fy) => {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.scale(fx, fy);
-      ctx.strokeStyle = '#dfb858';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.moveTo(0, 40);
-      ctx.lineTo(0, 0);
-      ctx.lineTo(40, 0);
-      ctx.stroke();
-
-      ctx.fillStyle = '#c89e3a';
-      ctx.beginPath();
-      ctx.arc(16, 16, 4.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    };
-    drawYardCorner(34, 34, 1, 1);
-    drawYardCorner(990, 34, -1, 1);
-    drawYardCorner(34, 990, 1, -1);
-    drawYardCorner(990, 990, -1, -1);
-    ctx.restore();
-
-    // 4. Four Turned-Brass Recessed Socket Pedestal Rings (aligned with ±1.20)
-    socketCenters.forEach(([sx, sy]) => {
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
-      ctx.shadowBlur = 12;
-      ctx.shadowOffsetY = 4;
-
-      // Outer turned brass ring
-      ctx.beginPath();
-      ctx.arc(sx, sy, 172, 0, Math.PI * 2);
-      ctx.strokeStyle = '#c89e3a';
-      ctx.lineWidth = 5.5;
-      ctx.stroke();
-
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetY = 0;
-
-      // Inner milled gold pinstripe ring
-      ctx.beginPath();
-      ctx.arc(sx, sy, 162, 0, Math.PI * 2);
-      ctx.strokeStyle = '#dfb858';
-      ctx.lineWidth = 2.0;
-      ctx.stroke();
-
-      // Recessed dark socket ring
-      ctx.beginPath();
-      ctx.arc(sx, sy, 150, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
-      ctx.fill();
-      ctx.strokeStyle = '#7a5a14';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // 4 Corner Gold Filigree Spurs around each socket
-      for (let a = 0; a < 4; a++) {
-        const ang = (a * Math.PI) / 2 + Math.PI / 4;
-        const spX = sx + Math.cos(ang) * 172;
-        const spY = sy + Math.sin(ang) * 172;
-        ctx.beginPath();
-        ctx.arc(spX, spY, 3.5, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffd700';
-        ctx.fill();
-      }
-      ctx.restore();
-    });
-
-    // 5. Central 8-Point Royal Heirloom Rosette Medallion
-    ctx.save();
-    const cx = 512;
-    const cy = 512;
-
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.60)';
     ctx.shadowBlur = 14;
     ctx.shadowOffsetY = 4;
 
-    // Inlaid circular brass medallion base
     ctx.beginPath();
-    ctx.arc(cx, cy, 108, 0, Math.PI * 2);
-    ctx.fillStyle = '#7a5214';
-    ctx.fill();
-    ctx.strokeStyle = '#c89e3a';
-    ctx.lineWidth = 4.5;
+    ctx.arc(sx, sy, 172, 0, Math.PI * 2);
+    ctx.strokeStyle = theme.yardRingColor;
+    ctx.lineWidth = 5.0;
     ctx.stroke();
 
     ctx.shadowBlur = 0;
     ctx.shadowOffsetY = 0;
 
-    // Milled gear bezel
     ctx.beginPath();
-    ctx.arc(cx, cy, 96, 0, Math.PI * 2);
-    ctx.strokeStyle = '#e0be5a';
+    ctx.arc(sx, sy, 160, 0, Math.PI * 2);
+    ctx.strokeStyle = theme.yardRingInner;
     ctx.lineWidth = 2.0;
     ctx.stroke();
 
-    // 8-Point Chiseled 3D Star Rosette
-    const rStar = 88;
-    const rInner = 36;
-    for (let i = 0; i < 8; i++) {
-      const aTip = (i * 2 * Math.PI) / 8 - Math.PI / 2;
-      const aLeft = aTip - Math.PI / 8;
-      const aRight = aTip + Math.PI / 8;
-
-      const tipX = cx + Math.cos(aTip) * rStar;
-      const tipY = cy + Math.sin(aTip) * rStar;
-      const lX = cx + Math.cos(aLeft) * rInner;
-      const lY = cy + Math.sin(aLeft) * rInner;
-      const rX = cx + Math.cos(aRight) * rInner;
-      const rY = cy + Math.sin(aRight) * rInner;
-
-      // Bright 24K gold facet
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(tipX, tipY);
-      ctx.lineTo(lX, lY);
-      ctx.closePath();
-      ctx.fillStyle = '#ffdf78';
-      ctx.fill();
-
-      // Shaded antique bronze facet
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(tipX, tipY);
-      ctx.lineTo(rX, rY);
-      ctx.closePath();
-      ctx.fillStyle = '#946c14';
-      ctx.fill();
-    }
-
-    // Central Gemstone Cabochon matching goti/pad color
     ctx.beginPath();
-    ctx.arc(cx, cy, 26, 0, Math.PI * 2);
-    const gemGrad = ctx.createRadialGradient(cx - 7, cy - 7, 3, cx, cy, 26);
-    gemGrad.addColorStop(0.0, '#ffffff');
-    gemGrad.addColorStop(0.3, padHex);
-    gemGrad.addColorStop(1.0, '#0a0d10');
-    ctx.fillStyle = gemGrad;
+    ctx.arc(sx, sy, 148, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
     ctx.fill();
-    ctx.strokeStyle = '#ffd700';
-    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = theme.outerBorder;
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Radiating filigree vines to the 4 socket pedestals
-    socketCenters.forEach(([sx, sy]) => {
-      ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)';
-      ctx.lineWidth = 2.0;
-      ctx.setLineDash([6, 6]);
+    for (let a = 0; a < 4; a++) {
+      const ang = (a * Math.PI) / 2 + Math.PI / 4;
+      const spX = sx + Math.cos(ang) * 172;
+      const spY = sy + Math.sin(ang) * 172;
       ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(sx, sy);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    });
-
+      ctx.arc(spX, spY, 4.0, 0, Math.PI * 2);
+      ctx.fillStyle = theme.yardRingColor;
+      ctx.fill();
+    }
     ctx.restore();
-  }
+  });
+
+  // 5. Central Theme Rosette
+  drawThemeYardCenterRosette(ctx, 512, 512, padHex, theme, socketCenters);
 
   const tex = new THREE.CanvasTexture(cvs);
   tex.encoding = THREE.sRGBEncoding;
@@ -1400,69 +2496,37 @@ function getCachedPadBoxTexture(padColor) {
   cvs.height = 256;
   const ctx = cvs.getContext('2d');
   const padHex = colorToHexStr(padColor);
-  const isSciFi = (currentTheme === 'scifi');
+  const theme = getThemeProfile(currentTheme);
 
-  if (isSciFi) {
-    // Modern Sci-Fi Stealth Carbon-Fiber Launchpad
-    const grad = ctx.createRadialGradient(128, 128, 10, 128, 128, 150);
-    grad.addColorStop(0.0, padHex);
-    grad.addColorStop(0.75, padHex);
-    grad.addColorStop(1.0, '#020617');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 256, 256);
+  // Gradient Base
+  const grad = ctx.createRadialGradient(128, 128, 15, 128, 128, 150);
+  grad.addColorStop(0.0, padHex);
+  grad.addColorStop(0.80, padHex);
+  grad.addColorStop(1.0, theme.outerBorder);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 256, 256);
 
-    // Glowing Neon Cyan Chamfer Rim
-    ctx.strokeStyle = '#00e5ff';
-    ctx.lineWidth = 7;
-    ctx.strokeRect(6, 6, 244, 244);
+  // Chamfer Rim
+  ctx.strokeStyle = theme.padRimColor;
+  ctx.lineWidth = 7;
+  ctx.strokeRect(6, 6, 244, 244);
 
-    ctx.strokeStyle = '#38bdf8';
-    ctx.lineWidth = 2.5;
-    ctx.strokeRect(14, 14, 228, 228);
+  ctx.strokeStyle = theme.padRimInner;
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(14, 14, 228, 228);
 
-    // Central Maglev Seating Ring
-    ctx.beginPath();
-    ctx.arc(128, 128, 76, 0, Math.PI * 2);
-    ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 3.5;
-    ctx.stroke();
+  // Center Seating Ring
+  ctx.beginPath();
+  ctx.arc(128, 128, 76, 0, Math.PI * 2);
+  ctx.strokeStyle = theme.padRimColor;
+  ctx.lineWidth = 3.5;
+  ctx.stroke();
 
-    ctx.beginPath();
-    ctx.arc(128, 128, 66, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
-    ctx.lineWidth = 2.0;
-    ctx.stroke();
-  } else {
-    // Royal Heirloom Turned Plinth
-    const grad = ctx.createRadialGradient(128, 128, 20, 128, 128, 150);
-    grad.addColorStop(0.0, padHex);
-    grad.addColorStop(0.85, padHex);
-    grad.addColorStop(1.0, '#101418');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 256, 256);
-
-    // 24K Inlaid Gold Chamfered Rim
-    ctx.strokeStyle = '#c89e3a';
-    ctx.lineWidth = 8;
-    ctx.strokeRect(6, 6, 244, 244);
-
-    ctx.strokeStyle = '#dfb858';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(14, 14, 228, 228);
-
-    // Turned brass center seating ring where goti base rests
-    ctx.beginPath();
-    ctx.arc(128, 128, 76, 0, Math.PI * 2);
-    ctx.strokeStyle = '#dfb858';
-    ctx.lineWidth = 3.5;
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(128, 128, 68, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
-    ctx.lineWidth = 2.0;
-    ctx.stroke();
-  }
+  ctx.beginPath();
+  ctx.arc(128, 128, 66, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+  ctx.lineWidth = 2.0;
+  ctx.stroke();
 
   const tex = new THREE.CanvasTexture(cvs);
   tex.encoding = THREE.sRGBEncoding;
@@ -1482,168 +2546,54 @@ function getCachedTrackTileTexture(tileColor) {
   cvs.height = 256;
   const ctx = cvs.getContext('2d');
   const hex = colorToHexStr(tileColor);
-  const isSciFi = (currentTheme === 'scifi');
+  const theme = getThemeProfile(currentTheme);
 
   // Tile Base Slab
   const grad = ctx.createLinearGradient(0, 0, 256, 256);
   grad.addColorStop(0.0, hex);
-  grad.addColorStop(0.55, hex);
-  grad.addColorStop(1.0, '#06090e');
+  grad.addColorStop(0.60, hex);
+  grad.addColorStop(1.0, theme.outerBorder);
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 256, 256);
 
-  if (isSciFi) {
-    // 3D Inset Bevel Highlight & Shadow (Cyan Neon)
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.55)';
-    ctx.lineWidth = 4;
+  // 3D Inset Bevel Highlight & Shadow
+  ctx.strokeStyle = theme.tileHighlight || 'rgba(255, 255, 255, 0.55)';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(4, 252);
+  ctx.lineTo(4, 4);
+  ctx.lineTo(252, 4);
+  ctx.stroke();
+
+  ctx.strokeStyle = theme.tileShadow || 'rgba(0, 0, 0, 0.65)';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(252, 4);
+  ctx.lineTo(252, 252);
+  ctx.lineTo(4, 252);
+  ctx.stroke();
+
+  // Inlaid Rim
+  ctx.strokeStyle = theme.trackRim1;
+  ctx.lineWidth = 4;
+  ctx.strokeRect(10, 10, 236, 236);
+
+  ctx.strokeStyle = theme.trackRim2;
+  ctx.lineWidth = 1.8;
+  ctx.strokeRect(16, 16, 224, 224);
+
+  // 4 Corner Accents
+  [
+    [22, 22], [234, 22], [22, 234], [234, 234]
+  ].forEach(([x, y]) => {
+    ctx.fillStyle = theme.trackRim1;
     ctx.beginPath();
-    ctx.moveTo(4, 252);
-    ctx.lineTo(4, 4);
-    ctx.lineTo(252, 4);
-    ctx.stroke();
-
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.75)';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(252, 4);
-    ctx.lineTo(252, 252);
-    ctx.lineTo(4, 252);
-    ctx.stroke();
-
-    // Inlaid Cyber Neon Rim
-    ctx.strokeStyle = '#00e5ff';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(10, 10, 236, 236);
-
-    ctx.strokeStyle = '#38bdf8';
-    ctx.lineWidth = 1.8;
-    ctx.strokeRect(16, 16, 224, 224);
-
-    // 4 Corner Cyan Tech Nodes
-    [
-      [22, 22], [234, 22], [22, 234], [234, 234]
-    ].forEach(([x, y]) => {
-      ctx.fillStyle = '#00f0ff';
-      ctx.beginPath();
-      ctx.arc(x, y, 3.5, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    // Holographic Cybernetic Arrowhead Pointing Home
-    ctx.save();
-    ctx.shadowColor = 'rgba(0, 229, 255, 0.55)';
-    ctx.shadowBlur = 8;
-    ctx.shadowOffsetY = 2;
-
-    // Left Wing (Bright Cyan)
-    ctx.beginPath();
-    ctx.moveTo(128, 64);
-    ctx.lineTo(58, 162);
-    ctx.lineTo(84, 186);
-    ctx.lineTo(128, 126);
-    ctx.closePath();
-    ctx.fillStyle = '#38bdf8';
+    ctx.arc(x, y, 3.2, 0, Math.PI * 2);
     ctx.fill();
+  });
 
-    // Right Wing (Electric Cyan/Deep Blue)
-    ctx.beginPath();
-    ctx.moveTo(128, 64);
-    ctx.lineTo(198, 162);
-    ctx.lineTo(172, 186);
-    ctx.lineTo(128, 126);
-    ctx.closePath();
-    ctx.fillStyle = '#0284c7';
-    ctx.fill();
-
-    ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(58, 162);
-    ctx.lineTo(128, 64);
-    ctx.lineTo(198, 162);
-    ctx.lineTo(172, 186);
-    ctx.lineTo(128, 126);
-    ctx.lineTo(84, 186);
-    ctx.closePath();
-    ctx.stroke();
-    ctx.restore();
-
-  } else {
-    // Heirloom 3D Inset Bevel Highlight & Shadow
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(4, 252);
-    ctx.lineTo(4, 4);
-    ctx.lineTo(252, 4);
-    ctx.stroke();
-
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.55)';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(252, 4);
-    ctx.lineTo(252, 252);
-    ctx.lineTo(4, 252);
-    ctx.stroke();
-
-    // Inlaid 24K Gold Rim
-    ctx.strokeStyle = '#c89e3a';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(10, 10, 236, 236);
-
-    ctx.strokeStyle = '#dfb858';
-    ctx.lineWidth = 1.8;
-    ctx.strokeRect(16, 16, 224, 224);
-
-    // 4 Corner Gold Accents
-    [
-      [22, 22], [234, 22], [22, 234], [234, 234]
-    ].forEach(([x, y]) => {
-      ctx.fillStyle = '#ffd700';
-      ctx.beginPath();
-      ctx.arc(x, y, 3, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    // Chiseled 3D Royal Chevron / Arrowhead Pointing Home
-    ctx.save();
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-    ctx.shadowBlur = 6;
-    ctx.shadowOffsetY = 2;
-
-    // Left Chevron Wing (Bright Gold)
-    ctx.beginPath();
-    ctx.moveTo(128, 70);
-    ctx.lineTo(60, 160);
-    ctx.lineTo(84, 185);
-    ctx.lineTo(128, 126);
-    ctx.closePath();
-    ctx.fillStyle = '#ffdf78';
-    ctx.fill();
-
-    // Right Chevron Wing (Shaded Antique Bronze)
-    ctx.beginPath();
-    ctx.moveTo(128, 70);
-    ctx.lineTo(196, 160);
-    ctx.lineTo(172, 185);
-    ctx.lineTo(128, 126);
-    ctx.closePath();
-    ctx.fillStyle = '#a67b17';
-    ctx.fill();
-
-    ctx.strokeStyle = '#7a5a14';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(60, 160);
-    ctx.lineTo(128, 70);
-    ctx.lineTo(196, 160);
-    ctx.lineTo(172, 185);
-    ctx.lineTo(128, 126);
-    ctx.lineTo(84, 185);
-    ctx.closePath();
-    ctx.stroke();
-    ctx.restore();
-  }
+  // Chiseled 3D Chevron / Arrowhead Pointing Home
+  drawThemeTrackArrow(ctx, theme);
 
   const tex = new THREE.CanvasTexture(cvs);
   tex.encoding = THREE.sRGBEncoding;
@@ -1652,6 +2602,7 @@ function getCachedTrackTileTexture(tileColor) {
   trackTileTexCache.set(key, tex);
   return tex;
 }
+
 
 function createQuadrants() {
   const quads = [
@@ -1793,7 +2744,7 @@ function createCenterPyramid() {
   // Dark square collar base perfectly framing the 3x3 central core
   const boxSize = 3.08;
   const boxH = 0.40;
-  const collarColor = (currentTheme === 'scifi') ? 0x0b1320 : 0x2e363d;
+  const collarColor = getThemeProfile(currentTheme).collarColor;
   const collar = new THREE.Mesh(
     new THREE.BoxGeometry(boxSize, boxH, boxSize),
     getMatteMat(collarColor)
@@ -1864,18 +2815,20 @@ function reloadBoardForTheme() {
   padBoxTexCache.clear();
   trackTileTexCache.clear();
 
+  const theme = getThemeProfile(currentTheme);
+
   if (boardTopMesh) {
     boardTopMesh.material.map = generateBoardCanvasTexture();
     boardTopMesh.material.map.needsUpdate = true;
   }
   if (boardBaseMesh) {
-    boardBaseMesh.material.color.setHex((currentTheme === 'scifi') ? 0x0f172a : 0x212930);
+    boardBaseMesh.material.color.setHex(theme.baseColor);
   }
   if (tableFloorMesh) {
-    tableFloorMesh.material.color.setHex((currentTheme === 'scifi') ? 0x030712 : PALETTE.TABLE);
+    tableFloorMesh.material.color.setHex(theme.tableColor);
   }
   if (centerCollarMesh) {
-    centerCollarMesh.material.color.setHex((currentTheme === 'scifi') ? 0x0b1320 : 0x2e363d);
+    centerCollarMesh.material.color.setHex(theme.collarColor);
   }
   yardFloorMeshes.forEach(({ mesh, q }) => {
     mesh.material.map = getCachedYardFloorTexture(q);
@@ -1899,42 +2852,47 @@ function setGameTheme(newTheme) {
 
   updateThemeUI();
   reloadBoardForTheme();
+
+  // Also sync active state in Matching Sets modal
+  const matchingCombo = THEME_COMBOS.find((c) => c.id === currentTheme);
+  if (matchingCombo) {
+    currentComboId = matchingCombo.id;
+    try {
+      localStorage.setItem('ludo_combo_set', currentComboId);
+    } catch (e) {}
+    document.querySelectorAll('.combo-card').forEach((card) => {
+      card.classList.toggle('active', card.dataset.comboId === currentComboId);
+    });
+    const comboLabel = document.getElementById('active-combo-label');
+    if (comboLabel) comboLabel.textContent = `Equipped: ${matchingCombo.name}`;
+  }
 }
 
 function toggleGameTheme() {
-  setGameTheme(currentTheme === 'scifi' ? 'heirloom' : 'scifi');
+  const currentIdx = THEME_COMBOS.findIndex((c) => c.id === currentTheme);
+  const nextCombo = THEME_COMBOS[(currentIdx + 1) % THEME_COMBOS.length] || THEME_COMBOS[0];
+  applyComboSet(nextCombo.id);
 }
 
 function updateThemeUI() {
-  const isSciFi = (currentTheme === 'scifi');
+  const theme = getThemeProfile(currentTheme);
   if (document.body) {
-    document.body.classList.toggle('theme-scifi', isSciFi);
+    // Clean old theme-* classes
+    Array.from(document.body.classList).forEach((cls) => {
+      if (cls.startsWith('theme-')) document.body.classList.remove(cls);
+    });
+    document.body.classList.add(`theme-${theme.id}`);
+    if (theme.id === 'space') document.body.classList.add('theme-scifi');
   }
 
   const themeBtnIcon = document.getElementById('theme-btn-icon');
   const themeBtnText = document.getElementById('theme-btn-text');
   if (themeBtnIcon && themeBtnText) {
-    if (isSciFi) {
-      themeBtnIcon.className = 'fa-solid fa-atom text-cyan-400';
-      themeBtnText.textContent = 'Sci-Fi';
-    } else {
-      themeBtnIcon.className = 'fa-solid fa-crown text-amber-400';
-      themeBtnText.textContent = 'Royal';
-    }
-  }
-
-  const optSciFi = document.getElementById('settings-theme-scifi');
-  const optHeirloom = document.getElementById('settings-theme-heirloom');
-  if (optSciFi && optHeirloom) {
-    if (isSciFi) {
-      optSciFi.className = 'btn-action p-2.5 rounded-xl bg-cyan-950/80 border border-cyan-400 text-white font-bold text-xs flex items-center justify-center gap-2';
-      optHeirloom.className = 'btn-action p-2.5 rounded-xl bg-slate-900 border border-white/10 text-slate-300 font-bold text-xs flex items-center justify-center gap-2 hover:border-amber-400';
-    } else {
-      optSciFi.className = 'btn-action p-2.5 rounded-xl bg-slate-900 border border-white/10 text-slate-300 font-bold text-xs flex items-center justify-center gap-2 hover:border-cyan-400';
-      optHeirloom.className = 'btn-action p-2.5 rounded-xl bg-amber-950/80 border border-amber-400 text-white font-bold text-xs flex items-center justify-center gap-2';
-    }
+    themeBtnIcon.className = theme.iconClass;
+    themeBtnText.textContent = theme.shortName;
   }
 }
+
 
 function createPawnGeo() {
   const pts = [];
@@ -4705,6 +5663,7 @@ function applyComboSet(comboId) {
 
   applyDiceSkin(combo.diceSkin);
   applyGotiSkin(combo.gotiSkin);
+  setGameTheme(comboId);
 
   document.querySelectorAll('.combo-card').forEach((card) => {
     if (card.dataset.comboId === comboId) {
