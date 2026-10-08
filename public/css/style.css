@@ -1443,5 +1443,51 @@ button:active, .btn-action:active, .btn-die-choice:active, .btn-popup-die:active
   box-shadow: 0 0 10px rgba(16, 185, 129, 0.25) !important;
 }
 
+/* ========================================================
+   🚀 MODERN SCI-FI THEME OVERLAYS
+   ======================================================== */
+body.theme-scifi {
+  --bg-teal: #030712;
+  --bg-surface: rgba(11, 19, 34, 0.85);
+  --border-cyan: rgba(0, 229, 255, 0.35);
+  --accent-gold: #00e5ff;
+}
 
+body.theme-scifi .glass-card {
+  background: rgba(11, 19, 34, 0.78) !important;
+  border-color: rgba(0, 229, 255, 0.28) !important;
+  box-shadow: 0 4px 20px rgba(0, 229, 255, 0.08) !important;
+}
 
+body.theme-scifi .glass-card:hover {
+  border-color: rgba(0, 229, 255, 0.55) !important;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.22) !important;
+}
+
+body.theme-scifi .status-banner {
+  background: rgba(8, 20, 38, 0.90) !important;
+  border-color: rgba(0, 229, 255, 0.45) !important;
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.25) !important;
+  color: #38bdf8 !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body.theme-scifi .hud-pill-tag {
+  border-color: rgba(0, 229, 255, 0.35) !important;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.15) !important;
+}
+
+body.theme-scifi #btn-roll {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #075985 100%) !important;
+  border-color: rgba(0, 229, 255, 0.7) !important;
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
+}
+
+body.theme-scifi #btn-roll:hover {
+  box-shadow: 0 0 35px rgba(0, 229, 255, 0.55), inset 0 1px 4px rgba(255, 255, 255, 0.5) !important;
+}
+
+body.theme-scifi #btn-roll:active {
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.3) !important;
+}

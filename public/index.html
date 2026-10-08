@@ -116,6 +116,12 @@
       <i id="lock-board-icon" class="fa-solid fa-lock-open text-amber-400"></i>
       <span id="lock-board-text" class="nav-text">Lock</span>
     </button>
+    <button id="btn-toggle-theme"
+      class="btn-action glass-card px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-cyan-500/30 text-[11px] font-semibold text-cyan-300 hover:text-white shadow-sm shadow-cyan-500/10"
+      title="Switch Theme (Modern Sci-Fi / Royal Heirloom)">
+      <i id="theme-btn-icon" class="fa-solid fa-atom text-cyan-400"></i>
+      <span id="theme-btn-text" class="nav-text">Sci-Fi</span>
+    </button>
     <button id="btn-open-hack"
       class="btn-action glass-card px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-amber-500/30 text-[11px] font-bold text-amber-300 hover:text-white shadow-sm shadow-amber-500/10 hidden"
       title="Precision Dev Diagnostics">
@@ -698,6 +704,25 @@
               <i class="fa-solid fa-lock-open text-amber-400" id="board-lock-icon-status"></i>
               <span id="board-lock-label-status">Unlocked</span>
             </button>
+          </div>
+
+          <div class="border-t border-white/10 pt-4">
+            <label class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2 block flex items-center gap-2">
+              <i class="fa-solid fa-palette"></i>
+              <span>Visual Theme</span>
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="settings-theme-scifi"
+                class="btn-action p-2.5 rounded-xl bg-cyan-950/80 border border-cyan-400 text-white font-bold text-xs flex items-center justify-center gap-2">
+                <i class="fa-solid fa-atom text-cyan-400"></i>
+                <span>Modern Sci-Fi</span>
+              </button>
+              <button id="settings-theme-heirloom"
+                class="btn-action p-2.5 rounded-xl bg-slate-900 border border-white/10 text-slate-300 font-bold text-xs flex items-center justify-center gap-2 hover:border-amber-400">
+                <i class="fa-solid fa-crown text-amber-400"></i>
+                <span>Royal Heirloom</span>
+              </button>
+            </div>
           </div>
         </div>
 
