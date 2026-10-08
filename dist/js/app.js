@@ -2511,24 +2511,32 @@ function getCachedPadBoxTexture(padColor) {
   const padHex = colorToHexStr(padColor);
   const theme = getThemeProfile(currentTheme);
 
-  // 1. Ultra-Modern Radiant Gemstone / Carbon Base Slab
-  const grad = ctx.createRadialGradient(128, 128, 10, 128, 128, 150);
-  grad.addColorStop(0.0, padHex);
-  grad.addColorStop(0.70, padHex);
-  grad.addColorStop(1.0, '#0a0d11');
-  ctx.fillStyle = grad;
+  // 1. Sleek Deep Obsidian / Midnight Slate Base Slab (High-Contrast Museum Base)
+  const baseGrad = ctx.createRadialGradient(128, 128, 15, 128, 128, 160);
+  baseGrad.addColorStop(0.0, '#1c232d');
+  baseGrad.addColorStop(0.55, '#121720');
+  baseGrad.addColorStop(1.0, '#090c10');
+  ctx.fillStyle = baseGrad;
   ctx.fillRect(0, 0, 256, 256);
 
-  // Subtle modern brushed satin sheen (45-degree light reflection)
+  // Subtle ambient player gemstone tint in the foundation
+  const tintGrad = ctx.createRadialGradient(128, 128, 20, 128, 128, 140);
+  tintGrad.addColorStop(0.0, 'rgba(0, 0, 0, 0)');
+  tintGrad.addColorStop(0.70, `${padHex}18`); // 10% translucent player color glow
+  tintGrad.addColorStop(1.0, 'rgba(0, 0, 0, 0.45)');
+  ctx.fillStyle = tintGrad;
+  ctx.fillRect(0, 0, 256, 256);
+
+  // Brushed satin luxury diagonal sheen
   const sheen = ctx.createLinearGradient(0, 0, 256, 256);
-  sheen.addColorStop(0.0, 'rgba(255, 255, 255, 0.18)');
-  sheen.addColorStop(0.45, 'rgba(255, 255, 255, 0.02)');
-  sheen.addColorStop(0.55, 'rgba(0, 0, 0, 0.08)');
-  sheen.addColorStop(1.0, 'rgba(0, 0, 0, 0.35)');
+  sheen.addColorStop(0.0, 'rgba(255, 255, 255, 0.12)');
+  sheen.addColorStop(0.40, 'rgba(255, 255, 255, 0.02)');
+  sheen.addColorStop(0.60, 'rgba(0, 0, 0, 0.15)');
+  sheen.addColorStop(1.0, 'rgba(0, 0, 0, 0.40)');
   ctx.fillStyle = sheen;
   ctx.fillRect(0, 0, 256, 256);
 
-  // 2. Modern 45-Degree Chamfered Outer Bezel
+  // 2. Double Metallic Brass Border with Player Gemstone Conduit
   const chamfer = 24;
   ctx.save();
   ctx.beginPath();
@@ -2542,14 +2550,14 @@ function getCachedPadBoxTexture(padColor) {
   ctx.lineTo(8, 8 + chamfer);
   ctx.closePath();
 
-  // Outer Metallic Bevel Rim
-  ctx.strokeStyle = theme.padRimColor;
-  ctx.lineWidth = 4.5;
+  // Outer Polished Brass Bezel Rim
+  ctx.strokeStyle = '#d4af37';
+  ctx.lineWidth = 4.0;
   ctx.stroke();
 
-  // 3D Highlight on Top/Left, Shadow on Bottom/Right
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
-  ctx.lineWidth = 2.0;
+  // 3D Metallic Specular Highlight on Top/Left, Contact Shadow on Bottom/Right
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+  ctx.lineWidth = 1.8;
   ctx.beginPath();
   ctx.moveTo(8, 248 - chamfer);
   ctx.lineTo(8, 8 + chamfer);
@@ -2557,7 +2565,7 @@ function getCachedPadBoxTexture(padColor) {
   ctx.lineTo(248 - chamfer, 8);
   ctx.stroke();
 
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.65)';
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.80)';
   ctx.lineWidth = 2.0;
   ctx.beginPath();
   ctx.moveTo(248 - chamfer, 8);
@@ -2567,59 +2575,79 @@ function getCachedPadBoxTexture(padColor) {
   ctx.lineTo(8 + chamfer, 248);
   ctx.stroke();
 
-  // Inner hairline conduit
+  // Vibrant Player Gemstone Inlay Ribbon (Sharp player identity & contrast)
   ctx.beginPath();
-  ctx.moveTo(18 + chamfer * 0.7, 18);
-  ctx.lineTo(238 - chamfer * 0.7, 18);
-  ctx.lineTo(238, 18 + chamfer * 0.7);
-  ctx.lineTo(238, 238 - chamfer * 0.7);
-  ctx.lineTo(238 - chamfer * 0.7, 238);
-  ctx.lineTo(18 + chamfer * 0.7, 238);
-  ctx.lineTo(18, 238 - chamfer * 0.7);
-  ctx.lineTo(18, 18 + chamfer * 0.7);
+  ctx.moveTo(16 + chamfer * 0.75, 16);
+  ctx.lineTo(240 - chamfer * 0.75, 16);
+  ctx.lineTo(240, 16 + chamfer * 0.75);
+  ctx.lineTo(240, 240 - chamfer * 0.75);
+  ctx.lineTo(240 - chamfer * 0.75, 240);
+  ctx.lineTo(16 + chamfer * 0.75, 240);
+  ctx.lineTo(16, 240 - chamfer * 0.75);
+  ctx.lineTo(16, 16 + chamfer * 0.75);
   ctx.closePath();
-  ctx.strokeStyle = theme.padRimInner;
-  ctx.lineWidth = 1.6;
+  ctx.strokeStyle = padHex;
+  ctx.lineWidth = 2.4;
+  ctx.stroke();
+
+  // Inner Fine Brass Conduit
+  ctx.beginPath();
+  ctx.moveTo(22 + chamfer * 0.6, 22);
+  ctx.lineTo(234 - chamfer * 0.6, 22);
+  ctx.lineTo(234, 22 + chamfer * 0.6);
+  ctx.lineTo(234, 234 - chamfer * 0.6);
+  ctx.lineTo(234 - chamfer * 0.6, 234);
+  ctx.lineTo(22 + chamfer * 0.6, 234);
+  ctx.lineTo(22, 234 - chamfer * 0.6);
+  ctx.lineTo(22, 22 + chamfer * 0.6);
+  ctx.closePath();
+  ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)';
+  ctx.lineWidth = 1.2;
   ctx.stroke();
   ctx.restore();
 
-  // 4 Corner Precision Fasteners / Studs
+  // 4 Corner Turned Brass Fasteners / Studs
   [
     [26, 26], [230, 26], [26, 230], [230, 230]
   ].forEach(([fx, fy]) => {
     ctx.beginPath();
-    ctx.arc(fx, fy, 4, 0, Math.PI * 2);
-    ctx.fillStyle = theme.padRimColor;
+    ctx.arc(fx, fy, 4.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#d4af37';
     ctx.fill();
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.55)';
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.65)';
     ctx.lineWidth = 1.2;
     ctx.stroke();
+    // Tiny specular dot on stud
+    ctx.beginPath();
+    ctx.arc(fx - 1, fy - 1, 1.2, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
   });
 
-  // 3. Precision Recessed Circular Docking Plinth (Horology / Aerospace Well)
+  // 3. Precision Recessed Circular Docking Well
   const cx = 128, cy = 128;
   const rOuter = 82;
 
-  // Outer recessed ring shadow
+  // Dark sunken well interior for extreme goti pop
   ctx.save();
   ctx.beginPath();
   ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+  ctx.fillStyle = '#0a0d12';
   ctx.fill();
-  ctx.strokeStyle = theme.padRimColor;
-  ctx.lineWidth = 3.0;
+  ctx.strokeStyle = padHex;
+  ctx.lineWidth = 2.5;
   ctx.stroke();
 
-  // Subtle circular micro-tracks (Horology sunray/sub-dial finish)
+  // Concentric micro-tracks
   for (let rTrack of [72, 62, 52]) {
     ctx.beginPath();
     ctx.arc(cx, cy, rTrack, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-    ctx.lineWidth = 1.0;
+    ctx.strokeStyle = 'rgba(212, 175, 55, 0.22)';
+    ctx.lineWidth = 0.9;
     ctx.stroke();
   }
 
-  // 4 Precision Index Tick Marks (North, South, East, West)
+  // 4 Precision Brass Index Ticks (N, S, E, W)
   [
     [cx, cy - rOuter - 2, cx, cy - rOuter + 8],
     [cx, cy + rOuter - 8, cx, cy + rOuter + 2],
@@ -2629,29 +2657,37 @@ function getCachedPadBoxTexture(padColor) {
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
-    ctx.strokeStyle = theme.padRimColor;
+    ctx.strokeStyle = '#d4af37';
     ctx.lineWidth = 2.5;
     ctx.stroke();
   });
 
-  // 4. Center Polished Jewel Target (Where Goti Rests)
-  const rTarget = 42;
-  const targetGrad = ctx.createRadialGradient(cx - 6, cy - 6, 2, cx, cy, rTarget);
-  targetGrad.addColorStop(0.0, '#ffffff');
-  targetGrad.addColorStop(0.35, padHex);
-  targetGrad.addColorStop(1.0, '#080c10');
+  // 4. Center High-Contrast Docking Socket Ring & Bed (Where Goti Sits)
+  const rTarget = 44;
+  const targetGrad = ctx.createRadialGradient(cx - 4, cy - 4, 3, cx, cy, rTarget);
+  targetGrad.addColorStop(0.0, '#1c2430');
+  targetGrad.addColorStop(0.60, '#0f141b');
+  targetGrad.addColorStop(1.0, '#06080b');
   ctx.beginPath();
   ctx.arc(cx, cy, rTarget, 0, Math.PI * 2);
   ctx.fillStyle = targetGrad;
   ctx.fill();
-  ctx.strokeStyle = theme.padRimInner;
-  ctx.lineWidth = 2.0;
+  // Turned brass lip around socket
+  ctx.strokeStyle = '#d4af37';
+  ctx.lineWidth = 2.2;
   ctx.stroke();
 
-  // Precision Center Crosshair Pip
+  // Glowing player-color halo ring inside socket lip
   ctx.beginPath();
-  ctx.arc(cx, cy, 3.5, 0, Math.PI * 2);
-  ctx.fillStyle = '#ffffff';
+  ctx.arc(cx, cy, rTarget - 4, 0, Math.PI * 2);
+  ctx.strokeStyle = padHex;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Precision center pearl crosshair pip
+  ctx.beginPath();
+  ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+  ctx.fillStyle = '#f8fafc';
   ctx.fill();
   ctx.restore();
 
