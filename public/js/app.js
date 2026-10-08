@@ -46,6 +46,16 @@ function setRollButtonEnabled(enabled) {
   const btn = document.getElementById('btn-roll');
   if (btn) {
     btn.disabled = !enabled;
+    if (!enabled) {
+      btn.classList.remove('bonus-roll-active');
+      btn.style.opacity = '0.45';
+      btn.style.pointerEvents = 'none';
+      btn.style.cursor = 'not-allowed';
+    } else {
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+      btn.style.cursor = 'pointer';
+    }
   }
 }
 
@@ -5471,6 +5481,8 @@ function finishTwoDiceTurn() {
     } else {
       const prevPlayer = engine.currentPlayer;
       const nextTurnId = engine.advanceTurn();
+      setRollButtonEnabled(false);
+      updateStatusBanner("Waiting for next player...");
       if (gameMode === 'online' && isMyTurnInOnlineGame(prevPlayer)) {
         broadcastTurnState(nextTurnId, false, null);
       }
@@ -5691,124 +5703,150 @@ function handleRollOutcome(rollResult) {
   const isLastGotiHome = (engine.diceCount === 2) && isPlayerLastGotiInHomeLane(current);
   const effectiveDiceCount = isLastGotiHome ? 1 : engine.diceCount;
 
-  // Bonus Roll Rules:
-  // 1-Die Game: ONLY rolling 6 grants bonus roll on roll
-  // 2-Dice Game: ONLY rolling 6+6 grants bonus roll on roll
-  const earnsBonus = (effectiveDiceCount === 1)
-    ? (rollResult.hasSix || rollResult.d1 === 6)
-    : (rollResult.d1 === 6 && rollResult.d2 === 6);
-
-  if (earnsBonus) {
-    if (effectiveDiceCount === 1) {
-      accumulatedTurnRolls.push(rollResult.d1);
-      if (engine.consecutiveSixes >= 3) {
-        accumulatedTurnRolls = [];
-        isAwaitingPawnMove = false;
-        isPawnRunning = false;
-        isTurnTransitioning = true;
-        setRollButtonEnabled(false);
-        updateStatusBanner(`⚠️ 3 Consecutive Sixes! ${current.name} forfeits turn!`);
-        setTimeout(() => {
-          if (gameMode === 'online') {
-            if (isMyTurnInOnlineGame(current)) {
-              const nextTurnId = engine.advanceTurn();
-              broadcastTurnState(nextTurnId, false, null);
-              startTurnCycle();
-            }
-          } else {
-            engine.advanceTurn();
-            startTurnCycle();
-          }
-        }, 1100);
-        return;
-      }
-    } else {
-      accumulatedTurnRolls.push(rollResult.d1, rollResult.d2);
-      if ((engine.consecutiveDoubles || 0) >= 3 || (engine.consecutiveSixes || 0) >= 3) {
-        accumulatedTurnRolls = [];
-        isAwaitingPawnMove = false;
-        isPawnRunning = false;
-        isTurnTransitioning = true;
-        setRollButtonEnabled(false);
-        updateStatusBanner(`⚠️ 3 Consecutive Double Sixes (6+6)! ${current.name} forfeits turn!`);
-        setTimeout(() => {
-          if (gameMode === 'online') {
-            if (isMyTurnInOnlineGame(current)) {
-              const nextTurnId = engine.advanceTurn();
-              broadcastTurnState(nextTurnId, false, null);
-              startTurnCycle();
-            }
-          } else {
-            engine.advanceTurn();
-            startTurnCycle();
-          }
-        }, 1100);
-        return;
-      }
-    }
-
-    // BONUS ROLL PHASE: Complete all rollings first before moving gotiyan!
-    isAwaitingPawnMove = false;
-    isPawnRunning = false;
-    isRolling = false;
+  // --- 1-DIE GAME MODE (or 2-Dice match where final goti is in Home Lane) ---
+  if (effectiveDiceCount === 1) {
+    hideTwoDiceUI();
     hideGotiDicePopup();
-    clearSelectablePawns();
+    setRollButtonEnabled(false);
 
-    const bonusCount = (effectiveDiceCount === 1) ? accumulatedTurnRolls.length : Math.floor(accumulatedTurnRolls.length / 2);
-    const detailMsg = (effectiveDiceCount === 1) ? `Rolled a 6! (Bonus Roll #${bonusCount})` : `Rolled 6+6! (Bonus Roll #${bonusCount})`;
-
-    if (gameMode === 'online') {
-      const isMyTurn = isMyTurnInOnlineGame(current);
-      if (isMyTurn) {
-        setRollButtonEnabled(true);
-        const btnRoll = document.getElementById('btn-roll');
-        if (btnRoll) {
-          btnRoll.classList.add('bonus-roll-active');
-          btnRoll.innerHTML = `<i class="fa-solid fa-fire text-amber-300 animate-pulse"></i> <span>BONUS ROLL</span> <span id="dice-pill" class="dice-badge">🎲</span>`;
-        }
-        updateStatusBanner(`🎲 ${detailMsg} • Roll again before moving goti!`);
-        startTurnTimer();
-      } else {
-        setRollButtonEnabled(false);
-        updateStatusBanner(`🎲 ${current.name}: ${detailMsg} • Rolling bonus roll...`);
-      }
-      return;
-    }
-
-    if (current.isBot) {
+    // 1. Check 3 Consecutive Sixes Penalty: immediately forfeits turn
+    if (rollResult.d1 === 6 && (engine.consecutiveSixes || 0) >= 3) {
+      isAwaitingPawnMove = false;
+      isPawnRunning = false;
+      isTurnTransitioning = true;
       setRollButtonEnabled(false);
-      updateStatusBanner(`🎲 ${current.name} (AI): ${detailMsg} • Rolling bonus roll...`);
+      updateStatusBanner(`⚠️ 3 Consecutive Sixes! ${current.name} forfeits turn! Passing turn...`);
       setTimeout(() => {
-        if (!isTurnTransitioning && !isRolling && !isPawnRunning && !engine.isGameOver) {
-          rollDiceAction(true);
+        const nextTurnId = engine.advanceTurn();
+        setRollButtonEnabled(false);
+        updateStatusBanner("Waiting for next player...");
+        if (gameMode === 'online') {
+          if (isMyTurnInOnlineGame(current)) {
+            broadcastTurnState(nextTurnId, false, null);
+          }
         }
-      }, 750);
+        startTurnCycle(false);
+      }, 1200);
       return;
     }
 
-    // Local human player
-    setRollButtonEnabled(true);
-    const btnRoll = document.getElementById('btn-roll');
-    if (btnRoll) {
-      btnRoll.classList.add('bonus-roll-active');
-      btnRoll.innerHTML = `<i class="fa-solid fa-fire text-amber-300 animate-pulse"></i> <span>BONUS ROLL</span> <span id="dice-pill" class="dice-badge">🎲</span>`;
+    // Single-roll developer hack deactivation
+    if (typeof isHackApplicableToCurrentPlayer === 'function' && isHackApplicableToCurrentPlayer()) {
+      if (diceHackState.mode === 'single') {
+        diceHackState.enabled = false;
+        setTimeout(() => {
+          if (typeof updateHudHackBadge === 'function') updateHudHackBadge();
+          if (typeof updateHackModalUI === 'function') updateHackModalUI();
+        }, 100);
+      }
     }
-    updateStatusBanner(`🎲 ${detailMsg} • Roll again before moving goti!`);
+
+    const validPawns = engine.getMovablePawns(current, rollResult);
+    const rollDisplay = `${rollResult.total}`;
+
+    // 2. No valid moves: consume roll and immediately advance turn
+    if (validPawns.length === 0) {
+      isAwaitingPawnMove = false;
+      isPawnRunning = false;
+      isTurnTransitioning = true;
+      setRollButtonEnabled(false);
+      updateStatusBanner(`${current.name} rolled ${rollDisplay}. No valid moves! Passing turn...`);
+      setTimeout(() => {
+        const rolledSix = (rollResult.hasSix || rollResult.total === 6 || rollResult.d1 === 6);
+        if (rolledSix && (engine.consecutiveSixes || 0) < 3) {
+          const bonusMsg = `Rolled a 6! (No moves possible) • Bonus Roll! 🎲`;
+          if (gameMode === 'online' && isMyTurnInOnlineGame(current)) {
+            broadcastTurnState(engine.currentTurnPlayerId, true, bonusMsg);
+          }
+          startTurnCycle(true, bonusMsg);
+        } else {
+          const nextTurnId = engine.advanceTurn();
+          setRollButtonEnabled(false);
+          updateStatusBanner("Waiting for next player...");
+          if (gameMode === 'online') {
+            if (isMyTurnInOnlineGame(current)) {
+              broadcastTurnState(nextTurnId, false, null);
+            }
+          }
+          startTurnCycle(false);
+        }
+      }, 1100);
+      return;
+    }
+
+    // 3. Valid pawn moves available: lock roll button and await pawn selection
+    isAwaitingPawnMove = true;
+    setRollButtonEnabled(false);
     startTurnTimer();
+
+    if (current.isBot && gameMode !== 'online') {
+      const chosenPawn = aiBot.chooseBestPawn(validPawns, rollResult, engine.players);
+      setTimeout(() => {
+        executePawnMove(chosenPawn, rollResult);
+      }, 600);
+    } else if (gameMode === 'online' && !isMyTurnInOnlineGame(current)) {
+      clearSelectablePawns();
+      isAwaitingPawnMove = false;
+      let oppMsg = `${current.name} rolled ${rollDisplay} • Waiting for opponent to move...`;
+      if (rollResult.hasSix) {
+        oppMsg = `${current.name} rolled a 6! Waiting for opponent to move...`;
+      }
+      updateStatusBanner(oppMsg);
+    } else if (validPawns.length === 1) {
+      // Single movable goti: auto-move after brief organic pause
+      const singlePawn = validPawns[0];
+      highlightSelectablePawns(validPawns);
+      updateStatusBanner(`⚡ Auto-Move: ${current.name}'s goti advancing ${rollDisplay} steps! 🎲`);
+      stopTurnTimer();
+      setTimeout(() => {
+        if (!isPawnRunning && !engine.isGameOver) {
+          executePawnMove(singlePawn, rollResult);
+        }
+      }, 450);
+    } else {
+      highlightSelectablePawns(validPawns);
+      let msg = `Select a pawn to advance (${rollDisplay})`;
+      if (rollResult.hasSix) {
+        msg = `Rolled a 6! Select a pawn to release or advance (${rollDisplay})`;
+      }
+      updateStatusBanner(msg);
+    }
     return;
   }
 
-  // Rolling phase complete! Add final roll to accumulatedTurnRolls
-  if (effectiveDiceCount === 1) {
-    accumulatedTurnRolls.push(rollResult.d1);
-  } else {
-    accumulatedTurnRolls.push(rollResult.d1, rollResult.d2);
+  // --- 2-DICE GAME MODE ---
+  const rollsToRun = [rollResult.d1, rollResult.d2];
+  const isDoubleSix = (rollResult.d1 === 6 && rollResult.d2 === 6);
+  twoDiceBonusGranted = isDoubleSix && ((engine.consecutiveDoubles || 0) < 3);
+  twoDiceBonusReasons = twoDiceBonusGranted ? ['Rolled Double Sixes (6+6)!'] : [];
+  twoDicePool = rollsToRun.map((val, idx) => ({ index: idx, value: val, used: false }));
+  activeDieIndex = null;
+  hideGotiDicePopup();
+  updateTwoDiceUI();
+  setRollButtonEnabled(false);
+
+  // Check 3 consecutive double-sixes penalty
+  if (isDoubleSix && ((engine.consecutiveDoubles || 0) >= 3 || (engine.consecutiveSixes || 0) >= 3)) {
+    isAwaitingPawnMove = false;
+    isPawnRunning = false;
+    isTurnTransitioning = true;
+    setRollButtonEnabled(false);
+    updateStatusBanner(`⚠️ 3 Consecutive Double Sixes (6+6)! ${current.name} forfeits turn! Passing turn...`);
+    setTimeout(() => {
+      const nextTurnId = engine.advanceTurn();
+      setRollButtonEnabled(false);
+      updateStatusBanner("Waiting for next player...");
+      if (gameMode === 'online') {
+        if (isMyTurnInOnlineGame(current)) {
+          broadcastTurnState(nextTurnId, false, null);
+        }
+      }
+      startTurnCycle(false);
+    }, 1200);
+    return;
   }
 
-  const rollsToRun = [...accumulatedTurnRolls];
-  accumulatedTurnRolls = [];
-
-  // When mode is 'single' (Next Roll), deactivate hack now that all rolls of this turn are completed
+  // Deactivate single hack in 2-dice mode
   if (typeof isHackApplicableToCurrentPlayer === 'function' && isHackApplicableToCurrentPlayer()) {
     if (diceHackState.mode === 'single') {
       diceHackState.enabled = false;
@@ -5819,140 +5857,69 @@ function handleRollOutcome(rollResult) {
     }
   }
 
-  // If we have multiple rolls (e.g. rolled 6 then 4, or 2 dice)
-  if (rollsToRun.length > 1) {
-    twoDiceBonusGranted = false;
-    twoDiceBonusReasons = [];
-    twoDicePool = rollsToRun.map((val, idx) => ({ index: idx, value: val, used: false }));
-    activeDieIndex = null;
-    hideGotiDicePopup();
-    updateTwoDiceUI();
-    setRollButtonEnabled(false);
+  // Check if any pawn can move with any die
+  const hasAnyMove = rollsToRun.some((val) => {
+    const r = { total: val, isSingleDie: true, hasSix: val === 6 };
+    return engine.getMovablePawns(current, r).length > 0;
+  });
 
-    // Check if any pawn can move with any die
-    const hasAnyMove = rollsToRun.some((val) => {
-      const r = { total: val, isSingleDie: true, hasSix: val === 6 };
-      return engine.getMovablePawns(current, r).length > 0;
-    });
-
-    if (!hasAnyMove) {
-      isAwaitingPawnMove = false;
-      isPawnRunning = false;
-      isTurnTransitioning = true;
-      hideTwoDiceUI();
-      hideGotiDicePopup();
-      setRollButtonEnabled(false);
-      updateStatusBanner(`${current.name} rolled [${rollsToRun.join(', ')}]. No valid moves!`);
-      setTimeout(() => {
-        if (gameMode === 'online') {
-          if (isMyTurnInOnlineGame(current)) {
-            const nextTurnId = engine.advanceTurn();
-            broadcastTurnState(nextTurnId, false, null);
-            startTurnCycle();
-          }
-        } else {
-          engine.advanceTurn();
-          startTurnCycle();
-        }
-      }, 1100);
-      return;
-    }
-
-    if (current.isBot && gameMode !== 'online') {
-      executeBotTwoDiceTurn();
-      return;
-    }
-
-    if (gameMode === 'online' && !isMyTurnInOnlineGame(current)) {
-      clearSelectablePawns();
-      isAwaitingPawnMove = false;
-      updateStatusBanner(`${current.name} rolled [${rollsToRun.join(', ')}] • Waiting for opponent to move...`);
-      return;
-    }
-
-    // Human player: highlight all gotiyan that can move with ANY available die
-    const allMovable = current.pawns.filter((p) => {
-      if (p.isFinished) return false;
-      return rollsToRun.some((val) => engine.canPawnMove(p, { total: val, isSingleDie: true, hasSix: val === 6 }));
-    });
-
-    // Check for automatic double-dice execution (e.g. 6+X to open and run, single goti on board taking both dice)
-    if (checkAndTriggerAutoTwoDiceMove(current, rollsToRun, allMovable)) {
-      return;
-    }
-
-    highlightSelectablePawns(allMovable);
-    isAwaitingPawnMove = true;
-    startTurnTimer();
-    updateStatusBanner(`${current.name}: Rolled [${rollsToRun.join(', ')}] • Click a goti to choose which die number to run!`);
-    return;
-  }
-
-  // Single roll (1 die, rolled non-six on first try)
-  hideTwoDiceUI();
-  hideGotiDicePopup();
-  const validPawns = engine.getMovablePawns(current, rollResult);
-  const rollDisplay = `${rollResult.total}`;
-
-  if (validPawns.length === 0) {
+  if (!hasAnyMove) {
     isAwaitingPawnMove = false;
     isPawnRunning = false;
     isTurnTransitioning = true;
+    hideTwoDiceUI();
+    hideGotiDicePopup();
     setRollButtonEnabled(false);
-    updateStatusBanner(`${current.name} rolled ${rollDisplay}. No valid moves!`);
+    updateStatusBanner(`${current.name} rolled [${rollsToRun.join(', ')}]. No valid moves! Passing turn...`);
     setTimeout(() => {
-      if (gameMode === 'online') {
-        if (isMyTurnInOnlineGame(current)) {
-          const nextTurnId = engine.advanceTurn();
-          broadcastTurnState(nextTurnId, false, null);
-          startTurnCycle();
+      if (twoDiceBonusGranted && (engine.consecutiveDoubles || 0) < 3) {
+        if (gameMode === 'online' && isMyTurnInOnlineGame(current)) {
+          broadcastTurnState(engine.currentTurnPlayerId, true, "Rolled 6+6! Bonus Roll! 🎲");
         }
+        startTurnCycle(true, "Rolled 6+6! Bonus Roll! 🎲");
       } else {
-        engine.advanceTurn();
-        startTurnCycle();
+        const nextTurnId = engine.advanceTurn();
+        setRollButtonEnabled(false);
+        updateStatusBanner("Waiting for next player...");
+        if (gameMode === 'online') {
+          if (isMyTurnInOnlineGame(current)) {
+            broadcastTurnState(nextTurnId, false, null);
+          }
+        }
+        startTurnCycle(false);
       }
     }, 1100);
     return;
   }
 
-  isAwaitingPawnMove = true;
-  setRollButtonEnabled(false);
-  startTurnTimer();
-
   if (current.isBot && gameMode !== 'online') {
-    const chosenPawn = aiBot.chooseBestPawn(validPawns, rollResult, engine.players);
-    setTimeout(() => {
-      executePawnMove(chosenPawn, rollResult);
-    }, 600);
-  } else if (gameMode === 'online' && !isMyTurnInOnlineGame(current)) {
+    executeBotTwoDiceTurn();
+    return;
+  }
+
+  if (gameMode === 'online' && !isMyTurnInOnlineGame(current)) {
     clearSelectablePawns();
     isAwaitingPawnMove = false;
-    let oppMsg = `${current.name} rolled ${rollDisplay} • Waiting for opponent to move...`;
-    if (rollResult.hasSix) {
-      oppMsg = `${current.name} rolled a 6! Waiting for opponent to move...`;
-    }
-    updateStatusBanner(oppMsg);
-  } else if (validPawns.length === 1) {
-    // Single movable goti: auto-move after brief organic pause
-    const singlePawn = validPawns[0];
-    highlightSelectablePawns(validPawns);
-    updateStatusBanner(`⚡ Auto-Move: ${current.name}'s goti advancing ${rollDisplay} steps! 🎲`);
-    stopTurnTimer();
-    setTimeout(() => {
-      if (!isPawnRunning && !engine.isGameOver) {
-        executePawnMove(singlePawn, rollResult);
-      }
-    }, 450);
-  } else {
-    highlightSelectablePawns(validPawns);
-    let msg = `Select a pawn to advance (${rollDisplay})`;
-    if (rollResult.hasSix) {
-      msg = `Rolled a 6! Select a pawn to release or advance (${rollDisplay})`;
-    } else if (rollResult.isDouble) {
-      msg = `Rolled Doubles! (${rollDisplay}) + Bonus Turn!`;
-    }
-    updateStatusBanner(msg);
+    updateStatusBanner(`${current.name} rolled [${rollsToRun.join(', ')}] • Waiting for opponent to move...`);
+    return;
   }
+
+  // Human player: highlight all gotiyan that can move with ANY available die
+  const allMovable = current.pawns.filter((p) => {
+    if (p.isFinished) return false;
+    return rollsToRun.some((val) => engine.canPawnMove(p, { total: val, isSingleDie: true, hasSix: val === 6 }));
+  });
+
+  // Check for automatic double-dice execution (e.g. 6+X to open and run, single goti on board taking both dice)
+  if (checkAndTriggerAutoTwoDiceMove(current, rollsToRun, allMovable)) {
+    return;
+  }
+
+  highlightSelectablePawns(allMovable);
+  isAwaitingPawnMove = true;
+  startTurnTimer();
+  updateStatusBanner(`${current.name}: Rolled [${rollsToRun.join(', ')}] • Click a goti to choose which die number to run!`);
+  return;
 }
 
 
@@ -6162,10 +6129,24 @@ function executePawnMove(pawn, rollInput) {
 
       isTurnTransitioning = true;
       setTimeout(() => {
-        if (!result.grantedBonusRoll) {
+        // Bonus Turn Conditions:
+        // 1. Rolled a 6 in 1-die mode (and consecutiveSixes < 3)
+        // 2. Captured an opponent goti
+        // 3. Reached sanctuary goal (finished goti)
+        const rolledSix = (engine.diceCount === 1)
+          ? (roll.hasSix || roll.total === 6 || roll.d1 === 6)
+          : (roll.d1 === 6 && roll.d2 === 6);
+        const earnedBonus = (rolledSix && (engine.consecutiveSixes || 0) < 3) ||
+                            result.grantedBonusRoll ||
+                            !!result.capturedOpponent ||
+                            !!result.reachedGoal;
+
+        if (!earnedBonus) {
           const prevPlayer = engine.currentPlayer;
           const nextTurnId = engine.advanceTurn();
           isPawnRunning = false;
+          setRollButtonEnabled(false);
+          updateStatusBanner("Waiting for next player...");
           if (gameMode === 'online' && isMyTurnInOnlineGame(prevPlayer)) {
             broadcastTurnState(nextTurnId, false, null);
           }
@@ -6177,6 +6158,8 @@ function executePawnMove(pawn, rollInput) {
             reasonMsg = `💥 Knockout! Captured ${oppName}'s goti! Roll again! 🎲`;
           } else if (result.reachedGoal) {
             reasonMsg = `🎯 Goti reached Home! Roll again! 🎲`;
+          } else if (rolledSix) {
+            reasonMsg = `🎲 Rolled a 6! Bonus Roll! 🎲`;
           }
           isPawnRunning = false;
           if (gameMode === 'online' && isMyTurnInOnlineGame(engine.currentPlayer)) {
@@ -6281,7 +6264,7 @@ function startTurnCycle(isBonusRoll = false, bonusMessage = null) {
       } else if (isLastGotiHome) {
         updateStatusBanner(`${current.name}'s Turn • Last goti in Home Lane (1 Die)...`);
       } else {
-        updateStatusBanner(`${current.name}'s Turn • Waiting for roll...`);
+        updateStatusBanner(`${current.name}'s Turn • Waiting for next player...`);
       }
     }
     return;
@@ -7822,6 +7805,8 @@ function broadcastTurnState(turnPlayerId, isBonusRoll = false, bonusMessage = nu
     type: 'turn_state',
     senderIndex: myOnlinePlayerIndex,
     turnPlayerId: turnPlayerId,
+    activePlayerId: turnPlayerId,
+    nextTurn: turnPlayerId,
     isBonusRoll: isBonusRoll || false,
     bonusMessage: bonusMessage || null,
     actionId
@@ -7850,8 +7835,46 @@ function broadcastTurnState(turnPlayerId, isBonusRoll = false, bonusMessage = nu
 
   if (webRtc) {
     webRtc.broadcast(msg);
+    webRtc.broadcast({
+      type: 'turn_changed',
+      senderIndex: myOnlinePlayerIndex,
+      activePlayerId: turnPlayerId,
+      nextTurn: turnPlayerId,
+      isBonusRoll: isBonusRoll || false,
+      bonusMessage: bonusMessage || null,
+      actionId
+    });
+    webRtc.broadcast({
+      type: 'next_player',
+      senderIndex: myOnlinePlayerIndex,
+      activePlayerId: turnPlayerId,
+      nextTurn: turnPlayerId,
+      actionId
+    });
   } else if (socket) {
     socket.emit('turn_state', msg);
+    socket.emit('turn_change', {
+      senderIndex: myOnlinePlayerIndex,
+      activePlayerId: turnPlayerId,
+      nextTurn: turnPlayerId,
+      isBonusRoll: isBonusRoll || false,
+      bonusMessage: bonusMessage || null,
+      actionId
+    });
+    socket.emit('turn_changed', {
+      senderIndex: myOnlinePlayerIndex,
+      activePlayerId: turnPlayerId,
+      nextTurn: turnPlayerId,
+      isBonusRoll: isBonusRoll || false,
+      bonusMessage: bonusMessage || null,
+      actionId
+    });
+    socket.emit('next_player', {
+      senderIndex: myOnlinePlayerIndex,
+      activePlayerId: turnPlayerId,
+      nextTurn: turnPlayerId,
+      actionId
+    });
   }
 }
 
@@ -7881,7 +7904,13 @@ function handleRemoteTurnState(data) {
   hideTwoDiceUI();
   clearSelectablePawns();
 
-  engine.currentTurnPlayerId = data.turnPlayerId;
+  const nextTurnId = (typeof data.turnPlayerId === 'number')
+    ? data.turnPlayerId
+    : ((typeof data.activePlayerId === 'number')
+      ? data.activePlayerId
+      : ((typeof data.nextTurn === 'number') ? data.nextTurn : 0));
+
+  engine.currentTurnPlayerId = nextTurnId;
   updatePlayerHUD();
   startTurnCycle(data.isBonusRoll, data.bonusMessage);
 }
@@ -7968,7 +7997,7 @@ function setupSocket() {
         handleRemotePawnMove(data);
       } else if (data.type === 'two_dice_step') {
         handleRemoteTwoDiceStep(data);
-      } else if (data.type === 'turn_state') {
+      } else if (data.type === 'turn_state' || data.type === 'turn_changed' || data.type === 'next_player') {
         handleRemoteTurnState(data);
       } else if (data.type === 'two_dice_pass') {
         handleRemoteTwoDicePass(data);
@@ -8134,6 +8163,14 @@ function connectSignalingSocket() {
   });
 
   socket.on('turn_state', (turnData) => {
+    handleRemoteTurnState(turnData);
+  });
+
+  socket.on('turn_changed', (turnData) => {
+    handleRemoteTurnState(turnData);
+  });
+
+  socket.on('next_player', (turnData) => {
     handleRemoteTurnState(turnData);
   });
 

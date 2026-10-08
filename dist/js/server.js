@@ -207,6 +207,7 @@ io.on('connection', (socket) => {
 
     room.inGame = true;
     room.currentTurn = 0;
+    room.canRoll = true;
     const diceCount = (data && typeof data.diceCount === 'number') ? data.diceCount : (room.diceCount || 1);
     io.to(currentRoom).emit('game_started', {
       currentTurn: 0,
@@ -219,6 +220,19 @@ io.on('connection', (socket) => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
     if (!room) return;
+
+    // Server-side turn validation: only the designated active player can roll
+    if (room.inGame) {
+      if (typeof room.currentTurn === 'number' && room.currentTurn !== playerIndex) {
+        socket.emit('error_message', { message: "It is not your turn to roll!" });
+        return;
+      }
+      if (!room.canRoll) {
+        socket.emit('error_message', { message: "Dice already rolled for this turn!" });
+        return;
+      }
+      room.canRoll = false; // Lock roll action immediately until turn completes or bonus is earned
+    }
 
     io.to(currentRoom).emit('dice_rolled', {
       playerId: playerIndex,
@@ -253,45 +267,46 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('turn_state', (turnData) => {
+  const handleTurnAdvance = (turnData) => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
-    if (room && typeof turnData.turnPlayerId === 'number') {
-      room.currentTurn = turnData.turnPlayerId;
-    }
-    io.to(currentRoom).emit('turn_state', turnData);
-  });
+    const activePlayerId = (typeof turnData.turnPlayerId === 'number')
+      ? turnData.turnPlayerId
+      : ((typeof turnData.activePlayerId === 'number')
+        ? turnData.activePlayerId
+        : ((typeof turnData.nextTurn === 'number') ? turnData.nextTurn : (room ? room.currentTurn : 0)));
 
-  socket.on('dice_mode_sync', ({ diceCount }) => {
-    if (!currentRoom) return;
-    const room = rooms.get(currentRoom);
-    if (room && typeof diceCount === 'number') {
-      room.diceCount = diceCount;
-    }
-    io.to(currentRoom).emit('dice_mode_sync', { diceCount });
-  });
-
-  socket.on('host_new_game', (data) => {
-    if (!currentRoom) return;
-    io.to(currentRoom).emit('host_new_game', data || {});
-  });
-
-  socket.on('host_exit_game', (data) => {
-    if (!currentRoom) return;
-    io.to(currentRoom).emit('host_exit_game', data || {});
-  });
-
-  socket.on('turn_change', ({ nextTurn, grantedBonus }) => {
-    if (!currentRoom) return;
-    const room = rooms.get(currentRoom);
     if (room) {
-      room.currentTurn = nextTurn;
+      room.currentTurn = activePlayerId;
+      room.canRoll = true; // Unlock roll action for the designated active player
     }
-    io.to(currentRoom).emit('turn_changed', {
-      nextTurn,
-      grantedBonus
+    const isBonus = turnData.isBonusRoll || turnData.grantedBonus || false;
+    const bonusMsg = turnData.bonusMessage || null;
+
+    io.to(currentRoom).emit('turn_state', {
+      ...turnData,
+      turnPlayerId: activePlayerId,
+      activePlayerId,
+      nextTurn: activePlayerId,
+      isBonusRoll: isBonus,
+      bonusMessage: bonusMsg
     });
-  });
+    io.to(currentRoom).emit('turn_changed', {
+      activePlayerId,
+      nextTurn: activePlayerId,
+      isBonusRoll: isBonus,
+      bonusMessage: bonusMsg
+    });
+    io.to(currentRoom).emit('next_player', {
+      activePlayerId,
+      nextTurn: activePlayerId
+    });
+  };
+
+  socket.on('turn_state', handleTurnAdvance);
+  socket.on('turn_change', handleTurnAdvance);
+  socket.on('turn_changed', handleTurnAdvance);
+  socket.on('next_player', handleTurnAdvance);
 
   socket.on('chat_message', ({ text, sender }) => {
     if (!currentRoom) return;
