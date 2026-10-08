@@ -75,13 +75,13 @@ const PALETTE = {
   TRACK_BASE: 0xb8c1c8,
   LINE_GRAY: 0x718290,
   YELLOW: 0xd9b300,
-  YELLOW_INNER: 0xccb760,
+  YELLOW_INNER: 0x6e5900,
   BLUE: 0x0c4bbd,
-  BLUE_INNER: 0x88add1,
+  BLUE_INNER: 0x072254,
   RED: 0xba1d1d,
-  RED_INNER: 0xc98288,
+  RED_INNER: 0x5a0e0e,
   CHARCOAL: 0x2b3238,
-  CHARCOAL_INNER: 0x98a6b2,
+  CHARCOAL_INNER: 0x161c20,
   DICE_BODY: 0xfafcff,
   DICE_PIPS: 0x182026,
   BRASS_GOLD: 0xc89e3a,
@@ -90,11 +90,11 @@ const PALETTE = {
   PAWN_YELLOW: 0xd9b300,
   PAWN_BLUE: 0x0c4bbd,
   PAWN_CHARCOAL: 0x2b3238,
-  // Yard Gotiyan Pad Boxes (Calibrated to match exact perceived gemstone body color of gotiyan)
-  PAD_RED: 0x851212,
-  PAD_YELLOW: 0x856900,
-  PAD_BLUE: 0x00329e,
-  PAD_CHARCOAL: 0x1a2024,
+  // Yard Gotiyan Pad Boxes (1:1 Exact Match to Gotiyan & Player)
+  PAD_RED: 0xba1d1d,
+  PAD_YELLOW: 0xd9b300,
+  PAD_BLUE: 0x0c4bbd,
+  PAD_CHARCOAL: 0x2b3238,
   // Standard Guild Tokens for PBR Heirloom Palette & Audit Compliance
   AMBER_GOLD: 0xd9b300,
   LAPIS_BLUE: 0x0c4bbd,
@@ -222,11 +222,11 @@ let ambientLight, keySpot, rimLight, fillLight;
 
 function setupStudioLights() {
   // Rich Studio Diffuse Ambient Light - Calibrated for balanced saturation & crisp contrast
-  ambientLight = new THREE.AmbientLight(0xffffff, 0.56);
+  ambientLight = new THREE.AmbientLight(0xffffff, 0.72);
   scene.add(ambientLight);
 
   // Key Studio Spotlight (warm ivory key spotlight casting punchy directional clarity)
-  keySpot = new THREE.DirectionalLight(0xfff8ee, 0.42);
+  keySpot = new THREE.DirectionalLight(0xfff8ee, 0.22);
   keySpot.position.set(5, 30, 8);
   keySpot.target.position.set(0, 0, 0);
   scene.add(keySpot.target);
@@ -248,12 +248,12 @@ function setupStudioLights() {
   keySpot.shadow.camera.far = 65;
 
   // Cool rim directional light for pawn contour separation & crisp highlights
-  rimLight = new THREE.DirectionalLight(0xd0e8ff, 0.22);
+  rimLight = new THREE.DirectionalLight(0xd0e8ff, 0.12);
   rimLight.position.set(-10, 20, -10);
   scene.add(rimLight);
 
   // Warm fill directional light for vibrant side facets
-  fillLight = new THREE.DirectionalLight(0xffeedd, 0.16);
+  fillLight = new THREE.DirectionalLight(0xffeedd, 0.10);
   fillLight.position.set(10, 20, 10);
   scene.add(fillLight);
 }

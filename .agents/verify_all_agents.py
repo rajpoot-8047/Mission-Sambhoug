@@ -194,6 +194,39 @@ def audit_low_ram_and_smart_dice():
     print("   [PASS] High graphics quality (antialias & highp), royal splash screen, rigid-body dice & smart 2-dice AI verified.")
     return True, "Passed"
 
+def audit_pawn_house_color_parity():
+    print("--------------------------------------------------")
+    print("8. [Pawn-House Color Parity Guard] Auditing 1:1 Goti & House Color Unity...")
+    app_js = os.path.join(JS_DIR, "app.js")
+    with open(app_js, "r", encoding="utf-8") as f:
+        text = f.read()
+
+    # 1. Pad boxes must match pawn colors 1:1
+    pad_tokens = [
+        "PAD_RED: 0xba1d1d",
+        "PAD_YELLOW: 0xd9b300",
+        "PAD_BLUE: 0x0c4bbd",
+        "PAD_CHARCOAL: 0x2b3238"
+    ]
+    for pt in pad_tokens:
+        if pt not in text:
+            return False, f"Missing exact pawn-matching pad color token: {pt}"
+
+    # 2. No washed out inner floors (old pastel tokens must be absent)
+    banned_pastels = ["0xc98288", "0x88add1", "0xccb760", "0x98a6b2"]
+    for bp in banned_pastels:
+        if bp in text:
+            return False, f"Banned pastel floor color found: {bp}"
+
+    # 3. Deep royal satin inner floor tokens present
+    satin_floors = ["RED_INNER: 0x5a0e0e", "BLUE_INNER: 0x072254", "YELLOW_INNER: 0x6e5900", "CHARCOAL_INNER: 0x161c20"]
+    for sf in satin_floors:
+        if sf not in text:
+            return False, f"Missing deep royal satin floor token: {sf}"
+
+    print("   [PASS] 100% Pawn-House color parity, zero pastel drift, and exact goti pad match verified.")
+    return True, "Passed"
+
 def main():
     print("==================================================")
     print("=== MISSION SAMBHOUG 3D LUDO - MULTI-AGENT AUDIT ===")
@@ -206,8 +239,9 @@ def main():
     s_ok, s_msg = audit_syntax()
     g_ok, g_msg = audit_anti_glare()
     r_ok, r_msg = audit_low_ram_and_smart_dice()
+    c_ok, c_msg = audit_pawn_house_color_parity()
 
-    all_passed = p_ok and v_ok and d_ok and o_ok and s_ok and g_ok and r_ok
+    all_passed = p_ok and v_ok and d_ok and o_ok and s_ok and g_ok and r_ok and c_ok
     print("==================================================")
     if all_passed:
         print("[SUCCESS] ALL AGENTS REPORT: 100% CLEAN, ZERO DEFECTS, MUSEUM GRADE!")

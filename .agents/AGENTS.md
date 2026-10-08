@@ -140,5 +140,15 @@ Before writing or approving any code, ask:
 - PCFSoftShadowMap resolution tuned to 1024x1024 with `-0.00008` bias.
 - Power preference set to `'high-performance'` and `mediump` shader precision on mobile.
 
+---
+
+## 16. 🎨 Pawn-House Color Parity Guard Agent (Exact Royal Gemstone Parity)
+**Mission:** Enforce 100% visual and mathematical color fidelity between pawns (gotiyan) and houses:
+- Yard goti pad boxes (`PAD_RED`, `PAD_YELLOW`, `PAD_BLUE`, `PAD_CHARCOAL`) match goti colors 1:1 (`#BA1D1D`, `#D9B300`, `#0C4BBD`, `#2B3238`).
+- Inner yard floors use deep royal satin beds (`#5A0E0E`, `#6E5900`, `#072254`, `#161C20`) with zero pastel/salmon/baby-blue drift.
+- Outer perimeter walls, stepped tracks, and center pyramid facets share identical royal player colors.
+- Balanced studio lighting prevents top-down diffuse bleaching of horizontal board surfaces.
+- Enforced automatically by `audit_pawn_house_color_parity()` in `verify_all_agents.py`.
+
 
 

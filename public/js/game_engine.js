@@ -65,7 +65,7 @@ class LudoGameEngine {
   constructor() {
     this.players = [
       new Player(0, 'Red', '#ba1d1d', false),
-      new Player(1, 'Yellow', '#b58900', true),
+      new Player(1, 'Yellow', '#d9b300', true),
       new Player(2, 'Blue', '#0c4bbd', true),
       new Player(3, 'Charcoal', '#2b3238', true)
     ];
