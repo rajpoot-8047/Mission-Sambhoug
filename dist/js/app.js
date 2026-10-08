@@ -1,3 +1,4 @@
+let centerSanctuaryCounterMeshes = {};
 /**
  * Mission Sambhoug - 3D Ludo Tabletop & Multiplayer Engine
  * Upgraded by 4 Specialized Agents:
@@ -189,6 +190,7 @@ function init() {
   createQuadrants();
   createSteppedTracks();
   createCenterPyramid();
+  updateCenterSanctuaryCounters();
   create3DPawns();
   createScaledDice();
 
@@ -3324,12 +3326,16 @@ function reclusterAllRestingPawns() {
         const mesh = pawns.find(
           (m) => m.userData.playerId === pw.playerId && m.userData.pawnId === pw.id
         );
-        if (mesh && !mesh.userData.isHopping) {
+        if (mesh) {
+        if (pw.isFinished || pw.stepOnTrack === 56) {
+          mesh.visible = false;
+        } else if (!mesh.userData.isHopping) {
           const target = getPawnWorldPosition(pw.playerId, pw.id, pw.stepOnTrack);
           mesh.position.x = target.x;
           mesh.position.z = target.z;
           mesh.userData.currentPos = { ...target };
         }
+      }
       }
     });
   });
@@ -3415,7 +3421,12 @@ function animatePawnWalk(pawnMesh, playerId, pawnId, fromStep, toStep, onComplet
       const finalPos = waypoints[waypoints.length - 1];
       pawnMesh.position.set(finalPos.x, finalPos.y, finalPos.z);
       pawnMesh.userData.currentPos = { ...finalPos };
-      reclusterAllRestingPawns();
+      if (toStep === 56) {
+        pawnMesh.visible = false;
+        updateCenterSanctuaryCounters();
+      } else {
+        reclusterAllRestingPawns();
+      }
       if (onComplete) onComplete();
       return;
     }
@@ -6384,6 +6395,8 @@ function resetToNewGame(targetDiceCount, isRemoteSync = false, isForce = false) 
   engine.resetGame(count);
   clearOfflineGameState();
   clearYardRankBadges();
+  clearCenterSanctuaryCounters();
+  updateCenterSanctuaryCounters();
 
   // Return all 3D pawn meshes to starting yard sockets
   pawns.forEach((mesh) => {
@@ -7813,6 +7826,7 @@ function executeTwoDiceStep(pawn, onStepDone) {
 
     function checkNext() {
       updateYardRankBadges();
+      updateCenterSanctuaryCounters();
       if (engine.isGameOver) {
         finishTwoDiceTurn();
         return;
@@ -8622,6 +8636,7 @@ function executePawnMove(pawn, rollInput) {
   animatePawnWalk(pawnMesh, pawn.playerId, pawn.id, result.fromStep, result.toStep, () => {
     function finalizeTurn() {
       updateYardRankBadges();
+      updateCenterSanctuaryCounters();
       if (engine.isGameOver) {
         isPawnRunning = false;
         isRolling = false;
@@ -11361,6 +11376,200 @@ function createYardRankBadgeMesh(rankType, playerName, isMe, quad) {
   return mesh;
 }
 
+function createCenterCounterTexture(pid, count) {
+  if (typeof document === 'undefined' || !document.createElement) return null;
+  const cvs = document.createElement('canvas');
+  cvs.width = 256;
+  cvs.height = 256;
+  const ctx = cvs.getContext('2d');
+  ctx.clearRect(0, 0, 256, 256);
+
+  const cx = 128;
+  const cy = 128;
+  const r = 112;
+
+  // 1. Dark Drop Shadow
+  ctx.beginPath();
+  ctx.arc(cx, cy + 4, r, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+  ctx.fill();
+
+  // 2. Base Radial Fill matching player gemstone
+  const grad = ctx.createRadialGradient(cx, cy, 20, cx, cy, r);
+  if (pid === 0) { // Red
+    grad.addColorStop(0, '#781212');
+    grad.addColorStop(0.65, '#450a0a');
+    grad.addColorStop(1, '#1a0303');
+  } else if (pid === 1) { // Yellow
+    grad.addColorStop(0, '#8c7000');
+    grad.addColorStop(0.65, '#524200');
+    grad.addColorStop(1, '#211a00');
+  } else if (pid === 2) { // Blue
+    grad.addColorStop(0, '#0c4bbd');
+    grad.addColorStop(0.65, '#072b6b');
+    grad.addColorStop(1, '#021230');
+  } else { // Charcoal
+    grad.addColorStop(0, '#38414a');
+    grad.addColorStop(0.65, '#21272c');
+    grad.addColorStop(1, '#0e1114');
+  }
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // 3. Metallic Outer Bezel & Highlight
+  let strokeOuter, strokeInner, textColor;
+  if (pid === 0) {
+    strokeOuter = '#ef4444'; strokeInner = '#fca5a5'; textColor = '#fee2e2';
+  } else if (pid === 1) {
+    strokeOuter = '#f59e0b'; strokeInner = '#fde68a'; textColor = '#fef3c7';
+  } else if (pid === 2) {
+    strokeOuter = '#38bdf8'; strokeInner = '#bae6fd'; textColor = '#e0f2fe';
+  } else {
+    strokeOuter = '#94a3b8'; strokeInner = '#e2e8f0'; textColor = '#f8fafc';
+  }
+
+  if (count === 4) {
+    // 👑 Crown gold border on complete sanctuary victory!
+    strokeOuter = '#fbbf24';
+    strokeInner = '#fef08a';
+    textColor = '#fef08a';
+  }
+
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = strokeOuter;
+  ctx.stroke();
+
+  // 4. Inset Hairline Ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, r - 10, 0, Math.PI * 2);
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = strokeInner;
+  ctx.stroke();
+
+  // 5. Hero Number Display ("0", "1", "2", "3", "4" with Crown)
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  if (count === 4) {
+    ctx.font = '36px sans-serif';
+    ctx.fillText('👑', cx, cy - 42);
+    ctx.font = '900 110px "Cinzel", "Plus Jakarta Sans", sans-serif';
+    ctx.lineWidth = 9;
+    ctx.strokeStyle = '#000000';
+    ctx.strokeText('4', cx, cy + 28);
+    ctx.fillStyle = textColor;
+    ctx.fillText('4', cx, cy + 28);
+  } else {
+    const numStr = String(count);
+    ctx.font = '900 135px "Cinzel", "Plus Jakarta Sans", sans-serif';
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+    ctx.strokeText(numStr, cx, cy + 6);
+    ctx.fillStyle = count === 0 ? 'rgba(255, 255, 255, 0.40)' : '#ffffff';
+    ctx.fillText(numStr, cx, cy + 6);
+  }
+
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.encoding = THREE.sRGBEncoding;
+  tex.generateMipmaps = true;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+function updateCenterSanctuaryCounters() {
+  if (!scene || !engine) return;
+
+  // Enforce zero gotiyan shown in center pyramid - only numbers
+  pawns.forEach((mesh) => {
+    const pIdx = mesh.userData.playerId;
+    const pNum = mesh.userData.pawnId;
+    const player = engine.players[pIdx];
+    const pawn = player?.pawns?.[pNum];
+    if (pawn && (pawn.isFinished || pawn.stepOnTrack === 56)) {
+      mesh.visible = false;
+    }
+  });
+
+  const activeCount = engine.activePlayerCount || 4;
+  let activeSequence = activeCount === 2 ? [0, 1] : (activeCount === 3 ? [0, 3, 1] : [0, 3, 1, 2]);
+  const activeIds = activeSequence.slice(0, activeCount);
+
+  // Centroids for each triangular facet of the center pyramid
+  const counterPositions = [
+    { pid: 0, x: 0.50, y: 1.54, z: -0.50 }, // Red (Back-Right)
+    { pid: 1, x: -0.50, y: 1.54, z: 0.50 }, // Yellow (Front-Left)
+    { pid: 2, x: -0.50, y: 1.54, z: -0.50 }, // Blue (Back-Left)
+    { pid: 3, x: 0.50, y: 1.54, z: 0.50 }   // Charcoal (Front-Right)
+  ];
+
+  counterPositions.forEach((cp) => {
+    const pid = cp.pid;
+    const player = engine.players[pid];
+    const finishedCount = player ? player.pawns.filter((p) => p.isFinished || p.stepOnTrack === 56).length : 0;
+    const isActive = activeIds.includes(pid);
+
+    let badgeMesh = centerSanctuaryCounterMeshes[pid];
+    if (!badgeMesh) {
+      const geo = new THREE.PlaneGeometry(0.72, 0.72);
+      const texture = createCenterCounterTexture(pid, finishedCount);
+      const mat = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        opacity: 0.98,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+      badgeMesh = new THREE.Mesh(geo, mat);
+      badgeMesh.rotation.x = -Math.PI / 2;
+      badgeMesh.position.set(cp.x, cp.y, cp.z);
+      badgeMesh.renderOrder = 8;
+      badgeMesh.userData = { playerId: pid, count: finishedCount };
+      scene.add(badgeMesh);
+      centerSanctuaryCounterMeshes[pid] = badgeMesh;
+    } else {
+      if (badgeMesh.userData.count !== finishedCount) {
+        badgeMesh.userData.count = finishedCount;
+        if (badgeMesh.material.map) badgeMesh.material.map.dispose();
+        badgeMesh.material.map = createCenterCounterTexture(pid, finishedCount);
+        badgeMesh.material.needsUpdate = true;
+
+        // Bouncy pop scale animation on score update
+        badgeMesh.scale.set(1.35, 1.35, 1.35);
+        const startT = performance.now();
+        const dur = 400;
+        function bounceAnim(now) {
+          const p = Math.min(1.0, (now - startT) / dur);
+          const s = 1.0 + 0.35 * Math.cos(p * Math.PI * 0.5) * (1 - p);
+          badgeMesh.scale.set(s, s, s);
+          if (p < 1.0) requestAnimationFrame(bounceAnim);
+          else badgeMesh.scale.set(1.0, 1.0, 1.0);
+        }
+        requestAnimationFrame(bounceAnim);
+      }
+    }
+    badgeMesh.visible = isActive;
+  });
+}
+
+function clearCenterSanctuaryCounters() {
+  if (!scene) return;
+  Object.keys(centerSanctuaryCounterMeshes).forEach((pid) => {
+    const mesh = centerSanctuaryCounterMeshes[pid];
+    if (mesh) {
+      scene.remove(mesh);
+      if (mesh.geometry) mesh.geometry.dispose();
+      if (mesh.material) {
+        if (mesh.material.map) mesh.material.map.dispose();
+        mesh.material.dispose();
+      }
+    }
+  });
+  centerSanctuaryCounterMeshes = {};
+}
+
+
 function updateYardRankBadges() {
   if (!scene || !engine) return;
 
@@ -11494,6 +11703,7 @@ function showVictoryModal(winner, rankings) {
   clearActiveMatchSession();
   clearOfflineGameState();
   updateYardRankBadges();
+  updateCenterSanctuaryCounters();
 
   const modal = document.getElementById('victory-modal');
   if (!modal) return;
