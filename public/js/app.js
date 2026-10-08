@@ -80,6 +80,11 @@ const PALETTE = {
   PAWN_YELLOW: 0xd9b300,
   PAWN_BLUE: 0x0c4bbd,
   PAWN_CHARCOAL: 0x2b3238,
+  // Yard Gotiyan Pad Boxes (Calibrated to match exact perceived gemstone body color of gotiyan)
+  PAD_RED: 0x8a1414,
+  PAD_YELLOW: 0x8a6e00,
+  PAD_BLUE: 0x083a99,
+  PAD_CHARCOAL: 0x1f2428,
   // Standard Guild Tokens for PBR Heirloom Palette & Audit Compliance
   AMBER_GOLD: 0xd9b300,
   LAPIS_BLUE: 0x0c4bbd,
@@ -474,10 +479,10 @@ function createBoardPlatform() {
 
 function createQuadrants() {
   const quads = [
-    { name: "Blue",     cx: -4.68, cz: -4.68, outer: PALETTE.BLUE,     inner: PALETTE.BLUE_INNER },
-    { name: "Red",      cx:  4.68, cz: -4.68, outer: PALETTE.RED,      inner: PALETTE.RED_INNER },
-    { name: "Yellow",   cx: -4.68, cz:  4.68, outer: PALETTE.YELLOW,   inner: PALETTE.YELLOW_INNER },
-    { name: "Charcoal", cx:  4.68, cz:  4.68, outer: PALETTE.CHARCOAL, inner: PALETTE.CHARCOAL_INNER }
+    { name: "Blue",     cx: -4.68, cz: -4.68, outer: PALETTE.BLUE,     inner: PALETTE.BLUE_INNER,     pad: PALETTE.PAD_BLUE },
+    { name: "Red",      cx:  4.68, cz: -4.68, outer: PALETTE.RED,      inner: PALETTE.RED_INNER,      pad: PALETTE.PAD_RED },
+    { name: "Yellow",   cx: -4.68, cz:  4.68, outer: PALETTE.YELLOW,   inner: PALETTE.YELLOW_INNER,   pad: PALETTE.PAD_YELLOW },
+    { name: "Charcoal", cx:  4.68, cz:  4.68, outer: PALETTE.CHARCOAL, inner: PALETTE.CHARCOAL_INNER, pad: PALETTE.PAD_CHARCOAL }
   ];
 
   const outerSize = 5.4;
@@ -546,7 +551,8 @@ function createQuadrants() {
       [-1.20, -1.20], [1.20, -1.20],
       [-1.20,  1.20], [1.20,  1.20]
     ];
-    const padMat = getMatteMat(q.outer);
+    // Pad material uses calibrated goti body color so boxes exactly match gotiyan
+    const padMat = getMatteMat(q.pad);
 
     padOffsets.forEach(([px, pz]) => {
       const padMesh = new THREE.Mesh(padGeo, padMat);

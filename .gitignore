@@ -1,6 +1,8 @@
 # Dependencies & Large Files
 node_modules/
 *.apk
+*.ipa
+*.mp4
 android/app/build/
 android/.gradle/
 
