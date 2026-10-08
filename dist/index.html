@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="3D Ludo" />
+  <meta name="theme-color" content="#06091c" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Mission Sambhoug</title>
+
+  <!-- Favicon & App Icon -->
+  <link rel="icon" type="image/png" href="app-icon.png">
+  <link rel="apple-touch-icon" href="app-icon.png">
+
+  <!-- Pre-Compiled Static Tailwind CSS (Zero Runtime Overhead, Offline First) -->
+  <link rel="stylesheet" href="css/tailwind.min.css">
+
+  <!-- Local Offline Three.js Engine & Controls -->
+  <script src="js/three.min.js"></script>
+  <script src="js/OrbitControls.js"></script>
+  <script src="js/GLTFExporter.js"></script>
+
+  <!-- Networking & Utilities (Local Bundled) -->
+  <script src="js/socket.io.min.js"></script>
+  <script src="js/peerjs.min.js"></script>
+  <script src="js/qrcode.min.js"></script>
+
+  <!-- Local Icons & Typography -->
+  <link rel="stylesheet" href="css/fontawesome/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="relative">
+
+  <!-- Royal Splash Screen with App-icon.jpg (Smooth Startup Overlay) -->
+  <div id="game-splash-screen"
+    class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#06091c] transition-opacity duration-700 ease-out select-none">
+    <div class="relative flex flex-col items-center px-6">
+      <!-- Ambient Golden Glow -->
+      <div class="absolute w-72 h-72 sm:w-96 sm:h-96 rounded-full bg-amber-500/15 blur-3xl -z-10 animate-pulse"></div>
+
+      <!-- App Icon / Splash Image Artwork -->
+      <div
+        class="w-56 h-56 sm:w-72 sm:h-72 rounded-3xl overflow-hidden shadow-2xl border border-amber-500/30 p-1.5 bg-gradient-to-b from-amber-500/25 via-amber-600/10 to-transparent">
+        <img src="splash-image.jpg" alt="Mission Sambhoug 3D Ludo"
+          class="w-full h-full object-cover rounded-[20px] drop-shadow-2xl" />
+      </div>
+
+      <!-- Title & Emblem -->
+      <h1
+        class="mt-6 text-xl sm:text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-yellow-300 to-amber-200 font-serif drop-shadow-md text-center">
+        MISSION SAMBHOUG
+      </h1>
+      <p class="text-[11px] sm:text-xs tracking-widest text-amber-300/80 uppercase font-semibold mt-1">
+        Royal 3D Heirloom Tabletop
+      </p>
+
+      <!-- Luxury Gold Progress Bar -->
+      <div class="w-44 sm:w-56 h-1 bg-slate-900/90 rounded-full mt-6 overflow-hidden border border-amber-500/25">
+        <div
+          class="h-full w-full bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500 rounded-full animate-pulse">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="webgl-canvas"></canvas>
+  <div id="vignette-layer" class="viewport-vignette"></div>
+
+  <!-- Subtle Minimalist Top Left Header (Mobile & Portrait Responsive) -->
+  <header class="top-nav-bar">
+    <button id="btn-open-multiplayer"
+      class="btn-action glass-card px-3 py-1.5 rounded-xl flex items-center gap-1.5 border border-white/10 text-[11px] font-semibold text-slate-300 hover:text-white"
+      title="Play Modes & Multiplayer">
+      <i class="fa-solid fa-gamepad text-emerald-400"></i>
+      <span class="nav-text">Modes</span>
+    </button>
+    <button id="btn-new-game"
+      class="btn-action glass-card px-3 py-1.5 rounded-xl flex items-center gap-1.5 border border-white/10 text-[11px] font-semibold text-slate-300 hover:text-white"
+      title="Reset & Start New Game">
+      <i class="fa-solid fa-rotate-left text-amber-400"></i>
+      <span class="nav-text">New Game</span>
+    </button>
+    <button id="btn-exit-game"
+      class="btn-action glass-card px-3 py-1.5 rounded-xl flex items-center gap-1.5 border border-white/10 text-[11px] font-semibold text-rose-300 hover:text-white"
+      title="Exit Match">
+      <i class="fa-solid fa-arrow-right-from-bracket text-rose-400"></i>
+      <span class="nav-text">Exit</span>
+    </button>
+    <button id="btn-open-settings"
+      class="btn-action glass-card px-3 py-1.5 rounded-xl flex items-center gap-1.5 border border-white/10 text-[11px] font-semibold text-slate-300 hover:text-white"
+      title="Settings & Customization">
+      <i class="fa-solid fa-gear text-pink-400"></i>
+      <span class="nav-text">Settings</span>
+    </button>
+    <button id="btn-sound"
+      class="btn-action glass-card p-2 rounded-xl border border-white/10 text-slate-300 text-xs hover:text-white"
+      title="Toggle Sound">
+      <i class="fa-solid fa-volume-high"></i>
+    </button>
+    <button id="btn-lock-board"
+      class="btn-action glass-card px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-white/10 text-[11px] font-semibold text-slate-300 hover:text-white"
+      title="Lock / Unlock Board Movement">
+      <i id="lock-board-icon" class="fa-solid fa-lock-open text-amber-400"></i>
+      <span id="lock-board-text" class="nav-text">Lock</span>
+    </button>
+    <button id="btn-open-hack"
+      class="btn-action glass-card px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-amber-500/30 text-[11px] font-bold text-amber-300 hover:text-white shadow-sm shadow-amber-500/10 hidden"
+      title="Precision Dev Diagnostics">
+      <i class="fa-solid fa-sliders text-amber-400"></i>
+      <span class="nav-text">Tools</span>
+    </button>
+  </header>
+
+  <!-- Top Right Active Player HUD Tag (Preserved exactly from reference image) -->
+  <div class="top-hud-bar">
+    <div id="hud-hack-badge" class="hud-hack-badge hidden" title="Precision Calibration Active">
+      <i class="fa-solid fa-bolt text-[9px] text-amber-400"></i>
+      <span id="hud-hack-badge-text">DEV: 6</span>
+    </div>
+    <div id="hud-turn-timer" class="hud-timer-badge cursor-pointer" title="Auto-Playing Mode • Click to Toggle ON/OFF">
+      <i id="hud-timer-icon" class="fa-solid fa-stopwatch text-[11px] text-amber-400"></i>
+      <span id="hud-timer-sec">20s</span>
+    </div>
+    <div id="active-player-tag" class="hud-pill-tag">
+      <span id="active-dot" class="hud-dot"></span>
+      <span id="active-player-name" class="hud-name">Red</span>
+      <span id="active-player-score" class="hud-score">0/4</span>
+    </div>
+
+    <!-- Hidden container for online room indicator if active -->
+    <div id="room-status-box"
+      class="hidden glass-card px-3 py-1.5 rounded-lg text-[11px] font-mono border border-emerald-500/40 text-emerald-300 flex items-center gap-2">
+      <i class="fa-solid fa-signal text-emerald-400"></i>
+      <span>ROOM: <strong id="room-code-display" class="tracking-widest text-white"></strong></span>
+    </div>
+  </div>
+
+  <!-- Interactive Turn Status Banner -->
+  <div id="status-banner" class="status-banner pointer-events-none">
+    <span id="status-text">Red's Turn • Tap Roll Dice</span>
+  </div>
+
+  <!-- Interactive 3D Goti Dice Popup (anchored above clicked goti in 2-dice mode) -->
+  <div id="goti-dice-popup" class="goti-dice-popup hidden">
+    <div class="goti-dice-popup-header">
+      <span id="popup-goti-title">Select Die for Goti</span>
+      <button id="btn-close-goti-popup" class="popup-close-btn" type="button" title="Close"><i
+          class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="goti-dice-popup-options">
+      <button id="btn-popup-die-1" class="btn-popup-die" type="button">
+        <i class="fa-solid fa-dice text-amber-400 text-lg"></i>
+        <div class="popup-die-details">
+          <span class="popup-die-label">Die 1</span>
+          <span class="popup-die-value"><strong id="popup-val-1">6</strong> Steps</span>
+          <span id="popup-note-1" class="popup-die-status">Valid</span>
+        </div>
+      </button>
+      <button id="btn-popup-die-2" class="btn-popup-die" type="button">
+        <i class="fa-solid fa-dice text-amber-400 text-lg"></i>
+        <div class="popup-die-details">
+          <span class="popup-die-label">Die 2</span>
+          <span class="popup-die-value"><strong id="popup-val-2">5</strong> Steps</span>
+          <span id="popup-note-2" class="popup-die-status">Valid</span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Bottom Control Overlay Tray (Compact, Ergonomic & Heirloom Luxury Micro-Dock) -->
+  <footer class="bottom-tray" id="bottom-tray">
+    <button id="btn-tray-collapse" class="tray-collapse-btn" type="button" title="Minimize / Expand controls">
+      <i id="tray-collapse-icon" class="fa-solid fa-chevron-down"></i>
+    </button>
+
+    <button id="btn-roll" class="btn-tray-roll">
+      <i class="fa-solid fa-dice text-sm"></i>
+      <span>ROLL DICE</span>
+      <span id="dice-pill" class="dice-badge">1</span>
+    </button>
+
+    <!-- Collapsible Secondary Controls -->
+    <div id="tray-nav-group" class="tray-nav-group">
+      <!-- Interactive 2-Dice Choice Bar: Choose which die value to run on which goti -->
+      <div id="two-dice-group" class="two-dice-group hidden">
+        <button id="btn-die-1" class="btn-die-choice" type="button" title="Select Die 1">
+          <i class="fa-solid fa-dice text-amber-400"></i>
+          <span>Die 1:</span>
+          <strong id="die-1-val" class="die-val-badge">6</strong>
+        </button>
+        <button id="btn-die-2" class="btn-die-choice" type="button" title="Select Die 2">
+          <i class="fa-solid fa-dice text-amber-400"></i>
+          <span>Die 2:</span>
+          <strong id="die-2-val" class="die-val-badge">5</strong>
+        </button>
+      </div>
+
+      <!-- Dice Count Toggle Option: 1 Die vs 2 Dice (Hidden from gameplay screen) -->
+      <button id="btn-toggle-dice" class="btn-tray-nav hidden" title="Switch between 1 Die (Classic) and 2 Dice (Speed Ludo)">
+        <i id="dice-mode-icon" class="fa-solid fa-cubes text-amber-400"></i>
+        <span id="dice-mode-label">1 Die</span>
+        <span id="dice-lock-badge"
+          class="hidden ml-auto text-[8px] px-1 py-0.5 rounded bg-black/60 text-amber-300 font-mono tracking-tight flex items-center gap-0.5"><i
+            class="fa-solid fa-lock text-[7px]"></i>LOCK</span>
+      </button>
+
+      <button id="cam-exact" class="btn-tray-nav">
+        <i class="fa-solid fa-camera"></i>
+        <span>Reference</span>
+      </button>
+
+      <button id="cam-top" class="btn-tray-nav" title="Top-Down View">
+        <i class="fa-solid fa-arrows-up-down-left-right"></i>
+        <span>Top</span>
+      </button>
+
+      <button id="btn-lock-board-tray" class="btn-tray-nav" title="Lock / Unlock Board Movement">
+        <i id="tray-lock-icon" class="fa-solid fa-lock-open text-amber-400"></i>
+        <span id="tray-lock-text">Lock</span>
+      </button>
+    </div>
+  </footer>
+
+  <!-- Multiplayer & Play Modes Modal (Compact, Fully Responsive & Super Premium) -->
+  <div id="multiplayer-modal" class="modal-overlay">
+    <div class="modal-content royal-multiplayer-modal relative shadow-2xl">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-amber-500/20">
+        <div class="flex items-center gap-2">
+          <div
+            class="w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center justify-center text-[11px] shadow-sm shadow-amber-500/20">
+            <i class="fa-solid fa-crown"></i>
+          </div>
+          <div>
+            <h2
+              class="font-serif text-[12px] sm:text-[13px] font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-yellow-200 to-amber-300 uppercase leading-none">
+              Royal Tabletop
+            </h2>
+            <p class="text-[8.5px] text-amber-300/70 font-semibold tracking-wider uppercase mt-0.5">Worldwide Online &
+              Offline</p>
+          </div>
+        </div>
+        <button id="btn-close-modal"
+          class="w-6 h-6 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center text-xs transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Segmented Mode Tabs -->
+      <div class="grid grid-cols-3 gap-1 p-0.5 bg-black/60 rounded-xl border border-white/10 mb-2">
+        <button id="tab-webrtc"
+          class="tab-btn active py-1 rounded-lg text-[10px] font-bold text-white bg-cyan-950/90 transition flex items-center justify-center gap-1">
+          <i class="fa-solid fa-globe text-cyan-400 text-[9.5px]"></i>
+          <span>WebRTC P2P</span>
+        </button>
+        <button id="tab-lan"
+          class="tab-btn py-1 rounded-lg text-[10px] font-bold text-slate-400 hover:text-white transition flex items-center justify-center gap-1">
+          <i class="fa-solid fa-wifi text-emerald-400 text-[9.5px]"></i>
+          <span>LAN Wi-Fi</span>
+        </button>
+        <button id="tab-local"
+          class="tab-btn py-1 rounded-lg text-[10px] font-bold text-slate-400 hover:text-white transition flex items-center justify-center gap-1">
+          <i class="fa-solid fa-robot text-amber-400 text-[9.5px]"></i>
+          <span>Offline AI</span>
+        </button>
+      </div>
+
+      <!-- TAB PANEL 1: LAN (Same Wi-Fi) -->
+      <div id="panel-lan" class="hidden space-y-1.5 mb-2">
+        <div class="p-2 rounded-xl bg-cyan-950/30 border border-cyan-500/25 flex items-center justify-between">
+          <div class="min-w-0 flex-1 mr-2">
+            <div class="text-[9.5px] text-cyan-300 font-bold flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Same Wi-Fi Network</span>
+            </div>
+            <div id="lan-url-display" class="font-mono text-[10px] text-white font-semibold truncate mt-0.5 select-all">
+              Loading LAN IP...</div>
+          </div>
+          <button id="btn-copy-lan-url"
+            class="btn-action px-2 py-0.5 rounded-md bg-cyan-800 hover:bg-cyan-700 text-white text-[9.5px] font-bold flex items-center gap-1">
+            <i class="fa-solid fa-copy text-[8.5px]"></i>
+            <span>Copy</span>
+          </button>
+        </div>
+
+        <div class="p-2 rounded-xl bg-black/60 border border-white/10 text-center flex flex-col items-center gap-1">
+          <div class="text-[10px] text-slate-300 font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-qrcode text-emerald-400"></i>
+            <span>Scan with Phone Camera:</span>
+          </div>
+          <div id="lan-qrcode"
+            class="p-1 bg-white rounded-lg shadow-md inline-block min-w-[90px] min-h-[90px] flex items-center justify-center">
+          </div>
+          <span class="text-[8.5px] text-slate-400">Connect phones & laptops to same Wi-Fi</span>
+        </div>
+
+        <div class="flex gap-1.5">
+          <input id="input-lan-player-name" type="text" placeholder="Your Name" value="Player"
+            class="flex-1 px-2.5 py-1 rounded-lg bg-black/50 border border-cyan-500/30 text-white placeholder-slate-500 text-[10.5px] focus:outline-none focus:border-cyan-400" />
+          <button id="btn-lan-host"
+            class="btn-action px-3 py-1 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-[10.5px] flex items-center gap-1 shadow-md shadow-emerald-500/20">
+            <i class="fa-solid fa-play text-[8.5px]"></i>
+            <span>Host LAN</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB PANEL 2: Online WebRTC P2P (Active Default) -->
+      <div id="panel-webrtc" class="space-y-1.5 mb-2">
+        <!-- Compact Worldwide Status Banner -->
+        <div class="royal-status-banner">
+          <div class="flex items-center justify-between mb-0.5">
+            <span class="text-[10px] font-bold text-cyan-300 flex items-center gap-1.5">
+              <span id="webrtc-server-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Worldwide WebRTC P2P</span>
+            </span>
+            <span id="webrtc-p2p-badge"
+              class="text-[8px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-500/40">🌍
+              Global Relay</span>
+          </div>
+          <p class="text-[9px] text-slate-300/85 leading-tight">
+            Play with friends anywhere around the world (Wi-Fi / Mobile 4G/5G). No same Wi-Fi needed!
+          </p>
+          <div class="mt-1 pt-0.5 border-t border-cyan-500/15 flex items-center justify-between text-[8.5px]">
+            <span class="text-slate-400 truncate">Network: <strong id="webrtc-server-ip-text"
+                class="text-cyan-200">Global Cloud Relay</strong></span>
+            <button id="btn-toggle-server-ip"
+              class="px-1.5 py-0.5 rounded bg-cyan-900/40 hover:bg-cyan-900/70 text-cyan-300 text-[8px] font-semibold border border-cyan-500/20">
+              LAN Option
+            </button>
+          </div>
+          <div id="webrtc-ip-drawer" class="hidden mt-1 pt-1 border-t border-cyan-500/15 flex gap-1">
+            <input id="input-server-ip" type="text" placeholder="192.168.100.68"
+              class="flex-1 px-2 py-0.5 rounded bg-black/60 border border-cyan-500/30 text-white text-[9px] font-mono focus:outline-none" />
+            <button id="btn-save-server-ip"
+              class="px-2 py-0.5 rounded bg-emerald-500 text-slate-950 font-bold text-[9px]">Set</button>
+          </div>
+        </div>
+
+        <!-- Initial Form: Create or Join -->
+        <div id="webrtc-setup-form" class="space-y-1.5">
+          <input id="input-webrtc-player-name" type="text" placeholder="Enter Your Name" value="Player"
+            class="w-full px-2.5 py-1.5 rounded-lg bg-black/50 border border-cyan-500/30 text-white placeholder-slate-500 text-[10.5px] focus:outline-none focus:border-cyan-400" />
+          <div class="grid grid-cols-2 gap-1.5">
+            <button id="btn-webrtc-create"
+              class="btn-action py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-[10.5px] flex items-center justify-center gap-1 shadow-md shadow-emerald-500/15">
+              <i class="fa-solid fa-plus text-[9px]"></i>
+              <span>Create Room</span>
+            </button>
+            <div class="flex gap-1">
+              <input id="input-webrtc-room-code" type="text" placeholder="CODE" maxlength="6"
+                class="w-14 px-1 py-1.5 rounded-lg bg-black/50 border border-cyan-500/30 text-white text-[10.5px] uppercase tracking-widest text-center font-mono focus:outline-none focus:border-cyan-400" />
+              <button id="btn-webrtc-join"
+                class="btn-action flex-1 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[10.5px] flex items-center justify-center gap-1">
+                <i class="fa-solid fa-right-to-bracket text-[9px]"></i>
+                <span>Join</span>
+              </button>
+            </div>
+          </div>
+          <div id="webrtc-status-msg" class="hidden text-center text-[10px] font-semibold py-0.5"></div>
+        </div>
+
+        <!-- Active Room Lobby Card -->
+        <div id="webrtc-lobby-card" class="hidden space-y-1.5">
+          <!-- Vault Room Code Banner -->
+          <div class="royal-vault-code flex items-center justify-between">
+            <div>
+              <span class="text-[7.5px] uppercase font-bold text-amber-400/80 tracking-widest block">P2P Room
+                Code</span>
+              <div id="webrtc-room-code-display"
+                class="font-mono text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-100 tracking-[0.22em] leading-tight drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]">
+                ----</div>
+            </div>
+            <button id="btn-copy-webrtc-code"
+              class="btn-action px-2 py-1 rounded-md bg-amber-500/15 hover:bg-amber-500/30 text-amber-200 text-[9.5px] font-bold flex items-center gap-1 border border-amber-500/35 transition">
+              <i class="fa-solid fa-copy text-[8.5px]"></i>
+              <span>Copy</span>
+            </button>
+          </div>
+
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-[9.5px] px-0.5">
+              <span id="webrtc-player-count-badge" class="font-bold text-amber-200/90">Players in Room (1/4)</span>
+              <span class="text-[8.5px] text-slate-400">Play with 2, 3, or 4 friends</span>
+            </div>
+
+            <!-- Player 1 (Red / Host) -->
+            <div class="royal-player-slot slot-red">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span id="webrtc-p1-dot"
+                  class="w-2 h-2 rounded-full bg-red-500 shadow-sm shadow-red-500/90 flex-shrink-0"></span>
+                <span id="webrtc-p1-name" class="font-bold text-white truncate text-[10.5px]">Player 1 (Host)</span>
+              </div>
+              <span class="royal-jewel-tag tag-red">Red Gotiyan</span>
+            </div>
+
+            <!-- Player 2 (Yellow / Guest 1) -->
+            <div class="royal-player-slot slot-yellow">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span id="webrtc-p2-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse flex-shrink-0"></span>
+                <span id="webrtc-p2-name" class="font-semibold text-slate-300 truncate text-[10.5px]">Waiting for Friend
+                  2...</span>
+              </div>
+              <span class="royal-jewel-tag tag-yellow">Yellow Gotiyan</span>
+            </div>
+
+            <!-- Player 3 (Blue / Guest 2) -->
+            <div class="royal-player-slot slot-blue">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span id="webrtc-p3-dot" class="w-2 h-2 rounded-full bg-slate-600 flex-shrink-0"></span>
+                <span id="webrtc-p3-name" class="font-semibold text-slate-400 truncate text-[10.5px]">Waiting for Friend
+                  3...</span>
+              </div>
+              <span class="royal-jewel-tag tag-blue">Blue Gotiyan</span>
+            </div>
+
+            <!-- Player 4 (Charcoal / Guest 3) -->
+            <div class="royal-player-slot slot-charcoal">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span id="webrtc-p4-dot" class="w-2 h-2 rounded-full bg-slate-600 flex-shrink-0"></span>
+                <span id="webrtc-p4-name" class="font-semibold text-slate-400 truncate text-[10.5px]">Waiting for Friend
+                  4...</span>
+              </div>
+              <span class="royal-jewel-tag tag-charcoal">Charcoal Gotiyan</span>
+            </div>
+          </div>
+
+          <div class="flex gap-1.5 pt-0.5">
+            <button id="btn-webrtc-leave"
+              class="btn-action flex-1 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-[10px] font-bold border border-slate-700/50">
+              Leave Room
+            </button>
+            <button id="btn-webrtc-start"
+              class="btn-action flex-1 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 text-slate-950 font-black text-[10.5px] flex items-center justify-center gap-1 shadow-md shadow-emerald-500/25">
+              <i class="fa-solid fa-play text-[8.5px]"></i>
+              <span id="btn-webrtc-start-text">Start Match</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB PANEL 3: Local Offline / AI -->
+      <div id="panel-local" class="hidden mb-2 space-y-2">
+        <!-- Sub-mode Selector: Play with AI vs Pass & Play -->
+        <div class="grid grid-cols-2 gap-1.5 p-0.5 bg-black/50 rounded-xl border border-white/10">
+          <button id="btn-mode-bots"
+            class="btn-action py-1.5 px-2 rounded-lg bg-amber-500/20 border border-amber-400/60 text-white font-bold text-[10.5px] flex items-center justify-center gap-1.5 transition">
+            <i class="fa-solid fa-robot text-amber-400 text-xs"></i>
+            <span>Play with AI</span>
+          </button>
+          <button id="btn-mode-local"
+            class="btn-action py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 font-bold text-[10.5px] flex items-center justify-center gap-1.5 hover:border-amber-400/30 transition">
+            <i class="fa-solid fa-users text-teal-400 text-xs"></i>
+            <span>Pass & Play</span>
+          </button>
+        </div>
+
+        <!-- Player Count Selector: 2, 3, or 4 Players -->
+        <div class="p-2 rounded-xl bg-cyan-950/30 border border-cyan-500/25">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-[9.5px] font-black uppercase tracking-wider text-amber-300 flex items-center gap-1">
+              <i class="fa-solid fa-users text-amber-400"></i>
+              <span>Number of Players</span>
+            </label>
+            <span id="ai-players-desc" class="text-[8.5px] font-mono text-cyan-300">1 Human + 1 AI</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-1.5">
+            <button id="btn-players-2"
+              class="btn-action py-1.5 px-1 rounded-xl bg-amber-500/20 border border-amber-400/70 text-white font-bold text-[10px] flex flex-col items-center gap-0.5 transition shadow-sm shadow-amber-500/20">
+              <div class="flex items-center gap-0.5 text-xs text-amber-400">
+                <i class="fa-solid fa-user"></i>
+                <i id="icon-p2-partner" class="fa-solid fa-robot"></i>
+              </div>
+              <span class="font-extrabold text-white text-[11px]">2 Players</span>
+              <span class="text-[7.5px] text-amber-300/80">Red vs Yellow</span>
+            </button>
+
+            <button id="btn-players-3"
+              class="btn-action py-1.5 px-1 rounded-xl bg-black/40 border border-white/10 text-slate-300 font-bold text-[10px] flex flex-col items-center gap-0.5 transition hover:border-amber-400/50">
+              <div class="flex items-center gap-0.5 text-xs text-slate-400">
+                <i class="fa-solid fa-user"></i>
+                <i id="icon-p3-partner1" class="fa-solid fa-robot"></i>
+                <i id="icon-p3-partner2" class="fa-solid fa-robot"></i>
+              </div>
+              <span class="font-extrabold text-white text-[11px]">3 Players</span>
+              <span class="text-[7.5px] text-slate-400">3 Corners</span>
+            </button>
+
+            <button id="btn-players-4"
+              class="btn-action py-1.5 px-1 rounded-xl bg-black/40 border border-white/10 text-slate-300 font-bold text-[10px] flex flex-col items-center gap-0.5 transition hover:border-amber-400/50">
+              <div class="flex items-center gap-0.5 text-xs text-slate-400">
+                <i class="fa-solid fa-user"></i>
+                <i id="icon-p4-partner1" class="fa-solid fa-robot"></i>
+                <i id="icon-p4-partner2" class="fa-solid fa-robot"></i>
+                <i id="icon-p4-partner3" class="fa-solid fa-robot"></i>
+              </div>
+              <span class="font-extrabold text-white text-[11px]">4 Players</span>
+              <span class="text-[7.5px] text-slate-400">Full Board</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Start Offline / AI Game Action -->
+        <button id="btn-start-offline-match"
+          class="btn-action w-full py-2 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 text-slate-950 font-black text-[11px] flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/25 active:scale-[0.98]">
+          <i class="fa-solid fa-play text-[9px]"></i>
+          <span id="btn-start-offline-text">Start Match (2 Players vs AI)</span>
+        </button>
+      </div>
+
+      <!-- Dice Mode Option (1: 1 Die vs 2: 2 Dice) -->
+      <div class="mb-2 border-t border-amber-500/20 pt-1.5">
+        <div class="flex items-center justify-between mb-1">
+          <label class="text-[9.5px] font-black uppercase tracking-wider text-amber-300/90 flex items-center gap-1">
+            <i class="fa-solid fa-dice-d6 text-amber-400"></i>
+            <span>Dice Modes</span>
+          </label>
+          <span id="modal-mode-status-badge"
+            class="text-[8.5px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-500/30">Selectable</span>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5">
+          <button id="btn-dice-opt-1"
+            class="btn-action py-1 px-2 rounded-lg bg-amber-500/15 border border-amber-400/60 text-white font-bold text-[10.5px] flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-dice text-amber-400 text-[10px]"></i>
+            <span>1: 1 Die (Classic)</span>
+          </button>
+          <button id="btn-dice-opt-2"
+            class="btn-action py-1 px-2 rounded-lg bg-black/40 border border-white/10 text-slate-300 font-bold text-[10.5px] flex items-center justify-center gap-1.5 hover:border-amber-400/40">
+            <i class="fa-solid fa-cubes text-amber-400 text-[10px]"></i>
+            <span>2: 2 Dice (Speed)</span>
+          </button>
+        </div>
+        <div id="modal-mode-locked-alert"
+          class="hidden mt-1 p-1 rounded-lg bg-amber-950/60 border border-amber-500/40 text-amber-200 text-[9.5px] flex items-center gap-1">
+          <i class="fa-solid fa-lock text-amber-400 text-[8.5px]"></i>
+          <span>Mode locked during active game. Click <strong>Start New Game</strong> to switch.</span>
+        </div>
+      </div>
+
+      <!-- Start New Game Action in Modal -->
+      <div>
+        <button id="btn-modal-new-game"
+          class="btn-action w-full py-1.5 rounded-lg bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 font-black text-[11px] flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20 hover:brightness-110 active:scale-[0.98]">
+          <i class="fa-solid fa-rotate-left text-[10px]"></i>
+          <span>Start New Game</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings & Customization Modal -->
+  <div id="settings-modal" class="modal-overlay">
+    <div
+      class="modal-content glass-card max-w-2xl w-[94%] p-5 rounded-3xl border border-cyan-500/40 relative max-h-[92vh] flex flex-col">
+      <button id="btn-close-settings" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-3 shrink-0">
+        <div
+          class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-lg shadow-lg shadow-cyan-500/20">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <div>
+          <h2 class="font-brand text-lg font-bold text-white">Customization & Themes</h2>
+          <p class="text-xs text-cyan-200/60">Equip matching 3D sets, themed gotiyan & custom dice skins</p>
+        </div>
+      </div>
+
+      <!-- Settings Navigation Tabs -->
+      <div class="flex items-center gap-2 mb-3 shrink-0 border-b border-white/10 pb-2.5 overflow-x-auto">
+        <button id="tab-btn-combos"
+          class="settings-tab-btn active px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+          <i class="fa-solid fa-star text-amber-400"></i>
+          <span>Matching Sets (16)</span>
+        </button>
+        <button id="tab-btn-gotiyan"
+          class="settings-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all text-slate-300 hover:text-white">
+          <i class="fa-solid fa-chess-pawn text-emerald-400"></i>
+          <span>Player Skin (17)</span>
+        </button>
+        <button id="tab-btn-dice"
+          class="settings-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all text-slate-300 hover:text-white">
+          <i class="fa-solid fa-dice text-pink-400"></i>
+          <span>Dice Skins (29)</span>
+        </button>
+        <button id="tab-btn-options"
+          class="settings-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all text-slate-300 hover:text-white">
+          <i class="fa-solid fa-sliders text-cyan-400"></i>
+          <span>Game Options</span>
+        </button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="overflow-y-auto pr-1 custom-scroll flex-1">
+        <!-- Panel 1: Matching Combo Sets -->
+        <div id="panel-combos" class="settings-tab-panel">
+          <div class="mb-2 text-[11px] text-slate-400 flex items-center justify-between">
+            <span>1-Click Equip Matching 3D Gotiyan + Dice Set:</span>
+            <span id="active-combo-label" class="text-amber-400 font-bold"></span>
+          </div>
+          <div id="combos-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+            <!-- Dynamically populated by app.js -->
+          </div>
+        </div>
+
+        <!-- Panel 2: Gotiyan (Pawns) Skins -->
+        <div id="panel-gotiyan" class="settings-tab-panel hidden">
+          <div class="mb-2 text-[11px] text-slate-400 flex items-center justify-between">
+            <span>Select 3D Player Skin & Texture Design:</span>
+            <span id="active-goti-label" class="text-emerald-400 font-bold"></span>
+          </div>
+          <div id="gotiyan-skins-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+            <!-- Dynamically populated by app.js -->
+          </div>
+        </div>
+
+        <!-- Panel 3: Dice Skins -->
+        <div id="panel-dice" class="settings-tab-panel hidden">
+          <div class="mb-2 text-[11px] text-slate-400 flex items-center justify-between">
+            <span>Select 3D Dice Texture & Accessories:</span>
+            <span id="active-dice-label" class="text-pink-400 font-bold"></span>
+          </div>
+          <div id="dice-skins-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+            <!-- Dynamically populated by app.js -->
+          </div>
+        </div>
+
+        <!-- Panel 4: Game Options -->
+        <div id="panel-options" class="settings-tab-panel hidden space-y-4 pt-1">
+          <div>
+            <label class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2 block flex items-center gap-2">
+              <i class="fa-solid fa-cubes"></i>
+              <span>Dice Mode</span>
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="settings-dice-opt-1"
+                class="btn-action p-2.5 rounded-xl bg-cyan-950/80 border border-cyan-400 text-white font-bold text-xs flex items-center justify-center gap-2">
+                <i class="fa-solid fa-dice text-amber-400"></i>
+                <span>1 Die (Classic Ludo)</span>
+              </button>
+              <button id="settings-dice-opt-2"
+                class="btn-action p-2.5 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-slate-300 font-bold text-xs flex items-center justify-center gap-2 hover:border-cyan-400">
+                <i class="fa-solid fa-cubes text-amber-400"></i>
+                <span>2 Dice (Speed Ludo)</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="border-t border-white/10 pt-4 flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-white block">Game Sound Effects</span>
+              <span class="text-[10px] text-slate-400">Tactile dice rolls, pawn steps, and knockouts</span>
+            </div>
+            <button id="btn-toggle-sound-settings"
+              class="btn-action px-3 py-1.5 rounded-xl bg-slate-800 border border-white/10 text-xs font-semibold text-slate-200 hover:text-white flex items-center gap-2">
+              <i class="fa-solid fa-volume-high text-emerald-400" id="sound-icon-status"></i>
+              <span id="sound-label-status">Sound ON</span>
+            </button>
+          </div>
+
+          <div class="border-t border-white/10 pt-4 flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-white block">Auto-Playing Mode (Turn Timer)</span>
+              <span class="text-[10px] text-slate-400">Auto-roll dice and advance gotiyan on 20s idle timeout</span>
+            </div>
+            <button id="btn-toggle-autoplay-settings"
+              class="btn-action px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-semibold flex items-center gap-2 transition hover:bg-emerald-500/30">
+              <i class="fa-solid fa-robot text-emerald-400" id="autoplay-icon-status"></i>
+              <span id="autoplay-label-status">Auto-Play ON</span>
+            </button>
+          </div>
+
+          <div class="border-t border-white/10 pt-4 flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-white block flex items-center gap-1.5">
+                <i class="fa-solid fa-lock text-amber-400"></i>
+                <span>Lock Board Movement</span>
+              </span>
+              <span class="text-[10px] text-slate-400">Freeze 3D camera to prevent accidental board rotation or tilting during play</span>
+            </div>
+            <button id="btn-toggle-board-lock-settings"
+              class="btn-action px-3 py-1.5 rounded-xl bg-slate-800 border border-white/10 text-xs font-semibold text-slate-200 hover:text-white flex items-center gap-2">
+              <i class="fa-solid fa-lock-open text-amber-400" id="board-lock-icon-status"></i>
+              <span id="board-lock-label-status">Unlocked</span>
+            </button>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Developer Precision Studio / Custom Dice Controller Modal -->
+  <div id="hack-menu-modal" class="modal-overlay">
+    <div
+      class="modal-content glass-card max-w-md w-[92%] p-5 rounded-3xl border border-amber-500/50 relative shadow-2xl bg-slate-950/95 flex flex-col gap-3">
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-2 border-b border-amber-500/20">
+        <div class="flex items-center gap-2.5">
+          <div
+            class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center justify-center text-sm shadow-md shadow-amber-500/20">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <div>
+            <h2
+              class="font-serif text-sm font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-yellow-200 to-amber-300 uppercase leading-none">
+              Developer Precision Studio
+            </h2>
+            <p class="text-[9px] text-amber-300/70 font-semibold tracking-wider uppercase mt-0.5">Custom Dice
+              Diagnostics & Calibration</p>
+          </div>
+        </div>
+        <button id="btn-close-hack-modal"
+          class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center text-sm transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Master Power Toggle -->
+      <div class="p-2.5 rounded-xl bg-black/60 border border-white/10 flex items-center justify-between">
+        <div>
+          <span class="text-xs font-bold text-white block">Enable Custom Dice</span>
+          <span class="text-[9.5px] text-slate-400">Override rolls with custom selected numbers</span>
+        </div>
+        <button id="btn-toggle-hack-power"
+          class="btn-action px-3 py-1 rounded-lg text-[10.5px] font-bold border transition flex items-center gap-1.5 bg-slate-800 text-slate-400 border-white/10">
+          <i class="fa-solid fa-power-off text-xs"></i>
+          <span id="hack-power-status-label">DISABLED</span>
+        </button>
+      </div>
+
+      <!-- Auto-Play Mode Toggle -->
+      <div class="p-2.5 rounded-xl bg-black/60 border border-white/10 flex items-center justify-between">
+        <div>
+          <span class="text-xs font-bold text-white block">Auto-Playing Mode</span>
+          <span class="text-[9.5px] text-slate-400">20s idle timeout auto-rolls and advances gotiyan</span>
+        </div>
+        <button id="btn-toggle-autoplay-dev"
+          class="btn-action px-3 py-1 rounded-lg text-[10.5px] font-bold border transition flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+          <i class="fa-solid fa-robot text-xs" id="dev-autoplay-icon"></i>
+          <span id="dev-autoplay-status-label">ENABLED</span>
+        </button>
+      </div>
+
+      <!-- Execution Scope & Duration -->
+      <div class="space-y-2 text-[10px]">
+        <div class="grid grid-cols-2 gap-2">
+          <!-- Mode Duration -->
+          <div class="p-2 rounded-xl bg-black/40 border border-white/5 flex flex-col gap-1">
+            <span class="text-slate-400 font-semibold">Mode Duration:</span>
+            <div class="grid grid-cols-2 gap-1">
+              <button id="btn-hack-mode-single"
+                class="btn-action py-1 rounded-md text-[9.5px] font-bold bg-amber-500 text-slate-950">Next Roll</button>
+              <button id="btn-hack-mode-always"
+                class="btn-action py-1 rounded-md text-[9.5px] font-bold bg-slate-800 text-slate-400 hover:text-white">Always</button>
+            </div>
+          </div>
+          <!-- Target Scope -->
+          <div class="p-2 rounded-xl bg-black/40 border border-white/5 flex flex-col gap-1">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400 font-semibold">Target Scope:</span>
+              <span id="hack-scope-label" class="text-[9px] font-bold text-amber-300">My Turns (Red)</span>
+            </div>
+            <div class="grid grid-cols-2 gap-1">
+              <button id="btn-hack-scope-me"
+                class="btn-action py-1 rounded-md text-[9.5px] font-bold bg-amber-500 text-slate-950 flex items-center justify-center gap-1">
+                <i class="fa-solid fa-user-check text-[9px]"></i>
+                <span id="hack-btn-me-text">My Turns</span>
+              </button>
+              <button id="btn-hack-scope-all"
+                class="btn-action py-1 rounded-md text-[9.5px] font-bold bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center gap-1">
+                <i class="fa-solid fa-users text-[9px]"></i>
+                <span>All Players</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Select Player by Color (with dynamic My Turn indicator) -->
+        <div class="p-2 rounded-xl bg-black/40 border border-white/5 flex flex-col gap-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400 font-semibold flex items-center gap-1.5">
+              <i class="fa-solid fa-palette text-amber-400"></i>
+              <span>Select Player by Color:</span>
+            </span>
+            <span id="hack-my-turn-indicator"
+              class="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded-md">
+              My Turn: Red
+            </span>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5" id="group-hack-players">
+            <button id="btn-hack-player-0" data-player="0"
+              class="btn-hack-player py-1 px-1 rounded-lg border font-bold text-[9.5px] flex items-center justify-center gap-1 transition">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-600 shadow-sm shadow-red-500/50"></span>
+              <span>Red</span>
+              <span id="badge-my-0"
+                class="hack-my-badge text-[7.5px] bg-amber-400 text-slate-950 px-1 rounded font-black hidden">YOU</span>
+            </button>
+            <button id="btn-hack-player-3" data-player="3"
+              class="btn-hack-player py-1 px-1 rounded-lg border font-bold text-[9.5px] flex items-center justify-center gap-1 transition">
+              <span class="w-2.5 h-2.5 rounded-full bg-slate-600 shadow-sm shadow-slate-400/50"></span>
+              <span>Charcoal</span>
+              <span id="badge-my-3"
+                class="hack-my-badge text-[7.5px] bg-amber-400 text-slate-950 px-1 rounded font-black hidden">YOU</span>
+            </button>
+            <button id="btn-hack-player-1" data-player="1"
+              class="btn-hack-player py-1 px-1 rounded-lg border font-bold text-[9.5px] flex items-center justify-center gap-1 transition">
+              <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 shadow-sm shadow-yellow-400/50"></span>
+              <span>Yellow</span>
+              <span id="badge-my-1"
+                class="hack-my-badge text-[7.5px] bg-amber-400 text-slate-950 px-1 rounded font-black hidden">YOU</span>
+            </button>
+            <button id="btn-hack-player-2" data-player="2"
+              class="btn-hack-player py-1 px-1 rounded-lg border font-bold text-[9.5px] flex items-center justify-center gap-1 transition">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-sm shadow-blue-500/50"></span>
+              <span>Blue</span>
+              <span id="badge-my-2"
+                class="hack-my-badge text-[7.5px] bg-amber-400 text-slate-950 px-1 rounded font-black hidden">YOU</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Die 1 Selector -->
+      <div class="space-y-1">
+        <div class="flex items-center justify-between text-[11px]">
+          <span class="font-bold text-amber-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-dice text-amber-400"></i>
+            <span>Die 1 Number (1st Roll):</span>
+          </span>
+          <span id="label-hack-die1" class="text-white font-mono font-bold text-xs">Auto</span>
+        </div>
+        <div class="grid grid-cols-7 gap-1" id="group-hack-die1">
+          <button data-die="1" data-val="auto" class="btn-hack-pill active">Auto</button>
+          <button data-die="1" data-val="1" class="btn-hack-pill">1</button>
+          <button data-die="1" data-val="2" class="btn-hack-pill">2</button>
+          <button data-die="1" data-val="3" class="btn-hack-pill">3</button>
+          <button data-die="1" data-val="4" class="btn-hack-pill">4</button>
+          <button data-die="1" data-val="5" class="btn-hack-pill">5</button>
+          <button data-die="1" data-val="6" class="btn-hack-pill">6</button>
+        </div>
+      </div>
+
+      <!-- Die 2 Selector (Speed / 2-Dice or Bonus #1) -->
+      <div class="space-y-1">
+        <div class="flex items-center justify-between text-[11px]">
+          <span class="font-bold text-amber-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-dice text-pink-400"></i>
+            <span>Die 2 Number (2-Dice / Bonus #1):</span>
+          </span>
+          <span id="label-hack-die2" class="text-white font-mono font-bold text-xs">Auto</span>
+        </div>
+        <div class="grid grid-cols-7 gap-1" id="group-hack-die2">
+          <button data-die="2" data-val="auto" class="btn-hack-pill active">Auto</button>
+          <button data-die="2" data-val="1" class="btn-hack-pill">1</button>
+          <button data-die="2" data-val="2" class="btn-hack-pill">2</button>
+          <button data-die="2" data-val="3" class="btn-hack-pill">3</button>
+          <button data-die="2" data-val="4" class="btn-hack-pill">4</button>
+          <button data-die="2" data-val="5" class="btn-hack-pill">5</button>
+          <button data-die="2" data-val="6" class="btn-hack-pill">6</button>
+        </div>
+      </div>
+
+      <!-- Die 3 Selector (Bonus #2 / 6+6+X) -->
+      <div class="space-y-1">
+        <div class="flex items-center justify-between text-[11px]">
+          <span class="font-bold text-amber-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-dice text-emerald-400"></i>
+            <span>Die 3 Number (Bonus #2 / 6+6+X):</span>
+          </span>
+          <span id="label-hack-die3" class="text-white font-mono font-bold text-xs">Auto</span>
+        </div>
+        <div class="grid grid-cols-7 gap-1" id="group-hack-die3">
+          <button data-die="3" data-val="auto" class="btn-hack-pill active">Auto</button>
+          <button data-die="3" data-val="1" class="btn-hack-pill">1</button>
+          <button data-die="3" data-val="2" class="btn-hack-pill">2</button>
+          <button data-die="3" data-val="3" class="btn-hack-pill">3</button>
+          <button data-die="3" data-val="4" class="btn-hack-pill">4</button>
+          <button data-die="3" data-val="5" class="btn-hack-pill">5</button>
+          <button data-die="3" data-val="6" class="btn-hack-pill">6</button>
+        </div>
+      </div>
+
+      <!-- 1-Click Quick Tactical Presets -->
+      <div class="space-y-1">
+        <span class="text-[10px] text-slate-400 font-semibold block">Quick Tactical Presets:</span>
+        <div class="grid grid-cols-3 gap-1.5 text-[9.5px]">
+          <button id="btn-preset-six"
+            class="btn-action py-1 px-1.5 rounded-lg bg-black/60 border border-amber-500/30 text-amber-300 hover:border-amber-400 font-bold flex items-center justify-center gap-1">
+            <i class="fa-solid fa-fire text-amber-400 text-[8.5px]"></i>
+            <span>Only 6</span>
+          </button>
+          <button id="btn-preset-openrun"
+            class="btn-action py-1 px-1.5 rounded-lg bg-black/60 border border-cyan-500/30 text-cyan-300 hover:border-cyan-400 font-bold flex items-center justify-center gap-1">
+            <i class="fa-solid fa-bolt text-cyan-400 text-[8.5px]"></i>
+            <span>6 + 1</span>
+          </button>
+          <button id="btn-preset-sixfive"
+            class="btn-action py-1 px-1.5 rounded-lg bg-black/60 border border-amber-500/30 text-amber-200 hover:border-amber-300 font-bold flex items-center justify-center gap-1">
+            <i class="fa-solid fa-rocket text-amber-400 text-[8.5px]"></i>
+            <span>6 + 5</span>
+          </button>
+          <button id="btn-preset-doubles"
+            class="btn-action py-1 px-1.5 rounded-lg bg-black/60 border border-emerald-500/30 text-emerald-300 hover:border-emerald-400 font-bold flex items-center justify-center gap-1">
+            <i class="fa-solid fa-clone text-emerald-400 text-[8.5px]"></i>
+            <span>6 + 6</span>
+          </button>
+          <button id="btn-preset-sixsixfour"
+            class="btn-action py-1 px-1.5 rounded-lg bg-black/60 border border-purple-500/30 text-purple-300 hover:border-purple-400 font-bold flex items-center justify-center gap-1">
+            <i class="fa-solid fa-burst text-purple-400 text-[8.5px]"></i>
+            <span>6 + 6 + 4</span>
+          </button>
+          <button id="btn-preset-one"
+            class="btn-action py-1 px-1.5 rounded-lg bg-black/60 border border-pink-500/30 text-pink-300 hover:border-pink-400 font-bold flex items-center justify-center gap-1">
+            <i class="fa-solid fa-bullseye text-pink-400 text-[8.5px]"></i>
+            <span>Exact 1</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="flex items-center gap-2 pt-1 border-t border-white/10 mt-1">
+        <button id="btn-reset-hack"
+          class="btn-action flex-1 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span>Reset All</span>
+        </button>
+        <button id="btn-apply-hack"
+          class="btn-action flex-1 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-check"></i>
+          <span>Save & Apply</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Victory & Positioning Overlay Modal -->
+  <div id="victory-modal" class="modal-overlay">
+    <div class="modal-content glass-card max-w-sm w-[92%] p-5 sm:p-6 rounded-3xl border border-amber-500/40 text-center flex flex-col max-h-[92vh] overflow-y-auto">
+      <div id="victory-badge-icon-box"
+        class="w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-400 mx-auto flex items-center justify-center text-3xl mb-3 shadow-lg shadow-amber-500/20 border border-amber-500/30">
+        <i id="victory-badge-icon" class="fa-solid fa-crown"></i>
+      </div>
+      <h2 id="victory-modal-title" class="font-brand text-2xl font-black text-white tracking-wide mb-1">ROYAL VICTORY!</h2>
+      <p id="victory-modal-desc" class="text-xs text-slate-300 mb-3">
+        <span id="winner-name" class="font-bold text-amber-300">Player</span> has led all 4 pawns into Sanctuary!
+      </p>
+
+      <!-- Match Positioning System: 1st, 2nd, 3rd and You Lose -->
+      <div class="my-2 bg-slate-950/80 border border-white/10 rounded-2xl p-3 text-left">
+        <div class="text-[10px] font-black uppercase tracking-wider text-amber-400/90 mb-2.5 flex items-center justify-between">
+          <span><i class="fa-solid fa-ranking-star mr-1 text-amber-400"></i> Match Standings</span>
+          <span id="victory-my-rank" class="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-bold">Positions</span>
+        </div>
+        <div id="victory-rankings-list" class="space-y-1.5">
+          <!-- Dynamically populated ranking rows: 1st, 2nd, 3rd, and You Lose -->
+        </div>
+      </div>
+
+      <button id="btn-victory-play-again"
+        class="btn-action w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/25 hover:brightness-110 active:scale-[0.98]">
+        <i class="fa-solid fa-rotate-left mr-1.5"></i>Play Again
+      </button>
+    </div>
+  </div>
+
+  <!-- Exit Confirmation Modal (Triggered on Back Navigation) -->
+  <div id="exit-confirm-modal" class="modal-overlay">
+    <div
+      class="modal-content glass-card max-w-sm w-[90%] p-6 rounded-3xl border border-rose-500/40 text-center shadow-2xl relative">
+      <div
+        class="w-16 h-16 rounded-2xl bg-rose-500/20 text-rose-400 mx-auto flex items-center justify-center text-3xl mb-4 shadow-lg shadow-rose-500/20">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </div>
+      <h2 class="font-brand text-2xl font-bold text-white mb-2 tracking-wide">EXIT GAME?</h2>
+      <p class="text-xs text-slate-300 mb-6 leading-relaxed">
+        Are you sure you want to exit <span class="text-amber-400 font-semibold">Mission Sambhoug 3D Ludo</span>?
+      </p>
+      <div class="flex items-center gap-3">
+        <button id="btn-cancel-exit"
+          class="flex-1 py-3 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 border border-slate-600/50 font-bold text-xs uppercase tracking-wider transition active:scale-95 shadow-md">
+          Cancel
+        </button>
+        <button id="btn-confirm-exit"
+          class="flex-1 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-rose-500/30 transition active:scale-95">
+          Exit App
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Scripts -->
+  <script src="js/paho-mqtt.min.js"></script>
+  <script src="js/board_data.js"></script>
+  <script src="js/game_engine.js"></script>
+  <script src="js/ai_bot.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/webrtc_network.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>

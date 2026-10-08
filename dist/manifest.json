@@ -1,0 +1,22 @@
+{
+  "name": "Mission Sambhoug 3D Ludo",
+  "short_name": "3D Ludo",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#06091c",
+  "theme_color": "#06091c",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "app-icon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
