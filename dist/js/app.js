@@ -7538,14 +7538,14 @@ function updatePopupScreenPosition() {
   if (!popup || popup.classList.contains('hidden') || !activeMeshForPopup) return;
 
   const screenPos = getScreenPositionFromObject(activeMeshForPopup);
-  const popupWidth = Math.min(250, window.innerWidth - 24);
-  const popupHeight = 110;
+  const popupWidth = Math.min(210, window.innerWidth - 20);
+  const popupHeight = 85;
 
   let left = screenPos.x - (popupWidth / 2);
-  let top = screenPos.y - popupHeight - 14;
+  let top = screenPos.y - popupHeight - 12;
 
-  left = Math.max(10, Math.min(window.innerWidth - popupWidth - 10, left));
-  top = Math.max(10, Math.min(window.innerHeight - popupHeight - 85, top));
+  left = Math.max(8, Math.min(window.innerWidth - popupWidth - 8, left));
+  top = Math.max(8, Math.min(window.innerHeight - popupHeight - 75, top));
 
   popup.style.left = `${left}px`;
   popup.style.top = `${top}px`;
@@ -7627,7 +7627,7 @@ function showGotiDicePopup(pawn, pMesh) {
       : (canMove ? 'Click to run' : (pawn.isInYard ? 'Requires 6' : 'Blocked'));
 
     btn.innerHTML = `
-      <i class="fa-solid fa-dice text-amber-400 text-lg"></i>
+      <i class="fa-solid fa-dice text-amber-400 text-sm"></i>
       <div class="popup-die-details">
         <span class="popup-die-label">${labelPrefix} ${d.index + 1}</span>
         <span class="popup-die-value"><strong>${d.value}</strong> Steps</span>
@@ -8078,86 +8078,7 @@ function autoExecuteTwoDiceTurn(firstPawn, firstDieIndex, reasonMsg) {
 }
 
 function checkAndTriggerAutoTwoDiceMove(current, rollsToRun, allMovable) {
-  if (!twoDicePool || twoDicePool.length < 2) return false;
-
-  const pawnsOnTrack = current.pawns.filter((p) => !p.isFinished && !p.isInYard);
-  const yardPawns = current.pawns.filter((p) => p.isInYard && !p.isFinished);
-  const unfinishedPawns = current.pawns.filter((p) => !p.isFinished);
-
-  // Rule A: 6+X to Open & Run automatically
-  // When no pawns are on track, and roll contains a 6 (e.g. 6+1, 6+2, 6+3, 6+4, 6+5):
-  // 6 opens a yard goti, and the other die immediately runs that newly opened goti!
-  if (pawnsOnTrack.length === 0 && yardPawns.length > 0 && rollsToRun.includes(6)) {
-    const sixDieIdx = twoDicePool.findIndex((d) => !d.used && d.value === 6);
-    const otherDieIdx = twoDicePool.findIndex((d, idx) => !d.used && idx !== sixDieIdx);
-    if (sixDieIdx !== -1 && otherDieIdx !== -1) {
-      const targetPawn = yardPawns[0];
-      const otherVal = twoDicePool[otherDieIdx].value;
-      const bannerMsg = `⚡ Auto: Opened ${current.name}'s goti with 6 and running ${otherVal} steps! 🎲`;
-      autoExecuteTwoDiceTurn(targetPawn, sixDieIdx, bannerMsg);
-      return true;
-    }
-  }
-
-  // Rule B: Only 1 goti on track, and no 6 rolled (or cannot open yard goti)
-  // Yard pawns cannot move without a 6, so the single track goti is the only goti that can move!
-  if (pawnsOnTrack.length === 1 && !rollsToRun.includes(6)) {
-    const targetPawn = pawnsOnTrack[0];
-    const canMoveAny = rollsToRun.some((val) =>
-      engine.canPawnMove(targetPawn, { total: val, isSingleDie: true, hasSix: val === 6 })
-    );
-    if (canMoveAny) {
-      const plan = aiBot.chooseBestTwoDicePlan(current, twoDicePool, engine.players, engine);
-      const firstDieIdx = (plan && plan.firstDieIndex !== undefined) ? plan.firstDieIndex : 0;
-      const bannerMsg = `⚡ Auto: Single goti on board taking both dice [${rollsToRun.join(', ')}]! 🎲`;
-      autoExecuteTwoDiceTurn(targetPawn, firstDieIdx, bannerMsg);
-      return true;
-    }
-  }
-
-  // Rule C: Only 1 unfinished goti remaining in total (other 3 in Home Goal)
-  // There is only 1 goti left in existence for this player!
-  if (unfinishedPawns.length === 1) {
-    const targetPawn = unfinishedPawns[0];
-    if (targetPawn.isInYard) {
-      if (rollsToRun.includes(6)) {
-        const sixDieIdx = twoDicePool.findIndex((d) => !d.used && d.value === 6);
-        const otherDieIdx = twoDicePool.findIndex((d, idx) => !d.used && idx !== sixDieIdx);
-        if (sixDieIdx !== -1 && otherDieIdx !== -1) {
-          const bannerMsg = `⚡ Auto: Opened final goti with 6 and running ${twoDicePool[otherDieIdx].value} steps! 🎲`;
-          autoExecuteTwoDiceTurn(targetPawn, sixDieIdx, bannerMsg);
-          return true;
-        }
-      }
-    } else {
-      const plan = aiBot.chooseBestTwoDicePlan(current, twoDicePool, engine.players, engine);
-      const firstDieIdx = (plan && plan.firstDieIndex !== undefined) ? plan.firstDieIndex : 0;
-      const bannerMsg = `⚡ Auto: Final goti moving automatically with [${rollsToRun.join(', ')}]! 🎲`;
-      autoExecuteTwoDiceTurn(targetPawn, firstDieIdx, bannerMsg);
-      return true;
-    }
-  }
-
-  // Rule D: Exactly 1 pawn can legally move with any die in rollsToRun
-  if (allMovable && allMovable.length === 1) {
-    const targetPawn = allMovable[0];
-    if (targetPawn.isInYard && rollsToRun.includes(6)) {
-      const sixDieIdx = twoDicePool.findIndex((d) => !d.used && d.value === 6);
-      const otherDieIdx = twoDicePool.findIndex((d, idx) => !d.used && idx !== sixDieIdx);
-      if (sixDieIdx !== -1 && otherDieIdx !== -1) {
-        const bannerMsg = `⚡ Auto: Opened goti with 6 and running ${twoDicePool[otherDieIdx].value} steps! 🎲`;
-        autoExecuteTwoDiceTurn(targetPawn, sixDieIdx, bannerMsg);
-        return true;
-      }
-    } else if (!targetPawn.isInYard) {
-      const plan = aiBot.chooseBestTwoDicePlan(current, twoDicePool, engine.players, engine);
-      const firstDieIdx = (plan && plan.firstDieIndex !== undefined) ? plan.firstDieIndex : 0;
-      const bannerMsg = `⚡ Auto: Only movable goti advancing with [${rollsToRun.join(', ')}]! 🎲`;
-      autoExecuteTwoDiceTurn(targetPawn, firstDieIdx, bannerMsg);
-      return true;
-    }
-  }
-
+  // Manual goti move rule: Always allow player to choose and click their own gotiyan
   return false;
 }
 
@@ -8312,17 +8233,6 @@ function handleRollOutcome(rollResult) {
         oppMsg = `${current.name} rolled a 6! Waiting for opponent to move...`;
       }
       updateStatusBanner(oppMsg);
-    } else if (validPawns.length === 1) {
-      // Single movable goti: auto-move after brief organic pause
-      const singlePawn = validPawns[0];
-      highlightSelectablePawns(validPawns);
-      updateStatusBanner(`⚡ Auto-Move: ${current.name}'s goti advancing ${rollDisplay} steps! 🎲`);
-      stopTurnTimer();
-      setTimeout(() => {
-        if (!isPawnRunning && !engine.isGameOver) {
-          executePawnMove(singlePawn, rollResult);
-        }
-      }, 450);
     } else {
       highlightSelectablePawns(validPawns);
       let msg = `Select a pawn to advance (${rollDisplay})`;
@@ -9088,8 +8998,8 @@ function setupUI() {
       if (typeof sounds !== 'undefined' && sounds.toggleMute) {
         const muted = sounds.toggleMute();
         btnMute.innerHTML = muted
-          ? '<i class="fa-solid fa-volume-xmark text-rose-400"></i>'
-          : '<i class="fa-solid fa-volume-high text-cyan-400"></i>';
+          ? '<i class="fa-solid fa-volume-xmark text-rose-400"></i><span class="nav-text">Mute</span>'
+          : '<i class="fa-solid fa-volume-high text-cyan-400"></i><span class="nav-text">Sound</span>';
       }
     });
   }

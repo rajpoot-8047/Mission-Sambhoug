@@ -82,50 +82,51 @@
   <!-- Subtle Minimalist Top Left Header (Mobile & Portrait Responsive) -->
   <header class="top-nav-bar">
     <button id="btn-open-multiplayer"
-      class="btn-action glass-card px-3 py-1.5 rounded-xl flex items-center gap-1.5 border border-white/10 text-[11px] font-semibold text-slate-300 hover:text-white"
+      class="top-nav-pill btn-action"
       title="Play Modes & Multiplayer">
-      <i class="fa-solid fa-gamepad text-emerald-400"></i>
+      <i class="fa-solid fa-gamepad icon-modes"></i>
       <span class="nav-text">Modes</span>
     </button>
     <button id="btn-new-game"
-      class="btn-action glass-card px-3 py-1.5 rounded-xl flex items-center gap-1.5 border border-white/10 text-[11px] font-semibold text-slate-300 hover:text-white"
+      class="top-nav-pill btn-action"
       title="Reset & Start New Game">
-      <i class="fa-solid fa-rotate-left text-amber-400"></i>
+      <i class="fa-solid fa-rotate-left icon-new-game"></i>
       <span class="nav-text">New Game</span>
     </button>
     <button id="btn-exit-game"
-      class="btn-action glass-card px-3 py-1.5 rounded-xl flex items-center gap-1.5 border border-white/10 text-[11px] font-semibold text-rose-300 hover:text-white"
+      class="top-nav-pill btn-action"
       title="Exit Match">
-      <i class="fa-solid fa-arrow-right-from-bracket text-rose-400"></i>
+      <i class="fa-solid fa-arrow-right-from-bracket icon-exit"></i>
       <span class="nav-text">Exit</span>
     </button>
     <button id="btn-open-settings"
-      class="btn-action glass-card px-3 py-1.5 rounded-xl flex items-center gap-1.5 border border-white/10 text-[11px] font-semibold text-slate-300 hover:text-white"
+      class="top-nav-pill btn-action"
       title="Settings & Customization">
-      <i class="fa-solid fa-gear text-pink-400"></i>
+      <i class="fa-solid fa-gear icon-settings"></i>
       <span class="nav-text">Settings</span>
     </button>
     <button id="btn-sound"
-      class="btn-action glass-card p-2 rounded-xl border border-white/10 text-slate-300 text-xs hover:text-white"
+      class="top-nav-pill btn-action"
       title="Toggle Sound">
-      <i class="fa-solid fa-volume-high"></i>
+      <i class="fa-solid fa-volume-high icon-sound"></i>
+      <span class="nav-text">Sound</span>
     </button>
     <button id="btn-lock-board"
-      class="btn-action glass-card px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-white/10 text-[11px] font-semibold text-slate-300 hover:text-white"
+      class="top-nav-pill btn-action"
       title="Lock / Unlock Board Movement">
-      <i id="lock-board-icon" class="fa-solid fa-lock-open text-amber-400"></i>
+      <i id="lock-board-icon" class="fa-solid fa-lock-open icon-lock"></i>
       <span id="lock-board-text" class="nav-text">Lock</span>
     </button>
     <button id="btn-toggle-theme"
-      class="btn-action glass-card px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-cyan-500/30 text-[11px] font-semibold text-cyan-300 hover:text-white shadow-sm shadow-cyan-500/10"
+      class="top-nav-pill btn-action"
       title="Switch Theme (Modern Sci-Fi / Royal Heirloom)">
-      <i id="theme-btn-icon" class="fa-solid fa-atom text-cyan-400"></i>
+      <i id="theme-btn-icon" class="fa-solid fa-atom icon-theme"></i>
       <span id="theme-btn-text" class="nav-text">Sci-Fi</span>
     </button>
     <button id="btn-open-hack"
-      class="btn-action glass-card px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-amber-500/30 text-[11px] font-bold text-amber-300 hover:text-white shadow-sm shadow-amber-500/10 hidden"
+      class="top-nav-pill btn-action hidden"
       title="Precision Dev Diagnostics">
-      <i class="fa-solid fa-sliders text-amber-400"></i>
+      <i class="fa-solid fa-sliders icon-tools"></i>
       <span class="nav-text">Tools</span>
     </button>
   </header>
@@ -168,7 +169,7 @@
     </div>
     <div class="goti-dice-popup-options">
       <button id="btn-popup-die-1" class="btn-popup-die" type="button">
-        <i class="fa-solid fa-dice text-amber-400 text-lg"></i>
+        <i class="fa-solid fa-dice text-amber-400 text-sm"></i>
         <div class="popup-die-details">
           <span class="popup-die-label">Die 1</span>
           <span class="popup-die-value"><strong id="popup-val-1">6</strong> Steps</span>
@@ -176,7 +177,7 @@
         </div>
       </button>
       <button id="btn-popup-die-2" class="btn-popup-die" type="button">
-        <i class="fa-solid fa-dice text-amber-400 text-lg"></i>
+        <i class="fa-solid fa-dice text-amber-400 text-sm"></i>
         <div class="popup-die-details">
           <span class="popup-die-label">Die 2</span>
           <span class="popup-die-value"><strong id="popup-val-2">5</strong> Steps</span>
