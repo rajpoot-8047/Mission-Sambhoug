@@ -10,6 +10,12 @@
   "android": {
     "allowMixedContent": true
   },
+  "ios": {
+    "contentInset": "automatic",
+    "preferredContentMode": "mobile",
+    "allowsLinkPreview": false,
+    "scrollEnabled": false
+  },
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 2200,

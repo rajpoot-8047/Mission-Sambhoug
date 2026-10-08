@@ -8672,6 +8672,28 @@ function executePawnMove(pawn, rollInput) {
   });
 }
 
+function triggerTurnVibration() {
+  try {
+    // 1. Capacitor Native Haptics Plugin (iOS Taptic Engine & Android Haptics)
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
+      const Haptics = window.Capacitor.Plugins.Haptics;
+      if (typeof Haptics.notification === 'function') {
+        Haptics.notification({ type: 'SUCCESS' }).catch(() => {});
+      } else if (typeof Haptics.impact === 'function') {
+        Haptics.impact({ style: 'HEAVY' }).catch(() => {});
+      } else if (typeof Haptics.vibrate === 'function') {
+        Haptics.vibrate({ duration: 250 }).catch(() => {});
+      }
+    }
+    // 2. Standard Web & Android WebView Vibration API
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      navigator.vibrate([160, 80, 160]);
+    }
+  } catch (e) {
+    // Graceful fallback if device permissions or hardware ignore vibration
+  }
+}
+
 function startTurnCycle(isBonusRoll = false, bonusMessage = null) {
   isTurnTransitioning = false;
   updatePlayerHUD();
@@ -8728,6 +8750,7 @@ function startTurnCycle(isBonusRoll = false, bonusMessage = null) {
   if (gameMode === 'online') {
     const isMyTurn = isMyTurnInOnlineGame(current);
     if (isMyTurn) {
+      triggerTurnVibration();
       setRollButtonEnabled(true);
       if (isBonusRoll && bonusMessage) {
         updateStatusBanner(`${bonusMessage} • Tap Bonus Roll!`);
@@ -8764,6 +8787,7 @@ function startTurnCycle(isBonusRoll = false, bonusMessage = null) {
       }
     }, isBonusRoll ? 1200 : 750);
   } else {
+    triggerTurnVibration();
     setRollButtonEnabled(true);
     if (isBonusRoll && bonusMessage) {
       updateStatusBanner(`${bonusMessage} • Tap Bonus Roll!`);
@@ -11554,6 +11578,14 @@ function updateYardRankBadges() {
   let activeSequence = activeCount === 2 ? [0, 1] : (activeCount === 3 ? [0, 3, 1] : [0, 3, 1, 2]);
   const activeIds = activeSequence.slice(0, activeCount);
 
+  // If match is NOT over and nobody has won / finished all pawns yet,
+  // do NOT show any rank badges!
+  const hasFinishedPlayers = (engine.rankings && engine.rankings.length > 0) || !!engine.winner;
+  if (!engine.isGameOver && !hasFinishedPlayers) {
+    clearYardRankBadges();
+    return;
+  }
+
   // If match is over OR 2 winners have finished in a 4-player match,
   // finalize remaining unfinished players into rankings sorted by game progress!
   if (engine.isGameOver || (activeCount === 4 && engine.rankings && engine.rankings.length >= 2)) {
@@ -11575,45 +11607,53 @@ function updateYardRankBadges() {
     }
   }
 
-  const activeRanks = (engine.rankings && engine.rankings.length > 0)
+  const finishedList = (engine.rankings && engine.rankings.length > 0)
     ? [...engine.rankings]
     : (engine.winner ? [engine.winner.id] : []);
 
-  // Ensure every active player is accounted for
-  activeIds.forEach((pid) => {
-    if (!activeRanks.includes(pid)) activeRanks.push(pid);
-  });
+  const totalPlayers = activeIds.length;
+  const isMatchComplete = !!engine.isGameOver;
 
   const myPlayer = (typeof getMyPlayerInfo === 'function') ? getMyPlayerInfo() : null;
   const myPlayerId = myPlayer ? myPlayer.id : 0;
-  const totalPlayers = activeIds.length;
-  const isMatchComplete = engine.isGameOver || activeRanks.length >= totalPlayers || (activeCount === 4 && engine.rankings && engine.rankings.length >= 2);
 
-  activeRanks.forEach((pid, rankIdx) => {
-    if (!activeIds.includes(pid)) return;
+  activeIds.forEach((pid) => {
+    const playerObj = engine.players[pid];
+    const isFinished = playerObj && (playerObj.isWinner || (playerObj.pawns && playerObj.pawns.filter((p) => p.isFinished).length === 4));
+    const rankIdx = finishedList.indexOf(pid);
 
     let rankType = null;
-    if (rankIdx === 0) {
+    if (rankIdx === 0 && (isFinished || isMatchComplete)) {
       rankType = '1st';
-    } else if (rankIdx === 1) {
+    } else if (rankIdx === 1 && (isFinished || isMatchComplete)) {
       if (totalPlayers === 2 && isMatchComplete) {
         rankType = 'lose';
       } else {
         rankType = '2nd';
       }
-    } else if (rankIdx === 2) {
+    } else if (rankIdx === 2 && (isFinished || isMatchComplete)) {
       if (totalPlayers === 3 && isMatchComplete) {
         rankType = 'lose';
       } else {
         rankType = '3rd';
       }
-    } else if (rankIdx === 3 || (isMatchComplete && rankIdx === activeRanks.length - 1)) {
+    } else if (isMatchComplete && (rankIdx === 3 || rankIdx === finishedList.length - 1 || rankIdx === -1)) {
       rankType = 'lose';
     }
 
-    // Only render 3rd or Lose badges once the match has completed or podium is finalized
-    if (!rankType) return;
-    if ((rankType === '3rd' || rankType === 'lose') && !isMatchComplete) return;
+    // Only render badges if player legitimately earned it (won) or match is complete
+    if (!rankType || ((rankType === '3rd' || rankType === 'lose') && !isMatchComplete)) {
+      if (yardRankMeshes[pid]) {
+        scene.remove(yardRankMeshes[pid]);
+        if (yardRankMeshes[pid].geometry) yardRankMeshes[pid].geometry.dispose();
+        if (yardRankMeshes[pid].material) {
+          if (yardRankMeshes[pid].material.map) yardRankMeshes[pid].material.map.dispose();
+          yardRankMeshes[pid].material.dispose();
+        }
+        delete yardRankMeshes[pid];
+      }
+      return;
+    }
 
     // Check if badge already exists for this player with identical rank
     if (yardRankMeshes[pid]) {
@@ -11633,7 +11673,6 @@ function updateYardRankBadges() {
     if (!quad) return;
 
     const isMe = (pid === myPlayerId);
-    const playerObj = engine.players[pid];
     const playerName = playerObj ? playerObj.name : quad.name;
 
     const badgeMesh = createYardRankBadgeMesh(rankType, playerName, isMe, quad);
@@ -11851,8 +11890,8 @@ function updateCameraViewport() {
 
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
-  // Crisp High-DPI Retina resolution
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.0));
+  // Razor-sharp High-DPI Retina resolution (clamped to 3.0 for OLED Super Retina sharpness)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 3.0));
 
   updateDicePositions();
 }
