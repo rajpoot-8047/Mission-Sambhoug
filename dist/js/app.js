@@ -2511,11 +2511,23 @@ function getCachedPadBoxTexture(padColor) {
   const padHex = colorToHexStr(padColor);
   const theme = getThemeProfile(currentTheme);
 
-  // 1. Sleek Deep Obsidian / Midnight Slate Base Slab (High-Contrast Museum Base)
+  // 1. Theme-Adaptive Base Slab (High-Contrast Theme-Specific Foundation)
+  const baseNum = (typeof theme.baseColor === 'number') ? theme.baseColor : 0x212930;
+  const bR = (baseNum >> 16) & 255;
+  const bG = (baseNum >> 8) & 255;
+  const bB = baseNum & 255;
+  const centerBaseHex = '#' + [Math.min(255, Math.round(bR * 1.35 + 8)), Math.min(255, Math.round(bG * 1.35 + 8)), Math.min(255, Math.round(bB * 1.35 + 8))].map(v => v.toString(16).padStart(2, '0')).join('');
+  const midBaseHex = '#' + [bR, bG, bB].map(v => v.toString(16).padStart(2, '0')).join('');
+  const darkBaseHex = '#' + [Math.max(4, Math.round(bR * 0.38)), Math.max(4, Math.round(bG * 0.38)), Math.max(4, Math.round(bB * 0.38))].map(v => v.toString(16).padStart(2, '0')).join('');
+  const deepShadowHex = '#' + [Math.max(2, Math.round(bR * 0.18)), Math.max(2, Math.round(bG * 0.18)), Math.max(2, Math.round(bB * 0.18))].map(v => v.toString(16).padStart(2, '0')).join('');
+
+  const rimColor = theme.padRimColor || '#d4af37';
+  const rimInner = theme.padRimInner || theme.borderRibbon2 || '#dfb858';
+
   const baseGrad = ctx.createRadialGradient(128, 128, 15, 128, 128, 160);
-  baseGrad.addColorStop(0.0, '#1c232d');
-  baseGrad.addColorStop(0.55, '#121720');
-  baseGrad.addColorStop(1.0, '#090c10');
+  baseGrad.addColorStop(0.0, centerBaseHex);
+  baseGrad.addColorStop(0.55, midBaseHex);
+  baseGrad.addColorStop(1.0, darkBaseHex);
   ctx.fillStyle = baseGrad;
   ctx.fillRect(0, 0, 256, 256);
 
@@ -2536,7 +2548,7 @@ function getCachedPadBoxTexture(padColor) {
   ctx.fillStyle = sheen;
   ctx.fillRect(0, 0, 256, 256);
 
-  // 2. Double Metallic Brass Border with Player Gemstone Conduit
+  // 2. Double Theme Metallic Border with Player Gemstone Conduit
   const chamfer = 24;
   ctx.save();
   ctx.beginPath();
@@ -2550,8 +2562,8 @@ function getCachedPadBoxTexture(padColor) {
   ctx.lineTo(8, 8 + chamfer);
   ctx.closePath();
 
-  // Outer Polished Brass Bezel Rim
-  ctx.strokeStyle = '#d4af37';
+  // Outer Polished Theme Bezel Rim
+  ctx.strokeStyle = rimColor;
   ctx.lineWidth = 4.0;
   ctx.stroke();
 
@@ -2590,7 +2602,7 @@ function getCachedPadBoxTexture(padColor) {
   ctx.lineWidth = 2.4;
   ctx.stroke();
 
-  // Inner Fine Brass Conduit
+  // Inner Fine Conduit in Theme Inner Accent
   ctx.beginPath();
   ctx.moveTo(22 + chamfer * 0.6, 22);
   ctx.lineTo(234 - chamfer * 0.6, 22);
@@ -2601,18 +2613,18 @@ function getCachedPadBoxTexture(padColor) {
   ctx.lineTo(22, 234 - chamfer * 0.6);
   ctx.lineTo(22, 22 + chamfer * 0.6);
   ctx.closePath();
-  ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)';
+  ctx.strokeStyle = rimInner;
   ctx.lineWidth = 1.2;
   ctx.stroke();
   ctx.restore();
 
-  // 4 Corner Turned Brass Fasteners / Studs
+  // 4 Corner Turned Studs in Theme Rim Color
   [
     [26, 26], [230, 26], [26, 230], [230, 230]
   ].forEach(([fx, fy]) => {
     ctx.beginPath();
     ctx.arc(fx, fy, 4.5, 0, Math.PI * 2);
-    ctx.fillStyle = '#d4af37';
+    ctx.fillStyle = rimColor;
     ctx.fill();
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.65)';
     ctx.lineWidth = 1.2;
@@ -2632,7 +2644,7 @@ function getCachedPadBoxTexture(padColor) {
   ctx.save();
   ctx.beginPath();
   ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
-  ctx.fillStyle = '#0a0d12';
+  ctx.fillStyle = deepShadowHex;
   ctx.fill();
   ctx.strokeStyle = padHex;
   ctx.lineWidth = 2.5;
@@ -2642,12 +2654,12 @@ function getCachedPadBoxTexture(padColor) {
   for (let rTrack of [72, 62, 52]) {
     ctx.beginPath();
     ctx.arc(cx, cy, rTrack, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(212, 175, 55, 0.22)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
     ctx.lineWidth = 0.9;
     ctx.stroke();
   }
 
-  // 4 Precision Brass Index Ticks (N, S, E, W)
+  // 4 Precision Theme Index Ticks (N, S, E, W)
   [
     [cx, cy - rOuter - 2, cx, cy - rOuter + 8],
     [cx, cy + rOuter - 8, cx, cy + rOuter + 2],
@@ -2657,7 +2669,7 @@ function getCachedPadBoxTexture(padColor) {
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
-    ctx.strokeStyle = '#d4af37';
+    ctx.strokeStyle = rimColor;
     ctx.lineWidth = 2.5;
     ctx.stroke();
   });
@@ -2665,15 +2677,15 @@ function getCachedPadBoxTexture(padColor) {
   // 4. Center High-Contrast Docking Socket Ring & Bed (Where Goti Sits)
   const rTarget = 44;
   const targetGrad = ctx.createRadialGradient(cx - 4, cy - 4, 3, cx, cy, rTarget);
-  targetGrad.addColorStop(0.0, '#1c2430');
-  targetGrad.addColorStop(0.60, '#0f141b');
-  targetGrad.addColorStop(1.0, '#06080b');
+  targetGrad.addColorStop(0.0, centerBaseHex);
+  targetGrad.addColorStop(0.60, midBaseHex);
+  targetGrad.addColorStop(1.0, deepShadowHex);
   ctx.beginPath();
   ctx.arc(cx, cy, rTarget, 0, Math.PI * 2);
   ctx.fillStyle = targetGrad;
   ctx.fill();
-  // Turned brass lip around socket
-  ctx.strokeStyle = '#d4af37';
+  // Socket lip in Theme Rim Color
+  ctx.strokeStyle = rimColor;
   ctx.lineWidth = 2.2;
   ctx.stroke();
 
