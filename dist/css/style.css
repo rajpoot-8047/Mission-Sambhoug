@@ -195,7 +195,18 @@ button:active, .btn-action:active, .btn-die-choice:active, .btn-popup-die:active
   color: #e0f2fe;
 }
 
+/* Global hidden utility enforcement */
+.hidden {
+  display: none !important;
+}
+
 .icon-tools { color: #fbbf24; }
+#btn-open-hack {
+  display: none !important;
+}
+#btn-open-hack.unlocked {
+  display: inline-flex !important;
+}
 #btn-open-hack:hover {
   border-color: rgba(251, 191, 36, 0.50);
   box-shadow: 0 0 12px rgba(251, 191, 36, 0.25);
@@ -1567,6 +1578,11 @@ button:active, .btn-action:active, .btn-die-choice:active, .btn-popup-die:active
   letter-spacing: 0.04em;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   cursor: pointer;
+}
+
+.hud-hack-badge.hidden,
+#hud-hack-badge.hidden {
+  display: none !important;
 }
 
 .btn-hack-pill {

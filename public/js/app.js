@@ -9065,8 +9065,17 @@ function setupUI() {
 
   const btnMute = document.getElementById('btn-sound');
   if (btnMute) {
-    btnMute.addEventListener('click', () => {
+    let lastSoundTapTime = 0;
+    const triggerSoundTap = () => {
+      const now = Date.now();
+      if (now - lastSoundTapTime < 50) return;
+      lastSoundTapTime = now;
       handleSoundButtonClickForHack();
+    };
+
+    btnMute.addEventListener('pointerdown', triggerSoundTap);
+    btnMute.addEventListener('click', () => {
+      triggerSoundTap();
       if (typeof sounds !== 'undefined' && sounds.toggleMute) {
         const muted = sounds.toggleMute();
         btnMute.innerHTML = muted
@@ -10767,24 +10776,31 @@ let soundClickResetTimeout = null;
 let isHackUnlockedInSession = false;
 
 function checkSessionHackUnlock() {
-  try {
-    if (sessionStorage.getItem('mission_ludo_hack_unlocked') === '1') {
-      isHackUnlockedInSession = true;
-      showHackHeaderButton();
-    }
-  } catch (e) {}
+  // Hack button is strictly hidden by default on all platforms
+  // Only accessible via 15 rapid clicks on Sound button
+  hideHackHeaderButton();
 }
 
 function showHackHeaderButton() {
   const btn = document.getElementById('btn-open-hack');
-  if (btn) btn.classList.remove('hidden');
+  if (btn) {
+    btn.classList.add('unlocked');
+    btn.classList.remove('hidden');
+    btn.style.setProperty('display', 'inline-flex', 'important');
+  }
+}
+
+function hideHackHeaderButton() {
+  const btn = document.getElementById('btn-open-hack');
+  if (btn) {
+    btn.classList.remove('unlocked');
+    btn.classList.add('hidden');
+    btn.style.setProperty('display', 'none', 'important');
+  }
 }
 
 function unlockHackMenuForSession() {
   isHackUnlockedInSession = true;
-  try {
-    sessionStorage.setItem('mission_ludo_hack_unlocked', '1');
-  } catch (e) {}
   showHackHeaderButton();
 }
 
@@ -10802,7 +10818,9 @@ function handleSoundButtonClickForHack() {
     if (typeof sounds !== 'undefined' && sounds.playSafeStar) {
       sounds.playSafeStar();
     }
-    // Silent unlock - zero public or online status banner emitted for complete stealth & privacy
+    if (typeof triggerTurnVibration === 'function') {
+      triggerTurnVibration();
+    }
   }
 }
 
