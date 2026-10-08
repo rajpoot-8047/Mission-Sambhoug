@@ -81,10 +81,10 @@ const PALETTE = {
   PAWN_BLUE: 0x0c4bbd,
   PAWN_CHARCOAL: 0x2b3238,
   // Yard Gotiyan Pad Boxes (Calibrated to match exact perceived gemstone body color of gotiyan)
-  PAD_RED: 0x8a1414,
-  PAD_YELLOW: 0x8a6e00,
-  PAD_BLUE: 0x083a99,
-  PAD_CHARCOAL: 0x1f2428,
+  PAD_RED: 0x851212,
+  PAD_YELLOW: 0x856900,
+  PAD_BLUE: 0x00329e,
+  PAD_CHARCOAL: 0x1a2024,
   // Standard Guild Tokens for PBR Heirloom Palette & Audit Compliance
   AMBER_GOLD: 0xd9b300,
   LAPIS_BLUE: 0x0c4bbd,
