@@ -216,26 +216,40 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('roll_dice', ({ val1, val2, rollResult, actionId }) => {
+  socket.on('dice_roll_start', (data) => {
+    if (!currentRoom) return;
+    io.to(currentRoom).emit('dice_roll_start', data);
+  });
+
+  socket.on('auto_roll', (data) => {
+    if (!currentRoom) return;
+    io.to(currentRoom).emit('auto_roll', data);
+  });
+
+  socket.on('ack', (data) => {
+    if (!currentRoom) return;
+    io.to(currentRoom).emit('ack', data);
+  });
+
+  socket.on('roll_dice', ({ val1, val2, rollResult, actionId, playerId }) => {
     if (!currentRoom) return;
     const room = rooms.get(currentRoom);
     if (!room) return;
 
-    // Server-side turn validation: only the designated active player can roll
+    // Server-side turn validation: designated active player, or Room Host resolving timeout
+    const isHost = (playerIndex === 0 || room.hostId === socket.id);
+    const effectivePlayerId = (typeof playerId === 'number' && isHost) ? playerId : playerIndex;
+
     if (room.inGame) {
-      if (typeof room.currentTurn === 'number' && room.currentTurn !== playerIndex) {
+      if (typeof room.currentTurn === 'number' && room.currentTurn !== effectivePlayerId && !isHost) {
         socket.emit('error_message', { message: "It is not your turn to roll!" });
-        return;
-      }
-      if (!room.canRoll) {
-        socket.emit('error_message', { message: "Dice already rolled for this turn!" });
         return;
       }
       room.canRoll = false; // Lock roll action immediately until turn completes or bonus is earned
     }
 
     io.to(currentRoom).emit('dice_rolled', {
-      playerId: playerIndex,
+      playerId: effectivePlayerId,
       val1,
       val2,
       rollResult,
@@ -245,26 +259,42 @@ io.on('connection', (socket) => {
 
   socket.on('pawn_move', (moveData) => {
     if (!currentRoom) return;
+    const isHost = (playerIndex === 0);
+    const effectivePlayerId = (typeof moveData?.playerId === 'number' && isHost) ? moveData.playerId : playerIndex;
     io.to(currentRoom).emit('pawn_moved', {
       ...moveData,
-      playerId: playerIndex
+      playerId: effectivePlayerId
     });
   });
 
   socket.on('two_dice_step', (stepData) => {
     if (!currentRoom) return;
+    const isHost = (playerIndex === 0);
+    const effectivePlayerId = (typeof stepData?.playerId === 'number' && isHost) ? stepData.playerId : playerIndex;
     io.to(currentRoom).emit('two_dice_stepped', {
       ...stepData,
-      playerId: playerIndex
+      playerId: effectivePlayerId
     });
   });
 
   socket.on('two_dice_pass', (passData) => {
     if (!currentRoom) return;
+    const isHost = (playerIndex === 0);
+    const effectivePlayerId = (typeof passData?.playerId === 'number' && isHost) ? passData.playerId : playerIndex;
     io.to(currentRoom).emit('two_dice_pass', {
       ...passData,
-      playerId: playerIndex
+      playerId: effectivePlayerId
     });
+  });
+
+  socket.on('request_game_sync', (syncReq) => {
+    if (!currentRoom) return;
+    io.to(currentRoom).emit('request_game_sync', syncReq);
+  });
+
+  socket.on('game_sync_snapshot', (snapshot) => {
+    if (!currentRoom) return;
+    io.to(currentRoom).emit('game_sync_snapshot', snapshot);
   });
 
   const handleTurnAdvance = (turnData) => {

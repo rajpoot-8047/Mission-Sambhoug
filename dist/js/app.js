@@ -7159,37 +7159,297 @@ function startTurnTimer(initialSeconds = 20) {
   }, 1000);
 }
 
+let autoRollSyncFallbackTimer = null;
+
+function scheduleAutoRollSyncFallback(expectedTurnId) {
+  clearAutoRollSyncFallback();
+  autoRollSyncFallbackTimer = setTimeout(() => {
+    if (gameMode === 'online' && !engine.isGameOver && !isRolling && !isPawnRunning) {
+      if (engine.currentTurnPlayerId === expectedTurnId) {
+        console.warn('⚠️ Auto-roll event failed to arrive within 2 seconds. Requesting state sync from Host...');
+        updateStatusBanner('⚠️ Auto-roll delayed. Syncing state with Room Host...');
+        const req = {
+          type: 'request_game_sync',
+          peerId: webRtc?.myPeerId,
+          playerIndex: myOnlinePlayerIndex,
+          playerName: webRtc?.playerName
+        };
+        if (webRtc) webRtc.broadcast(req);
+        if (socket && socket.connected) socket.emit('request_game_sync', req);
+      }
+    }
+  }, 2000);
+}
+
+function clearAutoRollSyncFallback() {
+  if (autoRollSyncFallbackTimer) {
+    clearTimeout(autoRollSyncFallbackTimer);
+    autoRollSyncFallbackTimer = null;
+  }
+}
+
 function handleTurnTimeout() {
   if (!isAutoPlayEnabled) return;
   if (engine.isGameOver || isPawnRunning) return;
   const current = engine.currentPlayer;
-  const isMyTurn = (gameMode !== 'online') || isMyTurnInOnlineGame(current);
 
-  // If waiting to roll dice:
-  if (!isRolling && !isAwaitingPawnMove) {
-    if (isMyTurn) {
-      updateStatusBanner(`⏰ 20s Expired! Auto-rolling for ${current.name}...`);
-      rollDiceAction();
-    } else {
-      setTimeout(() => {
-        if (!isRolling && !isAwaitingPawnMove && engine.currentPlayer.id === current.id) {
-          updateStatusBanner(`⏰ Opponent timed out! Auto-rolling for ${current.name}...`);
-          if (webRtc && webRtc.isHost) {
-            rollDiceAction();
-          }
-        }
-      }, 2500);
+  if (gameMode === 'online') {
+    // 3. Authoritative Turn Manager:
+    // Room Host (Player 1 / creator) is the source of truth for timer timeouts.
+    // Only the host resolves timeouts to prevent race conditions.
+    const isHost = (webRtc && webRtc.isHost) || (myOnlinePlayerIndex === 0);
+
+    if (!isHost) {
+      // Guest peer: wait for the Host's authoritative auto-roll / timeout resolution.
+      const isMyTurn = isMyTurnInOnlineGame(current);
+      if (isMyTurn) {
+        updateStatusBanner(`⏰ 20s Expired! Waiting for Host to auto-roll for you (${current.name})...`);
+      } else {
+        updateStatusBanner(`⏰ Opponent timed out! Waiting for Host to auto-roll for ${current.name}...`);
+      }
+      // If auto-roll fails to arrive within 2 seconds, request state sync
+      scheduleAutoRollSyncFallback(current.id);
+      return;
     }
+
+    // ROOM HOST: Authoritative timeout resolution
+    stopTurnTimer();
+
+    if (!isRolling && !isAwaitingPawnMove) {
+      updateStatusBanner(`⏰ Opponent timed out! Auto-rolling for ${current.name}...`);
+      executeAuthoritativeAutoRoll(current);
+    } else if (isAwaitingPawnMove && !isPawnRunning) {
+      updateStatusBanner(`⏰ 20s Expired! Auto-moving best goti for ${current.name}...`);
+      autoMoveBestPawn();
+    }
+    return;
+  }
+
+  // Local / offline games:
+  if (!isRolling && !isAwaitingPawnMove) {
+    updateStatusBanner(`⏰ 20s Expired! Auto-rolling for ${current.name}...`);
+    rollDiceAction(true);
     return;
   }
 
   // If waiting for pawn movement:
   if (isAwaitingPawnMove && !isPawnRunning) {
-    if (isMyTurn) {
-      updateStatusBanner(`⏰ 20s Expired! Auto-moving best goti for ${current.name}...`);
-      autoMoveBestPawn();
-    }
+    updateStatusBanner(`⏰ 20s Expired! Auto-moving best goti for ${current.name}...`);
+    autoMoveBestPawn();
   }
+}
+
+function executeAuthoritativeAutoRoll(targetPlayer) {
+  if (isTurnTransitioning || isRolling || isPawnRunning || engine.isGameOver) {
+    return;
+  }
+
+  stopTurnTimer();
+  isRolling = true;
+  setRollButtonEnabled(false);
+  const btnRoll = document.getElementById('btn-roll');
+  if (btnRoll) {
+    btnRoll.classList.remove('bonus-roll-active');
+  }
+  updateModeLockUI();
+
+  // Rule 2: In 2-Dice game, if only 1 last goti in home lane, force 1 die
+  const isLastGotiHome = (engine.diceCount === 2) && isPlayerLastGotiInHomeLane(targetPlayer);
+  const effectiveDiceCount = isLastGotiHome ? 1 : engine.diceCount;
+
+  const rollResult = engine.rollDice(effectiveDiceCount);
+  const v1 = rollResult.d1;
+  const v2 = (effectiveDiceCount === 2) ? rollResult.d2 : 0;
+
+  const actionId = `autoroll_${targetPlayer.id}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+  handledNetworkActionIds.add(actionId);
+
+  // Dispatch DICE_ROLL_START, AUTO_ROLL, DICE_ROLLED and roll over WebRTC DataChannel (readyState === 'open' verified)
+  if (webRtc) {
+    webRtc.broadcast({
+      type: 'DICE_ROLL_START',
+      playerId: targetPlayer.id,
+      actionId: `start_${actionId}`
+    });
+    webRtc.broadcast({
+      type: 'AUTO_ROLL',
+      playerId: targetPlayer.id,
+      v1: v1,
+      v2: v2,
+      rollResult: rollResult,
+      actionId: actionId
+    });
+    webRtc.broadcast({
+      type: 'DICE_ROLLED',
+      playerId: targetPlayer.id,
+      v1: v1,
+      v2: v2,
+      rollResult: rollResult,
+      actionId: actionId
+    });
+    webRtc.broadcast({
+      type: 'roll',
+      playerId: targetPlayer.id,
+      v1: v1,
+      v2: v2,
+      rollResult: rollResult,
+      actionId: actionId
+    });
+  }
+  if (socket && socket.connected) {
+    socket.emit('dice_roll_start', { playerId: targetPlayer.id, actionId: `start_${actionId}` });
+    socket.emit('roll_dice', { playerId: targetPlayer.id, val1: v1, val2: v2, rollResult, actionId });
+  }
+
+  // 2. Auto-Roll State Reset & Safety Timeout:
+  // Ensure dice animation Promise always resolves (3000ms max timeout) and resets isRolling = false
+  let animDone = false;
+  const animPromise = new Promise((resolve) => {
+    try {
+      sounds.playDiceRoll();
+      animatePremiumDiceTumble(v1, v2, () => {
+        if (!animDone) {
+          animDone = true;
+          resolve();
+        }
+      });
+    } catch (err) {
+      console.warn('Auto-roll tumble animation error:', err);
+      if (!animDone) {
+        animDone = true;
+        resolve();
+      }
+    }
+  });
+
+  const safetyTimeoutPromise = new Promise((resolve) => {
+    setTimeout(() => {
+      if (!animDone) {
+        console.warn('⏰ Auto-roll safety timeout (3000ms) fired. Forcing animation complete.');
+        animDone = true;
+        resolve();
+      }
+    }, 3000);
+  });
+
+  Promise.race([animPromise, safetyTimeoutPromise])
+    .finally(() => {
+      isRolling = false;
+      setRollButtonEnabled(false);
+    })
+    .then(() => {
+      handleAuthoritativeAutoRollOutcome(targetPlayer, rollResult);
+    })
+    .catch((err) => {
+      console.error('Error completing auto-roll:', err);
+      isRolling = false;
+      setRollButtonEnabled(false);
+      const nextTurnId = engine.advanceTurn();
+      broadcastTurnState(nextTurnId, false, null);
+      startTurnCycle(false);
+    });
+}
+
+function handleAuthoritativeAutoRollOutcome(targetPlayer, rollResult) {
+  if (gameMode === 'online') saveActiveMatchSession();
+  const current = targetPlayer;
+  const isLastGotiHome = (engine.diceCount === 2) && isPlayerLastGotiInHomeLane(current);
+  const effectiveDiceCount = isLastGotiHome ? 1 : engine.diceCount;
+
+  if (effectiveDiceCount === 1) {
+    hideTwoDiceUI();
+    hideGotiDicePopup();
+    setRollButtonEnabled(false);
+
+    // 1. Check 3 Consecutive Sixes
+    if (rollResult.d1 === 6 && (engine.consecutiveSixes || 0) >= 3) {
+      isAwaitingPawnMove = false;
+      isPawnRunning = false;
+      isTurnTransitioning = true;
+      updateStatusBanner(`⚠️ 3 Consecutive Sixes! ${current.name} forfeits turn! Passing turn...`);
+      setTimeout(() => {
+        const nextTurnId = engine.advanceTurn();
+        broadcastTurnState(nextTurnId, false, null);
+        startTurnCycle(false);
+      }, 1000);
+      return;
+    }
+
+    const validPawns = engine.getMovablePawns(current, rollResult);
+    const rollDisplay = `${rollResult.total}`;
+
+    // 2. No valid moves:
+    if (validPawns.length === 0) {
+      isAwaitingPawnMove = false;
+      isPawnRunning = false;
+      isTurnTransitioning = true;
+      updateStatusBanner(`${current.name} auto-rolled ${rollDisplay}. No valid moves! Passing turn...`);
+      setTimeout(() => {
+        const rolledSix = (rollResult.hasSix || rollResult.total === 6 || rollResult.d1 === 6);
+        if (rolledSix && (engine.consecutiveSixes || 0) < 3) {
+          const bonusMsg = `${current.name} auto-rolled 6! (No moves possible) • Bonus Roll! 🎲`;
+          broadcastTurnState(engine.currentTurnPlayerId, true, bonusMsg);
+          startTurnCycle(true, bonusMsg);
+        } else {
+          const nextTurnId = engine.advanceTurn();
+          broadcastTurnState(nextTurnId, false, null);
+          startTurnCycle(false);
+        }
+      }, 1000);
+      return;
+    }
+
+    // 3. Valid moves available: auto-move best goti immediately!
+    updateStatusBanner(`${current.name} auto-rolled ${rollDisplay} • Auto-moving best goti...`);
+    const chosenPawn = aiBot.chooseBestPawn(validPawns, rollResult, engine.players);
+    executePawnMove(chosenPawn, rollResult);
+    return;
+  }
+
+  // --- 2-Dice Mode Auto-Roll Outcome ---
+  const rollsToRun = [rollResult.d1, rollResult.d2];
+  const isDoubleSix = (rollResult.d1 === 6 && rollResult.d2 === 6);
+  twoDiceBonusGranted = isDoubleSix && ((engine.consecutiveDoubles || 0) < 3);
+  twoDiceBonusReasons = twoDiceBonusGranted ? ['Rolled Double Sixes (6+6)!'] : [];
+  twoDicePool = rollsToRun.map((val, idx) => ({ index: idx, value: val, used: false }));
+  activeDieIndex = null;
+  hideGotiDicePopup();
+  updateTwoDiceUI();
+  setRollButtonEnabled(false);
+
+  if (isDoubleSix && ((engine.consecutiveDoubles || 0) >= 3 || (engine.consecutiveSixes || 0) >= 3)) {
+    isAwaitingPawnMove = false;
+    isPawnRunning = false;
+    isTurnTransitioning = true;
+    updateStatusBanner(`⚠️ 3 Consecutive Double Sixes (6+6)! ${current.name} forfeits turn! Passing turn...`);
+    setTimeout(() => {
+      const nextTurnId = engine.advanceTurn();
+      broadcastTurnState(nextTurnId, false, null);
+      startTurnCycle(false);
+    }, 1000);
+    return;
+  }
+
+  const hasAnyMove = rollsToRun.some((val) => {
+    const r = { total: val, isSingleDie: true, hasSix: val === 6 };
+    return engine.getMovablePawns(current, r).length > 0;
+  });
+
+  if (!hasAnyMove) {
+    isAwaitingPawnMove = false;
+    isPawnRunning = false;
+    isTurnTransitioning = true;
+    hideTwoDiceUI();
+    updateStatusBanner(`${current.name} auto-rolled ${rollResult.d1}+${rollResult.d2}. No valid moves! Passing turn...`);
+    setTimeout(() => {
+      finishTwoDiceTurn();
+    }, 1000);
+    return;
+  }
+
+  // Auto-move with 2-dice pool
+  updateStatusBanner(`${current.name} auto-rolled ${rollResult.d1}+${rollResult.d2} • Auto-moving best gotiyan...`);
+  executeBotTwoDiceTurn();
 }
 
 function autoMoveBestPawn() {
@@ -7226,12 +7486,15 @@ function autoMoveBestPawn() {
     const chosen = aiBot.chooseBestPawn(valid, engine.lastRoll, engine.players);
     executePawnMove(chosen, engine.lastRoll);
   } else {
-    engine.advanceTurn();
+    const nextTurnId = engine.advanceTurn();
+    if (gameMode === 'online') {
+      broadcastTurnState(nextTurnId, false, null);
+    }
     startTurnCycle();
   }
 }
 
-function rollDiceAction(isAutoBotCall = false) {
+function rollDiceAction(isAutoBotCall = false, isAuthoritativeAutoRoll = false) {
   if (isTurnTransitioning || isRolling || isPawnRunning || isAwaitingPawnMove || engine.isGameOver) {
     if (isAwaitingPawnMove) {
       updateStatusBanner("Select a pawn to make your move first!");
@@ -7246,15 +7509,15 @@ function rollDiceAction(isAutoBotCall = false) {
     return;
   }
 
-  // In online multiplayer: only current player can roll
-  if (gameMode === 'online' && !isMyTurnInOnlineGame(engine.currentPlayer)) {
+  // In online multiplayer: only current player can roll (unless authoritative host call)
+  if (gameMode === 'online' && !isAuthoritativeAutoRoll && !isMyTurnInOnlineGame(engine.currentPlayer)) {
     updateStatusBanner("Wait for your turn!");
     return;
   }
 
   // Check if roll button is explicitly disabled (e.g. not user's turn to roll)
   const btnRollEl = document.getElementById('btn-roll');
-  if (btnRollEl && btnRollEl.disabled && !isAutoBotCall) {
+  if (btnRollEl && btnRollEl.disabled && !isAutoBotCall && !isAuthoritativeAutoRoll) {
     return;
   }
 
@@ -7314,16 +7577,58 @@ function rollDiceAction(isAutoBotCall = false) {
 
   if (gameMode === 'online') {
     const actionId = `roll_${myOnlinePlayerIndex}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+    handledNetworkActionIds.add(actionId);
     if (webRtc) {
-      webRtc.broadcast({ type: 'roll', playerId: myOnlinePlayerIndex, v1, v2, rollResult, actionId });
+      webRtc.broadcast({
+        type: 'DICE_ROLL_START',
+        playerId: myOnlinePlayerIndex,
+        actionId: `start_${actionId}`
+      });
+      webRtc.broadcast({
+        type: 'DICE_ROLLED',
+        playerId: myOnlinePlayerIndex,
+        v1,
+        v2,
+        rollResult,
+        actionId
+      });
+      webRtc.broadcast({
+        type: 'roll',
+        playerId: myOnlinePlayerIndex,
+        v1,
+        v2,
+        rollResult,
+        actionId
+      });
     } else if (socket) {
-      socket.emit('roll_dice', { val1: v1, val2: v2, rollResult, actionId });
+      socket.emit('dice_roll_start', { playerId: myOnlinePlayerIndex, actionId: `start_${actionId}` });
+      socket.emit('roll_dice', { playerId: myOnlinePlayerIndex, val1: v1, val2: v2, rollResult, actionId });
     }
   }
 
-  animatePremiumDiceTumble(v1, v2, () => {
+  let rollResolved = false;
+  const finishRoll = () => {
+    if (rollResolved) return;
+    rollResolved = true;
+    isRolling = false;
+    setRollButtonEnabled(false);
     handleRollOutcome(rollResult);
-  });
+  };
+
+  const rollSafetyTimer = setTimeout(() => {
+    console.warn('Roll animation safety timeout (3000ms) fired.');
+    finishRoll();
+  }, 3000);
+
+  try {
+    animatePremiumDiceTumble(v1, v2, () => {
+      clearTimeout(rollSafetyTimer);
+      finishRoll();
+    });
+  } catch (err) {
+    clearTimeout(rollSafetyTimer);
+    finishRoll();
+  }
 }
 
 // Master 100% Real-Life Rigid-Body Dice Physics Simulation
@@ -7425,6 +7730,43 @@ function animatePremiumDiceTumble(v1, v2, onComplete) {
 
   const _tempQuat = new THREE.Quaternion();
   const _wobbleQuat = new THREE.Quaternion();
+
+  let tumbleFinished = false;
+  function finishTumble() {
+    if (tumbleFinished) return;
+    tumbleFinished = true;
+
+    bodies.forEach((b) => {
+      if (b.mesh) {
+        b.mesh.position.set(b.targetPos.x, tableY, b.targetPos.z);
+        b.mesh.quaternion.copy(b.qTarget);
+      }
+      if (b.shadow) {
+        b.shadow.visible = false;
+      }
+    });
+
+    const pill = document.getElementById('dice-pill');
+    if (pill) {
+      if (isTwoDice) {
+        pill.textContent = `${v1}+${v2}=${v1 + v2}`;
+      } else {
+        pill.textContent = `${v1}`;
+      }
+    }
+
+    isRolling = false;
+    if (onComplete) {
+      try {
+        onComplete();
+      } catch (err) {
+        console.error('onComplete error in dice tumble:', err);
+      }
+    }
+  }
+
+  // Safety timer ensuring completion even if requestAnimationFrame throttles in background tab
+  const internalSafetyTimer = setTimeout(finishTumble, Math.max(1600, maxDuration + 300));
 
   function physicsLoop(now) {
     const elapsed = now - startTime;
@@ -7533,24 +7875,8 @@ function animatePremiumDiceTumble(v1, v2, onComplete) {
     if (elapsed < maxDuration) {
       requestAnimationFrame(physicsLoop);
     } else {
-      bodies.forEach((b) => {
-        if (b.mesh) {
-          b.mesh.position.set(b.targetPos.x, tableY, b.targetPos.z);
-          b.mesh.quaternion.copy(b.qTarget);
-        }
-        if (b.shadow) {
-          b.shadow.visible = false;
-        }
-      });
-
-      if (isTwoDice) {
-        document.getElementById('dice-pill').textContent = `${v1}+${v2}=${v1 + v2}`;
-      } else {
-        document.getElementById('dice-pill').textContent = `${v1}`;
-      }
-
-      isRolling = false;
-      if (onComplete) onComplete();
+      clearTimeout(internalSafetyTimer);
+      finishTumble();
     }
   }
 
@@ -7812,8 +8138,9 @@ function executeTwoDiceStep(pawn, onStepDone) {
 
   const result = engine.movePawn(pawn, singleRoll);
 
-  if (gameMode === 'online' && isMyTurnInOnlineGame(engine.players[pawn.playerId])) {
+  if (gameMode === 'online' && (isMyTurnInOnlineGame(engine.players[pawn.playerId]) || (webRtc && webRtc.isHost))) {
     const actionId = `step_${myOnlinePlayerIndex}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+    handledNetworkActionIds.add(actionId);
     const stepMsg = {
       type: 'two_dice_step',
       pawnId: pawn.id,
@@ -8042,7 +8369,7 @@ function finishTwoDiceTurn() {
       const reasonDetail = reasons.length > 0 ? ` (${reasons.join(' & ')})` : '';
       const bonusMsg = `Bonus Roll earned! 🎲${reasonDetail}`;
       updateStatusBanner(`${engine.currentPlayer.name}: ${bonusMsg}`);
-      if (gameMode === 'online' && isMyTurnInOnlineGame(engine.currentPlayer)) {
+      if (gameMode === 'online' && (isMyTurnInOnlineGame(engine.currentPlayer) || (webRtc && webRtc.isHost))) {
         broadcastTurnState(engine.currentTurnPlayerId, true, bonusMsg);
       }
       startTurnCycle(true, bonusMsg);
@@ -8051,7 +8378,7 @@ function finishTwoDiceTurn() {
       const nextTurnId = engine.advanceTurn();
       setRollButtonEnabled(false);
       updateStatusBanner("Waiting for next player...");
-      if (gameMode === 'online' && isMyTurnInOnlineGame(prevPlayer)) {
+      if (gameMode === 'online' && (isMyTurnInOnlineGame(prevPlayer) || (webRtc && webRtc.isHost))) {
         broadcastTurnState(nextTurnId, false, null);
       }
       startTurnCycle(false);
@@ -8244,7 +8571,7 @@ function handleRollOutcome(rollResult) {
         const rolledSix = (rollResult.hasSix || rollResult.total === 6 || rollResult.d1 === 6);
         if (rolledSix && (engine.consecutiveSixes || 0) < 3) {
           const bonusMsg = `Rolled a 6! (No moves possible) • Bonus Roll! 🎲`;
-          if (gameMode === 'online' && isMyTurnInOnlineGame(current)) {
+          if (gameMode === 'online' && (isMyTurnInOnlineGame(current) || (webRtc && webRtc.isHost))) {
             broadcastTurnState(engine.currentTurnPlayerId, true, bonusMsg);
           }
           startTurnCycle(true, bonusMsg);
@@ -8253,7 +8580,7 @@ function handleRollOutcome(rollResult) {
           setRollButtonEnabled(false);
           updateStatusBanner("Waiting for next player...");
           if (gameMode === 'online') {
-            if (isMyTurnInOnlineGame(current)) {
+            if (isMyTurnInOnlineGame(current) || (webRtc && webRtc.isHost)) {
               broadcastTurnState(nextTurnId, false, null);
             }
           }
@@ -8351,7 +8678,7 @@ function handleRollOutcome(rollResult) {
     updateStatusBanner(`${current.name} rolled [${rollsToRun.join(', ')}]. No valid moves! Passing turn...`);
     setTimeout(() => {
       if (twoDiceBonusGranted && (engine.consecutiveDoubles || 0) < 3) {
-        if (gameMode === 'online' && isMyTurnInOnlineGame(current)) {
+        if (gameMode === 'online' && (isMyTurnInOnlineGame(current) || (webRtc && webRtc.isHost))) {
           broadcastTurnState(engine.currentTurnPlayerId, true, "Rolled 6+6! Bonus Roll! 🎲");
         }
         startTurnCycle(true, "Rolled 6+6! Bonus Roll! 🎲");
@@ -8360,7 +8687,7 @@ function handleRollOutcome(rollResult) {
         setRollButtonEnabled(false);
         updateStatusBanner("Waiting for next player...");
         if (gameMode === 'online') {
-          if (isMyTurnInOnlineGame(current)) {
+          if (isMyTurnInOnlineGame(current) || (webRtc && webRtc.isHost)) {
             broadcastTurnState(nextTurnId, false, null);
           }
         }
@@ -8569,8 +8896,9 @@ function executePawnMove(pawn, rollInput) {
   const roll = rollInput || engine.lastRoll;
   const result = engine.movePawn(pawn, roll);
 
-  if (gameMode === 'online' && isMyTurnInOnlineGame(engine.players[pawn.playerId])) {
+  if (gameMode === 'online' && (isMyTurnInOnlineGame(engine.players[pawn.playerId]) || (webRtc && webRtc.isHost))) {
     const actionId = `move_${myOnlinePlayerIndex}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+    handledNetworkActionIds.add(actionId);
     const moveMsg = {
       type: 'move',
       pawnId: pawn.id,
@@ -8626,7 +8954,7 @@ function executePawnMove(pawn, rollInput) {
           isPawnRunning = false;
           setRollButtonEnabled(false);
           updateStatusBanner("Waiting for next player...");
-          if (gameMode === 'online' && isMyTurnInOnlineGame(prevPlayer)) {
+          if (gameMode === 'online' && (isMyTurnInOnlineGame(prevPlayer) || (webRtc && webRtc.isHost))) {
             broadcastTurnState(nextTurnId, false, null);
           }
           startTurnCycle(false);
@@ -8641,7 +8969,7 @@ function executePawnMove(pawn, rollInput) {
             reasonMsg = `🎲 Rolled a 6! Bonus Roll! 🎲`;
           }
           isPawnRunning = false;
-          if (gameMode === 'online' && isMyTurnInOnlineGame(engine.currentPlayer)) {
+          if (gameMode === 'online' && (isMyTurnInOnlineGame(engine.currentPlayer) || (webRtc && webRtc.isHost))) {
             broadcastTurnState(engine.currentTurnPlayerId, true, reasonMsg);
           }
           startTurnCycle(true, reasonMsg);
@@ -10293,6 +10621,9 @@ function handleRemoteDiceRoll(data) {
     if (handledNetworkActionIds.size > 300) handledNetworkActionIds.clear();
   }
 
+  // Clear pending fallback sync timer since roll event has arrived
+  clearAutoRollSyncFallback();
+
   const v1 = (data.v1 !== undefined) ? data.v1 : (data.val1 !== undefined ? data.val1 : (data.rollResult?.d1 || 1));
   const v2 = (data.v2 !== undefined) ? data.v2 : (data.val2 !== undefined ? data.val2 : (data.rollResult?.d2 || 0));
 
@@ -10317,10 +10648,34 @@ function handleRemoteDiceRoll(data) {
       }
     }
 
-    sounds.playDiceRoll();
-    animatePremiumDiceTumble(v1, v2, () => {
+    stopTurnTimer();
+    isRolling = true;
+    setRollButtonEnabled(false);
+
+    let remoteRollDone = false;
+    const finishRemoteRoll = () => {
+      if (remoteRollDone) return;
+      remoteRollDone = true;
+      isRolling = false;
+      setRollButtonEnabled(false);
       handleRollOutcome(roll);
-    });
+    };
+
+    const safetyTimer = setTimeout(() => {
+      console.warn('Remote dice animation safety timeout (3000ms) fired.');
+      finishRemoteRoll();
+    }, 3000);
+
+    try {
+      sounds.playDiceRoll();
+      animatePremiumDiceTumble(v1, v2, () => {
+        clearTimeout(safetyTimer);
+        finishRemoteRoll();
+      });
+    } catch (err) {
+      clearTimeout(safetyTimer);
+      finishRemoteRoll();
+    }
   }
 }
 
@@ -10362,6 +10717,16 @@ function broadcastTurnState(turnPlayerId, isBonusRoll = false, bonusMessage = nu
 
   if (webRtc) {
     webRtc.broadcast(msg);
+    webRtc.broadcast({
+      type: 'TURN_CHANGE',
+      senderIndex: myOnlinePlayerIndex,
+      turnPlayerId: turnPlayerId,
+      activePlayerId: turnPlayerId,
+      nextTurn: turnPlayerId,
+      isBonusRoll: isBonusRoll || false,
+      bonusMessage: bonusMessage || null,
+      actionId
+    });
     webRtc.broadcast({
       type: 'turn_changed',
       senderIndex: myOnlinePlayerIndex,
@@ -10411,6 +10776,9 @@ function handleRemoteTurnState(data) {
     handledNetworkActionIds.add(data.actionId);
     if (handledNetworkActionIds.size > 300) handledNetworkActionIds.clear();
   }
+
+  // Clear pending fallback sync timer since turn state has transitioned
+  clearAutoRollSyncFallback();
 
   // Guard against self-echo if relayed back by server or message bus
   if (typeof data.senderIndex === 'number' && data.senderIndex === myOnlinePlayerIndex) {
@@ -10518,16 +10886,30 @@ function setupSocket() {
       } else if (data.type === 'dice_mode_sync') {
         setDiceCount(data.diceCount, false);
         updateStatusBanner(`Host set match mode to ${data.diceCount === 2 ? '2 Dice (Speed)' : '1 Die (Classic)'}!`);
-      } else if (data.type === 'roll') {
+      } else if (data.type === 'DICE_ROLL_START' || data.type === 'dice_roll_start') {
+        clearAutoRollSyncFallback();
+        setRollButtonEnabled(false);
+        const player = engine.players[data.playerId];
+        if (player) {
+          updateStatusBanner(`${player.name} is rolling...`);
+        }
+      } else if (data.type === 'roll' || data.type === 'DICE_ROLLED' || data.type === 'dice_rolled' || data.type === 'AUTO_ROLL' || data.type === 'auto_roll') {
+        clearAutoRollSyncFallback();
         handleRemoteDiceRoll(data);
       } else if (data.type === 'move') {
+        clearAutoRollSyncFallback();
         handleRemotePawnMove(data);
       } else if (data.type === 'two_dice_step') {
+        clearAutoRollSyncFallback();
         handleRemoteTwoDiceStep(data);
-      } else if (data.type === 'turn_state' || data.type === 'turn_changed' || data.type === 'next_player') {
+      } else if (data.type === 'turn_state' || data.type === 'TURN_CHANGE' || data.type === 'turn_change' || data.type === 'turn_changed' || data.type === 'next_player') {
+        clearAutoRollSyncFallback();
         handleRemoteTurnState(data);
       } else if (data.type === 'two_dice_pass') {
+        clearAutoRollSyncFallback();
         handleRemoteTwoDicePass(data);
+      } else if (data.type === 'ACK' || data.type === 'ack') {
+        // DataChannel message delivery acknowledged
       } else if (data.type === 'host_new_game') {
         document.getElementById('victory-modal')?.classList.remove('open');
         document.getElementById('multiplayer-modal')?.classList.remove('open');
@@ -10538,11 +10920,12 @@ function setupSocket() {
         performFullGameExit("👑 Room Host has exited and ended the match.");
         if (typeof sounds !== 'undefined' && sounds.playCapture) sounds.playCapture();
       } else if (data.type === 'request_game_sync') {
-        if (isHostInLocalTeam() && (gameMode === 'online' || engine.isGameplayActive)) {
+        if ((webRtc?.isHost || myOnlinePlayerIndex === 0) && (gameMode === 'online' || engine.isGameplayActive)) {
           console.log('👑 Host received re-join sync request:', data);
           sendGameSyncSnapshot(data);
         }
       } else if (data.type === 'game_sync_snapshot') {
+        clearAutoRollSyncFallback();
         applyGameSyncSnapshot(data);
       }
     });
@@ -10673,7 +11056,20 @@ function connectSignalingSocket() {
     updateWebRtcLobbyUI(players);
   });
 
+  socket.on('dice_roll_start', ({ playerId, actionId }) => {
+    clearAutoRollSyncFallback();
+    setRollButtonEnabled(false);
+    const player = engine.players[playerId];
+    if (player) updateStatusBanner(`${player.name} is rolling...`);
+  });
+
+  socket.on('auto_roll', (data) => {
+    clearAutoRollSyncFallback();
+    handleRemoteDiceRoll(data);
+  });
+
   socket.on('dice_rolled', ({ playerId, val1, val2, rollResult, actionId }) => {
+    clearAutoRollSyncFallback();
     handleRemoteDiceRoll({ playerId, val1, val2, rollResult, actionId });
   });
 

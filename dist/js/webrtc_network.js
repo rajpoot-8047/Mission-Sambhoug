@@ -620,12 +620,14 @@ class WebRtcNetwork {
       if (peerEntry) peerEntry.isConnected = true;
       this.updateP2pStatus();
 
-      if (isHostSide) {
-        channel.send(JSON.stringify({
-          type: 'handshake',
-          hostIndex: 0,
-          roomCode: this.roomCode
-        }));
+      if (isHostSide && channel.readyState === 'open') {
+        try {
+          channel.send(JSON.stringify({
+            type: 'handshake',
+            hostIndex: 0,
+            roomCode: this.roomCode
+          }));
+        } catch (e) {}
       }
     };
 
@@ -635,6 +637,20 @@ class WebRtcNetwork {
         if (data && data.type === 'handshake') {
           this.updateP2pStatus();
           return;
+        }
+
+        // Send ACK back over DataChannel if message has actionId and is not already an ACK
+        if (data && data.actionId && data.type !== 'ACK' && data.type !== 'ack') {
+          if (channel.readyState === 'open') {
+            try {
+              channel.send(JSON.stringify({
+                type: 'ACK',
+                ackActionId: data.actionId,
+                originalType: data.type,
+                timestamp: Date.now()
+              }));
+            } catch (e) {}
+          }
         }
 
         // If host receives message from a guest, relay it over DataChannels to other guests
@@ -674,8 +690,25 @@ class WebRtcNetwork {
   }
 
   /**
+   * Send direct peer-to-peer message to a specific peer over DataChannel
+   */
+  sendToPeer(peerId, message) {
+    if (!message) return false;
+    const peer = this.peers.get(peerId);
+    if (peer && peer.dataChannel && peer.dataChannel.readyState === 'open') {
+      try {
+        peer.dataChannel.send(JSON.stringify(message));
+        return true;
+      } catch (e) {
+        console.warn('DataChannel sendToPeer error:', e);
+      }
+    }
+    return false;
+  }
+
+  /**
    * Broadcast message to ALL connected friends worldwide:
-   * 1. Direct WebRTC DataChannels across all peers in room (Zero Latency)
+   * 1. Direct WebRTC DataChannels across all peers in room (Zero Latency, readyState === 'open' verified)
    * 2. Worldwide Internet Message Bus (100% Guaranteed Delivery across any mobile network)
    * 3. Socket.IO Room Relay (Local fallback)
    */
@@ -683,12 +716,14 @@ class WebRtcNetwork {
     if (!message) return;
     const jsonStr = JSON.stringify(message);
 
-    // 1. Direct WebRTC DataChannels
+    // 1. Direct WebRTC DataChannels - STRICT readyState check
     this.peers.forEach((peer) => {
       if (peer.dataChannel && peer.dataChannel.readyState === 'open') {
         try {
           peer.dataChannel.send(jsonStr);
-        } catch (e) {}
+        } catch (e) {
+          console.warn('DataChannel broadcast send error:', e);
+        }
       }
     });
 
@@ -702,32 +737,36 @@ class WebRtcNetwork {
 
     // 3. Local Socket.IO Relay
     if (this.socket && this.socket.connected && this.roomCode) {
-      if (message.type === 'roll') {
+      const msgType = message.type || '';
+      if (msgType === 'roll' || msgType === 'DICE_ROLLED' || msgType === 'dice_rolled' || msgType === 'AUTO_ROLL' || msgType === 'auto_roll') {
         this.socket.emit('roll_dice', {
           val1: message.v1,
           val2: message.v2,
           rollResult: message.rollResult,
-          actionId: message.actionId
+          actionId: message.actionId,
+          playerId: message.playerId
         });
-      } else if (message.type === 'move') {
+      } else if (msgType === 'DICE_ROLL_START' || msgType === 'dice_roll_start') {
+        this.socket.emit('dice_roll_start', message);
+      } else if (msgType === 'move') {
         this.socket.emit('pawn_move', message);
-      } else if (message.type === 'two_dice_step') {
+      } else if (msgType === 'two_dice_step') {
         this.socket.emit('two_dice_step', message);
-      } else if (message.type === 'two_dice_pass') {
+      } else if (msgType === 'two_dice_pass') {
         this.socket.emit('two_dice_pass', message);
-      } else if (message.type === 'turn_state') {
+      } else if (msgType === 'turn_state' || msgType === 'TURN_CHANGE' || msgType === 'turn_change' || msgType === 'turn_changed' || msgType === 'next_player') {
         this.socket.emit('turn_state', message);
-      } else if (message.type === 'dice_mode_sync') {
+      } else if (msgType === 'dice_mode_sync') {
         this.socket.emit('dice_mode_sync', message);
-      } else if (message.type === 'start_match') {
+      } else if (msgType === 'start_match') {
         this.socket.emit('start_game');
-      } else if (message.type === 'host_new_game') {
+      } else if (msgType === 'host_new_game') {
         this.socket.emit('host_new_game', message);
-      } else if (message.type === 'host_exit_game') {
+      } else if (msgType === 'host_exit_game') {
         this.socket.emit('host_exit_game', message);
-      } else if (message.type === 'request_game_sync') {
+      } else if (msgType === 'request_game_sync') {
         this.socket.emit('request_game_sync', message);
-      } else if (message.type === 'game_sync_snapshot') {
+      } else if (msgType === 'game_sync_snapshot') {
         this.socket.emit('game_sync_snapshot', message);
       }
     }

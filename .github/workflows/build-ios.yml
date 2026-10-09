@@ -5,6 +5,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-ipa:
     runs-on: macos-14
@@ -19,6 +22,11 @@ jobs:
 
       - name: Install Dependencies
         run: npm install
+
+      - name: Prepare Web Assets for Capacitor
+        run: |
+          mkdir -p dist
+          cp -R public/* dist/
 
       - name: Sync Capacitor iOS Assets
         run: npx cap sync ios
@@ -56,3 +64,15 @@ jobs:
           name: Mission_Sambhoug_3D_Ludo_iOS_IPA
           path: Mission_Sambhoug_Ludo.ipa
           retention-days: 14
+
+      - name: Publish IPA to GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: latest
+          name: "Mission Sambhoug 3D Ludo (Latest Build)"
+          body: "Automated iOS IPA build containing the latest WebRTC multiplayer deadlock fix and gameplay updates."
+          files: Mission_Sambhoug_Ludo.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
